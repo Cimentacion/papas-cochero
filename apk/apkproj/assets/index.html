@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="7.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="7.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -375,6 +375,7 @@ body.fm .sw{border-color:#343a7c;border-radius:5px}
 <div id="modal" hidden><div class="win"><div class="bar" id="mod-t"></div><div class="body" id="mod-b"></div></div></div>
 <div id="toast" hidden></div>
 <input type="file" id="photo-in" accept="image/*" hidden>
+<input type="file" id="save-in" accept=".json,.txt,application/json,text/plain" hidden>
 
 <script>
 (()=>{
@@ -1257,7 +1258,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["cambios","Pedir cambios"]]};
+const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}</button>`).join("")}</div>`}
 function viewClub(){
@@ -2098,6 +2099,23 @@ function feedbackBox(){
    <p class="hint">Web del juego: ${esc(window.PC_REMOTE)}</p>
   </div></section>`;
 }
+function saveCode(){save();return "PAPAS1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function loadCode(txt){try{txt=String(txt||"").trim();let j;if(txt.startsWith("PAPAS1:"))j=JSON.parse(decodeURIComponent(escape(atob(txt.slice(7).replace(/\s+/g,"")))));else j=JSON.parse(txt);if(!j||j.v!==5||!Array.isArray(j.players))throw 0;
+  if(!confirmLoad()){return}localStorage.setItem(KEY,JSON.stringify(j));toast("Partida cargada.");setTimeout(()=>location.reload(),600)}catch(e){toast("Ese código no es una partida válida.")}}
+function confirmLoad(){return true}
+function saveBox(){
+  const code=saveCode();
+  return `<section class="win"><div class="bar">Pasar la partida <small>del HTML a la APK o al revés</small></div><div class="body">
+   <p class="hint">El HTML y la APK guardan la partida por separado. Para pasarla, saca el código en uno y cárgalo en el otro. Si cargas una partida, se sustituye la que tengas en este dispositivo.</p>
+   <p class="pc-h">1 · Sacar esta partida</p>
+   <div class="pc-act"><button class="btn primary" data-act="savecopy">Copiar código</button><button class="btn" data-act="savefile">Guardar en archivo</button><button class="btn" data-act="saveshare">Compartir (WhatsApp…)</button></div>
+   <textarea id="save-out" class="inp" rows="3" style="width:100%;font-size:11px" readonly>${code}</textarea>
+   <p class="pc-h">2 · Cargar una partida</p>
+   <textarea id="save-txt" class="inp" rows="3" style="width:100%;font-size:11px" placeholder="Pega aquí el código (empieza por PAPAS1:)"></textarea>
+   <div class="pc-act"><button class="btn primary" data-act="saveload">Cargar código pegado</button><button class="btn" data-act="savepick">Cargar desde archivo</button></div>
+   <p class="hint">Temporada ${S.season} · ${S.players.length} jugadores · ${S.money} € · ${(code.length/1024).toFixed(0)} KB</p>
+  </div></section>`;
+}
 function openExternal(url){try{if(window.AndroidBridge){AndroidBridge.open(url);return}}catch(e){}const w=window.open(url,"_blank");if(!w)location.href=url}
 function mafiaBox(){
   const d=S.debt||0,ue=Math.ceil(Math.max(d,1000)/10);
@@ -2128,7 +2146,7 @@ function houseBox(){
 }
 function viewMister(){
   const c=S.coach;
-  const sm=sub("mister");if(sm==="cambios")return feedbackBox();if(sm==="trabajos")return jobsBox();if(sm==="mafia")return mafiaBox();if(sm==="chaparral")return chapaBox();
+  const sm=sub("mister");if(sm==="cambios")return feedbackBox();if(sm==="partida")return saveBox();if(sm==="trabajos")return jobsBox();if(sm==="mafia")return mafiaBox();if(sm==="chaparral")return chapaBox();
   return `<section class="win"><div class="bar">Ficha del entrenador</div><div class="body">
    <div class="ficha"><canvas class="face lg" data-face="coach" width="192" height="192"></canvas>
     <dl><dt>Nombre</dt><dd>${esc(c.name)}</dd><dt>Mote</dt><dd>${esc(c.nick)}</dd><dt>Edad</dt><dd>${c.age} años</dd><dt>Peinado</dt><dd>${HAIRN[c.look.hair]}</dd><dt>Balance</dt><dd>${c.w}G ${c.d}E ${c.l}P</dd><dt>Goles</dt><dd>${c.gf} a favor, ${c.ga} en contra</dd></dl></div>
@@ -2678,6 +2696,7 @@ function renderOffers(){
 function modal(title,html){$("#mod-t").textContent=title;$("#mod-b").innerHTML=html;$("#modal").hidden=false;$("#mod-b").scrollTop=0}
 function closeModal(){$("#modal").hidden=true;CINE=null}
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2800)}
+$("#save-in").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>loadCode(r.result);r.readAsText(f);e.target.value=""});
 $("#photo-in").addEventListener("change",e=>{
   const f=e.target.files&&e.target.files[0];if(!f)return;
   const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{
@@ -2693,6 +2712,11 @@ const A={
   skin:()=>{let k="pc";try{k=localStorage.getItem("papascochero_skin")||"pc"}catch(e){}k=k==="fm"?"pc":"fm";try{localStorage.setItem("papascochero_skin",k)}catch(e){}if(!document.body.classList.contains("fm")!==(k==="fm")){}document.body.classList.toggle("fm",k==="fm");applySkin();render();toast(k==="fm"?"Aspecto Football Manager.":"Aspecto PC Fútbol de saldo.")},
   doupdate:()=>{closeModal();save();if(location.href.indexOf(window.PC_REMOTE)===0)location.reload();else location.reload()},
   updcheck:()=>checkUpdates(true),
+  savecopy:async()=>{const t=saveCode();try{await navigator.clipboard.writeText(t);toast("Código copiado. Pégalo en la otra versión.")}catch(e){const a=$("#save-out");a.focus();a.select();try{document.execCommand("copy");toast("Código copiado.")}catch(e2){toast("Mantén pulsado el texto y copia.")}}},
+  savefile:()=>{const t=saveCode();const b=new Blob([t],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`papas-cochero-T${S.season}.txt`;document.body.appendChild(a);a.click();a.remove();toast("Si no se descarga, usa «Copiar código».")},
+  saveshare:async()=>{const t=saveCode();try{if(navigator.share){await navigator.share({title:"Partida de Los Papas Cochero",text:t});return}}catch(e){}try{await navigator.clipboard.writeText(t);toast("No se puede compartir aquí: código copiado.")}catch(e){toast("Usa «Copiar código».")}},
+  saveload:()=>loadCode($("#save-txt").value),
+  savepick:()=>$("#save-in").click(),
   fbsend:()=>{const t=($("#fb-title").value||"").trim(),b=($("#fb-body").value||"").trim();if(!t&&!b){toast("Escribe algo.");return}const body=`${b}\n\n---\nVersión ${window.PC_VERSION} · temporada ${S.season} · ${S.comp?S.comp.name:"pretemporada"}`;openExternal(`https://github.com/Cimentacion/papas-cochero/issues/new?labels=peticion&title=${encodeURIComponent(t||b.slice(0,60))}&body=${encodeURIComponent(body)}`);toast("Se abre GitHub: dale a Submit.")},
   sub:v=>{S.sub=S.sub||{};S.sub[S.tab]=v;save();render();window.scrollTo(0,0)},
   tab:v=>{if(prepLocked()&&v!=="prep"){toast("Ya has avisado a la gente. Termina de preparar el partido.");return}if(v==="pueblo"){S.sub=S.sub||{};S.sub.squad="fichar";v="squad"}if(v==="datos"){S.sub=S.sub||{};S.sub.comp="datos";v="comp"}S.tab=v;pendingFire=null;pendingReset=false;save();render();window.scrollTo(0,0)},
