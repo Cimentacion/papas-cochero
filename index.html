@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="11.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="11.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1262,7 +1262,7 @@ function viewCreator(){
   </div></section>`;
 }
 function startGame(){
-  S={v:5,field:0,season:1,tierTeams:{},tmarket:[],house:0,scouts:["primo"],reports:[],reach:0,coach:{...C,moral:55,w:0,d:0,l:0,gf:0,ga:0},money:300,week:1,phase:"pre",comp:null,players:[],lineup:Array(11).fill(null),formation:"4-4-2",
+  S={v:5,mafiaFix:1,field:0,season:1,tierTeams:{},tmarket:[],house:0,scouts:["primo"],reports:[],reach:0,coach:{...C,moral:55,w:0,d:0,l:0,gf:0,ga:0},money:300,week:1,phase:"pre",comp:null,players:[],lineup:Array(11).fill(null),formation:"4-4-2",
     sessions:[null,null,null],sessLog:[],upg:[],sponsors:[],sponsorPay:{},perks:{comida:0},freeWork:0,news:[],tab:"pueblo",nextId:1,trophies:[],prep:null,memorial:[],openPlace:"paro",tierNext:0,eds:0};
   S.sites=genSites();
   addNews("Fundas Los Papas Cochero en la barra del bar. Testigos: dos clientes y el camarero.");
@@ -1469,8 +1469,10 @@ function prepAvail(p){const P=S.prep;if(!P)return !p.injured;if(P.arrive)return 
 function autoLineup(){
   const roles=FORMS[S.formation];const P=S.prep;const av=S.players.filter(p=>prepAvail(p)&&!(P&&P.arrive&&P.arrive[p.id].min>0));const used=new Set();
   const order=roles.map((r,i)=>i).sort((a,b)=>(roles[a]==="POR"?-1:0)-(roles[b]==="POR"?-1:0));
-  S.lineup=Array(11).fill(null);
-  order.forEach(i=>{const best=av.filter(p=>!used.has(p.id)).sort((a,b)=>ovrAs(b,roles[i])*knownFit(b,roles[i])-ovrAs(a,roles[i])*knownFit(a,roles[i]))[0];if(best){S.lineup[i]=best.id;used.add(best.id)}});
+  S.lineup=Array(11).fill(null);const sc=(p,r)=>ovrAs(p,r)*knownFit(p,r);
+  const ord2=order.slice().sort((a,b)=>["POR","DEL","DEF","MED"].indexOf(roles[a])-["POR","DEL","DEF","MED"].indexOf(roles[b]));
+  ord2.forEach(i=>{const best=av.filter(p=>!used.has(p.id)&&p.known&&p.pos===roles[i]).sort((a,b)=>sc(b,roles[i])-sc(a,roles[i]))[0];if(best){S.lineup[i]=best.id;used.add(best.id)}});
+  order.forEach(i=>{if(S.lineup[i])return;const best=av.filter(p=>!used.has(p.id)).sort((a,b)=>sc(b,roles[i])-sc(a,roles[i]))[0];if(best){S.lineup[i]=best.id;used.add(best.id)}});
 }
 function cleanLineup(){S.lineup=S.lineup.map(id=>id&&pById(id)&&!pById(id).injured?id:null)}
 function viewSquad(){
@@ -2750,7 +2752,7 @@ async function olBegin(lid){
   const bots=Math.min(L.bots||0,16-snaps.length);if(snaps.length+bots<2){toast("Nadie más ha aceptado todavía. Añade bots o espera.");return}
   const avg=snaps.reduce((a,p)=>a+(p.str||14),0)/Math.max(1,snaps.length);const R=seeded(hashStr(lid));
   const bn=olBotNames(bots);const teams=snaps.concat(bn.map((n,i)=>({n,u:"",bot:1,str:+(avg*(.75+R()*.45)).toFixed(1),col:RIVC[i%RIVC.length],form:pick(NORMAL_FORMS),ro:rosterFor(n),tier:snaps[0]?snaps[0].tier:0})));
-  const order=shufR([...teams.keys()],R);const T=order.map(i=>teams[i]);
+  const order=L.fr?[...teams.keys()].sort((a,b)=>(teams[b].u===L.org)-(teams[a].u===L.org)):shufR([...teams.keys()],R);const T=order.map(i=>teams[i]);
   const fx=olRR(T.length,L.two).map(r=>r.map(([a,b])=>a+"_"+b).join(","));
   const pot=L.fr?0:Math.round(60+snaps.reduce((a,p)=>a+(p.spon||0)*6+20,0)+bots*12);
   await fbq(`l/${lid}`,"PATCH",{teams:T,fx,r:0,rt:TS,st:"run",pot});olPollLeagues(true);toast("¡Arranca la liga!")}
@@ -2853,7 +2855,7 @@ function olPlay(lid){
   const b=$("#olban");if(b)b.remove();
   startPrep();if(mm.human){S.prep.ol={side:mm.home?"h":"g"};olLobbyHere();}save();render();window.scrollTo(0,0)}
 function olResumeLobby(){if(S&&S.olSwap&&S.prep&&S.prep.ol&&!OL.lobbyT)olLobbyHere()}
-function olRestore(){const w=S.olSwap;if(!w)return;S.comp=w.comp;S.league=w.league;S.prep=w.prep;S.lineup=w.lineup||S.lineup;S.formation=w.formation||S.formation;S.phase=w.phase||S.phase;S.olSwap=null;S.tab="online";S.sub=S.sub||{};S.sub.online="ligas";clearInterval(OL.lobbyT);OL.lobbyT=0;save()}
+function olRestore(){if(S.olFld){S.field=S.olFld.field;S.upg=S.olFld.upg;S.embargo=S.olFld.embargo;S.olFld=null}const w=S.olSwap;if(!w)return;S.comp=w.comp;S.league=w.league;S.prep=w.prep;S.lineup=w.lineup||S.lineup;S.formation=w.formation||S.formation;S.phase=w.phase||S.phase;S.olSwap=null;S.tab="online";S.sub=S.sub||{};S.sub.online="ligas";clearInterval(OL.lobbyT);OL.lobbyT=0;save()}
 function olCancel(){const ol=S.comp&&S.comp.ol;if(ol&&S.prep&&S.prep.bets&&S.prep.bets.length){ledSync();S.prep.bets.forEach(b=>{S.money+=b.amt;led(`Apuesta anulada: ${b.label}`,b.amt)})}olRestore();render();window.scrollTo(0,0)}
 /* lobby humano contra humano */
 function olLiveKey(){const ol=S.comp.ol;return `${ol.lid}_${ol.k}`}
@@ -2880,11 +2882,12 @@ async function olKick(){
   const arrived=goers().filter(p=>P.arrive&&P.arrive[p.id]&&P.arrive[p.id].min<90);
   const L=S.lineup.map((id,i)=>id&&arrived.some(p=>p.id===id)?{p:{...pById(id),mE:pById(id).energy},role:FORMS[S.formation][i]}:null).filter(Boolean);
   const pw=L.length?power(L,S.formation,{home:ol.home}):{a:5,d:5};
-  await fbq(`lv/${key}/${side}q`,"PUT",{n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
+  await fbq(`lv/${key}/${side}q`,"PUT",{fld:{field:S.field||0,upg:S.upg||[],embargo:!!S.embargo},n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
   OL.kickBot=false;const t0=Date.now(),LIM=90000;let q=null;
   const show=()=>modal("Saltando al campo",`<p>Esperando a que <b>${esc(ol.oppN)}</b> salga del vestuario para jugar el partido en directo…</p><p class="hint">Quedan <b id="olkw">${Math.ceil((LIM-(Date.now()-t0))/1000)}</b> s. Si no aparece, jugarás contra su equipo manejado por la máquina.</p>`);
   show();while(Date.now()-t0<LIM&&!OL.kickBot){q=await fbq(`lv/${key}/${oside}q`);if(q)break;const e=$("#olkw");if(e)e.textContent=Math.ceil((LIM-(Date.now()-t0))/1000);else if(!OL.kickBot)show();await new Promise(r=>setTimeout(r,1000))}
   closeModal();const T=S.comp.teams[1];
+  if(q&&!ol.home&&q.fld){S.olFld={field:S.field,upg:S.upg,embargo:S.embargo};S.field=q.fld.field||0;S.upg=arr(q.fld.upg);S.embargo=!!q.fld.embargo}
   if(q){T.roster=arr(q.ro).length?arr(q.ro):T.roster;T.form=q.form||T.form;T.str=q.str||T.str;if(q.col&&q.col!==ourKit().c1)T.col=q.col}
   const online=q?{role:side,key,peerOk:true}:null;if(!q)toast(`${ol.oppN} no aparece. Su equipo lo maneja la máquina.`);
   S.prep.ol.kicked=2;startMatch(online)}
@@ -2940,7 +2943,7 @@ function olTheir(goal,name){
 const olA=n=>{const O=M&&M.online;return O&&O.role==="g"&&!O.solo&&O.cur?O.cur["a"+n]||0:0};
 /* final del partido online */
 function olEndMatch(res){
-  const c=S.comp,ol=c.ol,m=M.m;const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
+  const c=S.comp,ol=c.ol,m=M.m;const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;if(S.olFld){S.field=S.olFld.field;S.upg=S.olFld.upg;S.embargo=S.olFld.embargo;S.olFld=null}
   const bets=S.prep.bets.map(b=>{let won=false;if(b.type==="res")won=b.pick===res;else if(b.side==="u")won=!!M.goals[b.id];else won=M.rivScorers.includes(b.name);return{...b,won,pay:won?Math.round(b.amt*b.odds):0}});
   const betWin=bets.reduce((a,b)=>a+b.pay,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
   const prize=(OL.lg[ol.lid]||{}).fr?0:res==="W"?40+c.tier*20:res==="D"?15+c.tier*8:0;if(prize){S.money+=prize;led(`Prima liga online (${res==="W"?"victoria":"empate"})`,prize)}
@@ -3173,7 +3176,7 @@ function tick(){
   else if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
   updScore();
   if(clockEnd(m))return;
-  if(hole&&M.slots.includes(null)){if(canFill()){if(M.skipping)autoFill();else{M.hold=true;addLog(m,`Hay un hueco en el campo. Meter a alguien cuenta como cambio (llevas ${M.subs}/5). El partido espera a que decidas.`,"ev")}}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
+  if(hole&&M.slots.includes(null)){if(canFill()){autoFill();addLog(m,`Hueco tapado con el más apto del banquillo. Si quieres otro, toca el puesto y cámbialo.`,"ev")}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
   renderSquad();
 }
 function clockEnd(m){
@@ -3287,6 +3290,7 @@ function startMatch(olo){
      addLog(0,`${T0.n} solo trae a ${M.oppN}. ${pick(["Dos se han quedado dormidos.","Uno tiene comunión y el otro está de resaca.","Les falta gente: el de la furgoneta no ha arrancado.","Han preguntado en el bar y nadie quería.","Su delantero está en un juicio de divorcio."])} Aprovechadlo.`,"goal")}}
   else{const ro=S.comp.teams[M.opp].roster||[];M.oppN=Math.min(11,ro.length||11);if(M.oppN<11){M.vis.them=M.vis.them.slice(0,M.oppN);addLog(0,`${S.comp.teams[M.opp].n} solo ha conseguido traer a ${M.oppN}.`,"goal")}}
   {const sp=$("#m-speed"),sk=document.querySelector('#mctl [data-act="skip"]');const lock=!!(olo||(S.comp.ol&&S.comp.ol.human));if(sp){sp.disabled=lock;if(lock){M.speed=1;sp.textContent="Normal"}}if(sk)sk.disabled=lock}
+  if(olo&&S.olFld){M.ours=true;addLog(0,`Jugáis en el campo de ${S.comp.teams[M.opp].n}, con todos sus defectos: ${S.embargo?"en mitad de la calle":curField().n}.`,"ev")}
   if(olo){olLiveInit(olo);addLog(0,`Partido EN DIRECTO contra ${S.comp.teams[M.opp].n}, que lo maneja otra persona desde su móvil.`,"goal")}
   M.cine={type:"entrada",t0:performance.now(),dur:2800,data:{ours:v.ours,venue:v.n}};M.cineUntil=performance.now()+2800;
   updScore();renderSquad();M.timer=setTimeout(run,300);
@@ -4028,7 +4032,8 @@ function loop(t){
 
 /* ================= arranque ================= */
 drawCrest($("#crest"));applySkin();
-load();if(S&&S.olSwap)olRestore();if(!S)newCreator();announceUpdate();voxLoad();setTimeout(()=>checkUpdates(false),2500);setInterval(()=>{if(!M)checkUpdates(false);else if(UPD.pending&&!M){}},15*60*1000);
+load();if(S&&S.olSwap)olRestore();if(S&&S.olFld){S.field=S.olFld.field;S.upg=S.olFld.upg;S.embargo=S.olFld.embargo;S.olFld=null}
+if(S&&!S.mafiaFix){S.mafiaFix=1;if(S.debt>0||S.embargo||S.mafiaStrikes){S.debt=0;S.loanP=0;S.mafiaStrikes=0;S.embargo=false;addNews("Los del polígono se olvidan de tu deuda: dicen que fue un error del contable. Recuperas el campo.")}save()}if(!S)newCreator();announceUpdate();voxLoad();setTimeout(()=>checkUpdates(false),2500);setInterval(()=>{if(!M)checkUpdates(false);else if(UPD.pending&&!M){}},15*60*1000);
 render();requestAnimationFrame(loop);
 setTimeout(()=>{try{olStart()}catch(e){}},1500);
 document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olOn())olPublish(true)}catch(e){}});
