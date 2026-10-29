@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="9.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="9.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1332,7 +1332,8 @@ function viewPueblo(){
   const cap=HOUSES[S.house||0].scouts;const mine=(S.scouts||[]);
   const scoutRows=SCOUTS.map(sc=>{const hired=mine.includes(sc.id);const lock=(sc.t||0)>(S.reach||0);
     return `<div class="place"><div><b>${esc(sc.n)}</b><p>${esc(sc.d)} Cobra ${sc.w} €/semana${sc.c?` y ${sc.c} € por firmar`:""}.</p></div>${hired?`<button class="btn mini" data-act="unscout" data-v="${sc.id}">Despedir</button>`:lock?`<span class="hint">Sube de categoría</span>`:`<button class="btn mini primary" data-act="scout" data-v="${sc.id}" ${mine.length>=cap?"disabled":""}>Contratar</button>`}</div>`}).join("");
-  return `${S.reports&&S.reports.length?`<section class="win"><div class="bar">Informes de tus ojeadores <small>Posición confirmada · faltan un 20-25 % menos</small></div><div class="body"><div class="list">${S.reports.map(p=>prow(p,"report")).join("")}</div></div></section>`:""}
+  S.newRep=0;
+  return `${S.reports&&S.reports.length?`<section class="win"><div class="bar">Informes de tus ojeadores <small>Posición confirmada · faltan un 20-25 % menos</small></div><div class="body"><p class="hint">Cada ojeador te trae un jugador nuevo cada vez que pasa una semana (al pasar semana o después de cada partido de liga). Pulsa «Fichar» en el que te guste.</p><div class="list">${S.reports.map(p=>prow(p,"report")).join("")}</div></div></section>`:mine.length?`<section class="win"><div class="bar">Informes de tus ojeadores</div><div class="body"><p class="hint">Todavía no han traído a nadie. El informe llega cuando pasa la semana: dale a «Pasar semana» o juega el partido de liga. Los partidos online no pasan semanas.</p></div></div></section>`:`<section class="win"><div class="bar">Informes de tus ojeadores</div><div class="body"><p class="hint">No tienes ningún ojeador contratado. Contrata uno abajo (el primo Rafi es gratis).</p></div></section>`}
   <section class="win"><div class="bar">${esc(pl.n)} <small>${cand.length} disponibles · plantilla ${S.players.length}/22</small></div><div class="body"><div class="list">${cand.length?cand.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div></section>
   <section class="win"><div class="bar">Sitios de ${HOME} y alrededores <small>${opened.length}/${PLACES.length} descubiertos</small></div><div class="body">
    <p class="hint">Cada semana hay caras nuevas. Los <span class="unk">???</span> no saben ni de qué juegan: se descubre entrenando o jugando. La media va de 1 a 99: aquí, de 10 a 20 ya es mucho.</p>${rows}
@@ -2368,6 +2369,7 @@ function viewPrep(){
      <div class="pc-act"><button class="btn" data-act="olbot">Jugar ya contra la máquina</button></div></div></section>`}
   if(P.step==="conv"){
     const av=S.players.filter(p=>!p.injured);const n=av.filter(p=>P.conv[p.id]).length;
+    if(!av.length)return head+`<section class="win"><div class="bar">1 · Convocatoria</div><div class="body"><p><b>No tienes a nadie disponible.</b> ${S.players.length?`Tus ${S.players.length} jugadores están lesionados.`:"Tu plantilla está vacía: no te queda ningún jugador."} Ficha gente en Equipo › Fichar${S.players.length?" o espera a que se curen":""}.</p><div class="row"><button class="btn primary" data-act="${OLc?"olcancel":"tab"}" data-v="club">${OLc?"Dejarlo para luego":"Volver"}</button></div></div></section>`;
     const rows=av.sort((a,b)=>(!!P.conv[b.id]-!!P.conv[a.id])||(shownOvr(b)-shownOvr(a))).map(p=>`<div class="crow ${P.conv[p.id]?"on":""}"><button class="tb" data-act="conv" data-id="${p.id}" aria-pressed="${!!P.conv[p.id]}">${P.conv[p.id]?"VA":"NO VA"}</button>
       <div class="cn"><b>${esc(short(p))} <span style="font-weight:400">· ${posLabel(p)} · ${shownOvr(p)}</span></b><small>Energía ${p.energy}${p.veh?` · trae ${esc(p.veh.n)} (${p.veh.plazas} plazas)`:" · sin vehículo"}</small></div></div>`).join("");
     const inj=S.players.filter(p=>p.injured);
@@ -2655,6 +2657,7 @@ function olLeagueView(lid,L){
 function olPlay(lid){
   const L=OL.lg[lid];const mm=olMyMatch(lid,L);if(!mm){toast("Ese partido ya no está disponible.");return}
   if(M){toast("Termina antes el partido que estás jugando.");return}
+  if(!S.players.some(p=>!p.injured)){toast(S.players.length?"Todos tus jugadores están lesionados. Si no juegas a tiempo, el partido se simula.":"No tienes jugadores. Ficha gente en Equipo › Fichar antes de jugar.");return}
   const o=mm.opp;const oppT=Object.assign({n:o.n,str:o.str||14,col:o.col||"#888",kit:o.kit||null,crest:o.crest||null,stad:o.stad||null,roster:arr(o.ro).length?arr(o.ro):rosterFor(o.n),form:o.form||"4-4-2",town:olTown(o.n),tierOf:o.tier||0,venue:1},z());
   if(oppT.col===ourKit().c1)oppT.col=oppT.kit&&oppT.kit.c2&&oppT.kit.c2!==ourKit().c1?oppT.kit.c2:"#f2f2f2";
   const meT=Object.assign({n:clubName(),town:HOME,str:0,us:1,col:ourKit().c1},z());
@@ -2859,7 +2862,7 @@ function scoutWeek(){
     const pool=sc.ojo===0?open.filter(pl=>pl.t===0):open;
     const extra=sc.ojo>=3?PLACES.filter(pl=>pl.t===(S.reach||0)+1):[];
     const pl=pick(pool.concat(extra));const p=genPlayer(pl.id,sc.ojo*2.5);p.known=true;p.scout=sc.n;p.rel=+(.75+Math.random()*.05).toFixed(2);p.cost=Math.round(p.cost*1.1)+sc.ojo*3;
-    S.reports.unshift(p)});
+    S.reports.unshift(p);S.newRep=(S.newRep||0)+1;if(S.news)addNews(`${sc.n} trae un informe: ${fullName(p)}, ${POSN[p.pos]||p.pos}, media ${ovr(p)}. Está en Equipo › Fichar.`)});
   S.reports=S.reports.slice(0,8);
 }
 
