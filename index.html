@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="8.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="8.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1987,14 +1987,17 @@ const voxReady=()=>!!(VOX.man&&VOX.ctx&&S&&S.voxOff!==true);
 function voxInit(){try{if(!VOX.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(AC)VOX.ctx=new AC()}VOX.ctx&&VOX.ctx.resume()}catch(e){}}
 async function voxBuf(k){if(VOX.buf[k])return VOX.buf[k];const r=await fetch(VOX.base+k+".mp3");const a=await r.arrayBuffer();const b=await new Promise((res,rej)=>VOX.ctx.decodeAudioData(a,res,rej));VOX.buf[k]=b;return b}
 async function voxPlay(keys,important){
-  if(important){VOX.q=[];try{VOX.cur&&VOX.cur.stop()}catch(e){}VOX.cur=null}else if(VOX.cur||VOX.q.length)return;
-  VOX.q.push(...keys);if(VOX.cur)return;
-  while(VOX.q.length){const k=VOX.q.shift();try{const b=await voxBuf(k);const src=VOX.ctx.createBufferSource();src.buffer=b;const g=VOX.ctx.createGain();g.gain.value=1.4;src.connect(g);g.connect(VOX.ctx.destination);VOX.cur=src;await new Promise(r=>{src.onended=r;src.start()});}catch(e){}VOX.cur=null}
+  if(important){VOX.gen=(VOX.gen||0)+1;try{VOX.cur&&VOX.cur.stop()}catch(e){}VOX.cur=null}else if(VOX.busy)return;
+  const g=VOX.gen||0;VOX.busy=true;
+  for(const k of keys){if(g!==(VOX.gen||0))return;let b;try{b=await voxBuf(k)}catch(e){continue}if(g!==(VOX.gen||0))return;
+    await new Promise(r=>{try{const src=VOX.ctx.createBufferSource();src.buffer=b;const gn=VOX.ctx.createGain();gn.gain.value=1.4;src.connect(gn);gn.connect(VOX.ctx.destination);VOX.cur=src;src.onended=r;src.start()}catch(e){r()}});
+    if(g!==(VOX.gen||0))return;VOX.cur=null}
+  VOX.busy=false;
 }
 function vo(ev,name,important){
   if(!S||S.comm===false||(M&&M.skipping))return;const st=castStyle();const style=st==="paleto"?"paleto":(st==="tele"&&VOL.tele[ev]?"tele":"normal");
   const lines=VOL[style][ev]||(style==="paleto"?null:VOL.normal[ev]);if(!lines){if(style==="paleto"&&Math.random()<.3)vo("b_any");return}
-  const realStyle=VOL[style][ev]?style:"normal";const i=Math.floor(Math.random()*lines.length),txt=lines[i];const spk=(realStyle==="paleto"&&ev==="b_any")?i%2:(ev.startsWith("b_")?1:0);
+  const realStyle=VOL[style][ev]?style:"normal";VOX.recent=VOX.recent||{};const rk=realStyle+ev,rec=VOX.recent[rk]||(VOX.recent[rk]=[]);let pool=[...lines.keys()].filter(x=>!rec.includes(x));if(!pool.length){rec.length=0;pool=[...lines.keys()]}const i=pick(pool);rec.push(i);if(rec.length>Math.max(1,Math.floor(lines.length*.7)))rec.shift();const txt=lines[i];if(!important&&(VOX.busy||(window.speechSynthesis&&speechSynthesis.speaking)))return;const spk=(realStyle==="paleto"&&ev==="b_any")?i%2:(ev.startsWith("b_")?1:0);
   if(/latas?/.test(txt))setTimeout(()=>SFX.can(),txt.length*55);
   const wantsName=!/[.!?»]$/.test(txt.trim());const nm=name&&wantsName?(/^(El|La)$/.test(String(name).split(" ")[0])?String(name):String(name).split(" ")[0]):null;
   if(voxReady()&&VOX.man.has(`${realStyle}_${ev}_${i}`)){const keys=[`${realStyle}_${ev}_${i}`];if(nm&&VOX.man.has("n_"+vslug(nm)))keys.push("n_"+vslug(nm));voxPlay(keys,important);return}
@@ -2521,7 +2524,7 @@ const onIds=()=>M.slots.filter(Boolean);
 const benchList=()=>M.sq.filter(p=>!M.slots.includes(p.id)&&!M.out.has(p.id)&&M.arr[p.id]<=M.min);
 const oppName=()=>S.comp.teams[M.opp].n;
 function htTalk(){const d=M.us-M.them;modal("Charla del descanso",`<p>${d<0?"Vais perdiendo.":d>0?"Vais ganando.":"Vais empatados."} El vestuario es el maletero del Seat Ibiza. ¿Qué les dices?</p><div class=\"pc-act\"><button class=\"btn primary\" data-act=\"htalk\" data-v=\"animar\">Animarlos: «Lo estáis haciendo bien»</button><button class=\"btn\" data-act=\"htalk\" data-v=\"bronca\">Echarles la bronca</button><button class=\"btn\" data-act=\"htalk\" data-v=\"latas\">Amenazar con quitar las latas</button><button class=\"btn\" data-act=\"htalk\" data-v=\"nada\">Comerte el bocadillo en silencio</button></div>`)}
-function myPower(){return power(onList(),M.form,{home:M.home,tactic:M.tactic,boost:M.boost>0,mod:M.mod,oppStr:M.oppStr})}
+function myPower(){const P=power(onList(),M.form,{home:M.home,tactic:M.tactic,boost:M.boost>0,mod:M.mod,oppStr:M.oppStr});const k=Math.pow(onList().length/11,1.6);return{a:P.a*k,d:P.d*k}}
 const clk=()=>M?(M.addN>0?`${M.min}+${M.addN}`:String(M.min)):"0";
 function addLog(min,t,cls){if(M&&!M.defer&&(cls==="bad"||cls==="ev")&&min>0&&!/Hay un hueco|descuento|Descanso/.test(t))(voxReady()||castStyle()==="paleto"?0:speak(t.replace(/«|»/g,"")));if(M&&M.defer){M.defer.push([min,t,cls,(M&&min===M.min)?clk():String(min)]);return}const lab=(M&&min===M.min)?clk():String(min);const d=document.createElement("div");d.className="l "+(cls||"");d.innerHTML=`<b>${lab}'</b>${esc(t)}`;$("#mlog").prepend(d)}
 function updScore(){const u=M.dispUs!=null?M.dispUs:M.us,t=M.dispThem!=null?M.dispThem:M.them;$("#m-score").textContent=M.m.a===0?`${u}-${t}`:`${t}-${u}`;$("#m-min").textContent=clk()+"'"}
@@ -2538,7 +2541,7 @@ function shot(special){
 }
 function theirChance(boost){
   const L=onList();const P=myPower(),O=M.oppStr*M.omod*M.oA*(boost||1);
-  const pg=O/(O+P.d*1.2)*.33;
+  const pg=Math.min(.85,O/(O+P.d*1.2)*(.33+.45*(1-onList().length/11)));
   const gkS=L.find(x=>x.role==="POR")||L.find(x=>x.role==="DEF");const d=L.length?pick(L).p:null;
   const g=gkS?short(gkS.p):"Nadie",dn=d?short(d):"el aire";const rp=rivPlayer();
   if(Math.random()<pg){M.them++;M.lastChance={side:"them",name:rp.n,res:"goal"};M.rivScorers.push(rp.n);M.ballT={x:6,y:50+rnd(-6,6)};M.net={side:0,until:performance.now()+1500};addLog(M.min,pick(GOAL_THEM)(rp.n,g,dn),"bad")}
@@ -2592,7 +2595,7 @@ function tick(){
   if(!inAdd){coachAuto(m);prayTick(m);if(castStyle()==="paleto"&&Math.random()<.06)paletoSay(true)}
   if(m>2&&foulTick(m)){updScore();return}
   if(m>3&&Math.random()<.04*(.4+.6*relNow())&&weird())return;
-  if(!M.pause&&Math.random()<.2)chance();
+  if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
   updScore();
   if(clockEnd(m))return;
   if(hole&&M.slots.includes(null)){if(canFill()){if(M.skipping)autoFill();else{M.hold=true;addLog(m,`Hay un hueco en el campo. Meter a alguien cuenta como cambio (llevas ${M.subs}/5). El partido espera a que decidas.`,"ev")}}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
@@ -2696,6 +2699,9 @@ function startMatch(){
   sq.filter(p=>arr[p.id]>0).forEach(p=>addLog(0,`${short(p)} todavía no ha llegado. Se le espera hacia el minuto ${arr[p.id]}.`,"bad"));
   const n=onIds().length;if(n<11)addLog(0,`Empezáis con ${n}. Habéis preguntado en el bar y nadie quería.`,"bad");
   visInit();
+  {const T0=S.comp.teams[M.opp];const tr=T0.tierOf!=null?T0.tierOf:S.comp.tier;const pm=[.6,.4,.18][tr]||0;let miss=0;if(Math.random()<pm){miss=wpick([1,2,3,4],x=>[5,3,1.5,.6][x-1]);}
+   if(miss){M.oppN=11-miss;M.oppStr*=Math.pow(M.oppN/11,1.4);const out=M.vis.them.filter(p=>p.role!=="POR").sort(()=>Math.random()-.5).slice(0,miss);M.vis.them=M.vis.them.filter(p=>!out.includes(p));
+     addLog(0,`${T0.n} solo trae a ${M.oppN}. ${pick(["Dos se han quedado dormidos.","Uno tiene comunión y el otro está de resaca.","Les falta gente: el de la furgoneta no ha arrancado.","Han preguntado en el bar y nadie quería.","Su delantero está en un juicio de divorcio."])} Aprovechadlo.`,"goal")}}
   M.cine={type:"entrada",t0:performance.now(),dur:2800,data:{ours:v.ours,venue:v.n}};M.cineUntil=performance.now()+2800;
   updScore();renderSquad();M.timer=setTimeout(run,300);
 }
