@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="8.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="8.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -191,6 +191,8 @@ body.fm .bub.them{background:#232766;border-color:#3a3f8a}body.fm .bub.me{backgr
 .goalgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;border:6px solid #fff;border-bottom:0;background:repeating-linear-gradient(0deg,#0000 0 10px,#fff3 10px 11px),repeating-linear-gradient(90deg,#2f7d32 0 10px,#2a7230 10px 11px);margin:8px 0}.goalgrid .gz{height:64px;font-size:26px;background:#ffffff22;border:2px dashed #fff8;color:#fff;cursor:pointer}.goalgrid .gz:active{background:#ffd23f88}.goalgrid.fk .gz:nth-child(n+4){background:repeating-linear-gradient(90deg,#c8233a55 0 14px,#0000 14px 20px)}
 .verfoot{text-align:center;font-size:11px;opacity:.6;color:#fff;padding:8px 0 90px}
 .mstats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:4px 0;font-size:12px;color:#fff}.mstats>div{display:grid;grid-template-columns:1fr auto 1fr;gap:4px;align-items:center;background:rgba(0,0,0,.35);padding:3px 5px;border-radius:4px}.mstats b{font-weight:700}.mstats b:last-child{text-align:right}.mstats small{opacity:.7;font-size:10px;text-align:center}.mstats.big{grid-template-columns:1fr;color:inherit}.mstats.big>div{background:#0001;font-size:14px}
+.pfc{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}.ppos{font-family:var(--f-display);font-size:20px;line-height:1;background:#000;color:#ffd23f;padding:4px 6px;min-width:56px;text-align:center}.ppos.unk{color:#ff6b6b}
+.pcount{position:sticky;top:calc(var(--toph,64px) + 52px);z-index:4;background:#000;color:#ffd23f;padding:6px 10px;margin:-4px 0 8px;font-size:14px}.pcount b{font-size:18px}
 .plink{cursor:pointer;text-decoration:underline dotted;color:inherit}.plink small{font-size:11px;opacity:.7;text-decoration:none}
 .pcard{border-radius:14px;padding:14px;color:#1b1b1b;border:3px solid #0006;box-shadow:inset 0 0 0 2px #fff5}
 .pcard.gold{background:linear-gradient(160deg,#fff1b0,#e7b923 45%,#b8860b)}.pcard.silver{background:linear-gradient(160deg,#ffffff,#c9ced6 45%,#8b939e)}.pcard.bronze{background:linear-gradient(160deg,#f6d2b0,#c98a52 45%,#8a5528)}
@@ -1255,7 +1257,7 @@ function trainingBox(){
 }
 const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
-function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}</button>`).join("")}</div>`}
+function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}${k==="plantilla"?` (${S.players.length})`:""}</button>`).join("")}</div>`}
 function viewClub(){
   const c=S.coach;const n=S.players.length;let top="";
   if(S.phase==="pre"){
@@ -1289,7 +1291,7 @@ function prow(p,mode){
    ?`${p.injured?`<small class="tag bad">Lesionado ${p.injured} sem.</small>`:""}<small>${p.wage} €/sem · ${p.goals} goles</small><button class="btn mini" data-act="fire" data-id="${p.id}">${pendingFire===p.id?"¿Seguro?":"Echar"}</button>`
    :`<small><b>${p.cost?p.cost+" €":"Gratis"}</b></small><small>${p.wage} €/sem</small>${p.scout&&mode==="report"?`<small>${esc(p.scout)}</small>`:""}<button class="btn mini primary" data-act="${mode==="report"?"hirerep":"hire"}" data-id="${p.id}">Fichar</button>`;
   return `<div class="prow ${p.injured?"inj":""}">
-   <canvas class="face" data-face="${p.id}" width="128" height="128"></canvas>
+   <div class="pfc"><canvas class="face" data-face="${p.id}" width="128" height="128"></canvas><div class="ppos ${p.known?"":"unk"}">${posLabel(p)}</div></div>
    <div class="pi"><div class="pn">${mode==="squad"?`<a class="plink" data-act="card" data-id="${p.id}">${esc(fullName(p))} <small>· ver carta</small></a>`:esc(fullName(p))}</div>
     <div class="pm"><span class="${p.known?"":"unk"}">${posLabel(p)}</span> · ${p.age} años · ${esc(p.origen)}${p.veh?` · ${esc(p.veh.n)} (${p.veh.plazas} plazas)`:""}${p.knock>0?` · <b style="color:#c8233a">TOCADO</b>`:""}${p.star?" · ⭐":""}${specs(p).length?` · <i>${specs(p).join(", ")}</i>`:""}</div>
     <div class="pt">${t.n}. <span>${t.d}</span></div>
@@ -1336,6 +1338,7 @@ function viewSquad(){
   {const k=sub("squad");if(k==="estrellas")return starsBox();if(k==="cantera")return canteraBox();if(k==="once")return lineupSection()+tacBox();if(k==="fichar")return viewPueblo()}
   return `
   <section class="win"><div class="bar">Plantilla <small>${S.players.length}/22</small></div><div class="body">
+   <div class="pcount"><b>${S.players.length}</b> jugadores · ${["POR","DEF","MED","DEL"].map(r=>`${S.players.filter(p=>p.known&&p.pos===r).length} ${r}`).join(" · ")}${S.players.some(p=>!p.known)?` · ${S.players.filter(p=>!p.known).length} ???`:""}${S.players.some(p=>p.injured)?` · ${S.players.filter(p=>p.injured).length} lesionados`:""}</div>
    ${S.memorial.length?`<p class="hint">En memoria de: ${S.memorial.map(esc).join(", ")}.</p>`:""}
    <div class="list">${ps.length?ps.map(p=>prow(p,"squad")).join(""):`<p class="hint">No tienes a nadie. Ve al pueblo.</p>`}</div></div></section>`;
 }
