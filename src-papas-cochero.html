@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="7.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="7.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -414,6 +414,7 @@ const TRAITS=[
  {id:"noche",n:"Trabaja de noche",d:"+2 FÍS, pero llega directa del trabajo y empieza cansada.",fis:2},
  {id:"cachas",n:"Cachas de gimnasio",d:"+4 FÍS, −3 CAB. No ha tocado un balón en su vida.",fis:4,cab:-3},
  {id:"reza",n:"Se santigua en cada córner",d:"+1 CAB. A veces falta por misa.",cab:1},
+ {id:"devoto",n:"Muy devoto",d:"De vez en cuando se pone a rezar en mitad del partido. Mientras reza, jugáis con uno menos.",cab:1},
  {id:"normal",n:"Normal, dentro de lo que cabe",d:"Sin rarezas conocidas."}
 ];
 const tr=id=>TRAITS.find(t=>t.id===id)||TRAITS[TRAITS.length-1];
@@ -1978,6 +1979,16 @@ function coachProtest(m){
     if(M.coachYel){M.coachOut=true;M.shouts=0;const sb=$("#m-shout");if(sb){sb.textContent="Expulsado";sb.disabled=true}M.mod*=.97;addLog(m,`¡Expulsan al míster ${S.coach.name}! Se va a ver el partido desde la valla con un bocadillo de mortadela.`,"bad");cardShow("#e02020","el entrenador");}
     else{M.coachYel=true;addLog(m,`Amarilla para el míster por protestar. «¡Que no he dicho nada!»`,"bad");cardShow("#ffd23f","el entrenador")}}
 }
+const PRAYERS=["Señor, que no nos metan otro.","Virgencita, que me quede como estoy.","Dios mío, si marcamos, dejo las latas.","San Pancracio, échanos una mano, que vamos fatal.","Que el árbitro vea la luz, amén."];
+function prayTick(m){
+  M.prays=M.prays||{};const P=M.prays;
+  Object.keys(P).forEach(k=>{if(P[k].until<=m){const x=P[k];if(x.side==="us")M.mod/=.92;else M.omod/=.9;if(x.spr)x.spr.pray=false;delete P[k];if(!M.skipping)addLog(m,`${x.n} termina de rezar y vuelve al partido.`,"ev")}});
+  if(M.skipping&&Math.random()<.5)return;
+  onList().forEach(({p})=>{if(P["u"+p.id]||!(p.trait==="devoto"||p.trait==="reza")||Math.random()>.012)return;const spr=M.vis&&M.vis.us.find(x=>x.id===p.id);
+    P["u"+p.id]={side:"us",until:m+rnd(2,4),n:short(p),spr};M.mod*=.92;if(spr)spr.pray=true;addLog(m,`${short(p)} se arrodilla a rezar en mitad del campo. Unos minutos jugáis con uno menos.`,"bad");speak(pick(PRAYERS),false,1)});
+  (M.vis?M.vis.them:[]).forEach(spr=>{if(spr.role==="POR"||P["t"+spr.full]||hashStr(spr.full)%10!==3||Math.random()>.012)return;
+    P["t"+spr.full]={side:"them",until:m+rnd(2,4),n:spr.full,spr};M.omod*=.9;spr.pray=true;M.boost=Math.max(M.boost||0,2);addLog(m,`¡${spr.full} se ha puesto a rezar! Tienen uno menos: es vuestro momento.`,"goal");speak(pick(PRAYERS),false,1);coachSay("win")});
+}
 function foulTick(m){
   if(M.skipping&&Math.random()<.5)return false;
   if(Math.random()>.08*(M.weather==="lluvia"?1.3:1))return false;
@@ -2423,7 +2434,7 @@ function tick(){
     else if(Math.random()<.00012*relNow()){removeAt(i,"juzgado",`Aparece un funcionario con una notificación del juzgado para ${short(p)}. Se va a leerla al coche y no vuelve.`);hole=true}
     else if(p.mE<=3){removeAt(i,"agotado",`${short(p)} se tumba en el centro del campo y dice que hasta aquí ha llegado.`);hole=true}
   });
-  if(!inAdd)coachAuto(m);
+  if(!inAdd){coachAuto(m);prayTick(m)}
   if(m>2&&foulTick(m)){updScore();return}
   if(m>3&&Math.random()<.04*(.4+.6*relNow())&&weird())return;
   if(!M.pause&&Math.random()<.2)chance();
@@ -2994,7 +3005,8 @@ function visUpdate(dt){
     team.forEach(p=>{
     let tx,ty;
     const u0=U(p.bx),wob=Math.sin(T*.9+p.ph*3)*1.2,wobY=Math.cos(T*.7+p.ph*5)*1.4;
-    if(p.ov){tx=p.ov.x;ty=p.ov.y}
+    if(p.pray){tx=p.x;ty=p.y}
+    else if(p.ov){tx=p.ov.x;ty=p.ov.y}
     else if(p===V.holder){tx=p.x+dir*2.5;ty=p.y+(34-p.y)*.06+Math.sin(T*2.2+p.ph)*.8}
     else if(p.role==="POR"){tx=X(2.5+prog*4+(inP?3:0));ty=34+(b.y-34)*.3}
     else if(p===press){const ang=Math.atan2(b.y-p.y,b.x-p.x);tx=b.x-Math.cos(ang)*1.4;ty=b.y-Math.sin(ang)*1.4}
@@ -3091,6 +3103,7 @@ function drawMatchView(cv){
     if(gb===0||gb===2||gb===3){c.fillStyle=lumi(tc)>150?"#222":"#ffffff";c.font=`bold ${Math.round(6*s)}px Archivo Narrow, sans-serif`;c.textAlign="center";c.fillText(String(p.num),q.x,q.y-12.8*s)}
     c.fillStyle=p.look.skin;c.beginPath();c.arc(q.x,q.y-23.2*s,3.3*s,0,7);c.fill();if(p.look.hair){c.fillStyle=p.look.hair;c.fillRect(q.x-3.3*s,q.y-27*s,6.6*s,2.4*s)}
     if(p===V.holder||(V.ball.move&&V.ball.move.end&&p.ov)){const nm=p.name;c.font="bold 11px Archivo Narrow, sans-serif";const w=c.measureText(nm).width+8;c.fillStyle=p.side==="us"?"rgba(90,52,21,.9)":"rgba(0,0,0,.75)";c.fillRect(q.x-w/2,q.y-34*s,w,13);c.fillStyle="#fff";c.fillText(nm,q.x,q.y-34*s+10)}
+    if(p.pray){c.fillStyle="rgba(255,255,255,.92)";c.strokeStyle="#111";c.lineWidth=1;const tx="🙏 rezando";c.font="bold 11px Archivo Narrow, sans-serif";const w=c.measureText(tx).width+8;c.fillRect(q.x-w/2,q.y-40*s,w,14);c.strokeRect(q.x-w/2,q.y-40*s,w,14);c.fillStyle="#111";c.textAlign="center";c.fillText(tx,q.x,q.y-40*s+11)}
     if(p.card&&T<p.card.until){c.fillStyle=p.card.c;c.fillRect(q.x+3*s,q.y-36*s,4.5*s,6.5*s);c.strokeStyle="#000";c.lineWidth=1;c.strokeRect(q.x+3*s,q.y-36*s,4.5*s,6.5*s)}
     c.textAlign="left"});
   goal(1);
