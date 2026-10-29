@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="9.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="9.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -169,11 +169,19 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-siz
 .bet .btn{font-family:var(--f-body);font-weight:700;font-size:13px;letter-spacing:0;display:flex;flex-direction:column;align-items:center;padding:6px 2px}
 .bet .btn small{font-family:var(--f-mono);font-size:18px;font-weight:400}
 .betok{background:#e3f6dc;border:2px solid #2f8a2f;padding:6px 8px;margin:6px 0;display:flex;flex-direction:column;gap:4px;font-size:14px}.betok>div{display:flex;justify-content:space-between;align-items:center;gap:6px}body.fm .betok{background:#12301a;border-color:#3fbf5a;color:#e9eaf7}.ledger i{font-style:normal;color:#777;font-size:12px;margin-right:4px}
+.olban{display:flex;gap:8px;align-items:center;justify-content:space-between;background:#ffd23f;color:#111;border:2px solid #000;padding:6px 8px;margin:6px var(--gut,8px);font-size:14px}
+.olcode{font-family:var(--f-display);font-size:34px;letter-spacing:.2em;text-align:center;margin:6px 0}
+.olfx{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;padding:4px 0;border-bottom:1px dotted #8f939a;font-size:14px}.olfx span:last-child{text-align:right}.olfx b{font-family:var(--f-mono);font-size:18px;min-width:52px;text-align:center}.olfx.me{background:#fff3b0}
+.olgo{background:#e3f6dc;border:2px solid #2f8a2f;padding:8px;margin:6px 0}
+.oltb{width:100%;border-collapse:collapse;font-size:14px}.oltb td,.oltb th{padding:3px 4px;border-bottom:1px dotted #8f939a;text-align:left}.oltb tr.me{background:#fff3b0}.oltb tr.pz td:first-child{color:#1f8f4e;font-weight:700}
+.olcd{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;background:#111;color:#ffd23f;font-family:var(--f-display);padding:8px 12px;margin:6px 0;border:2px solid #ffd23f}.olcd b{font-size:26px}.olcd.hurry{background:#c8233a;color:#fff}
+.mwait{background:#111;color:#ffd23f;text-align:center;padding:6px;font-family:var(--f-display);font-size:13px}
+body.fm .olfx.me,body.fm .oltb tr.me{background:#262b72}body.fm .olgo{background:#12301a;border-color:#3fbf5a}
 .bet2{display:grid;grid-template-columns:1fr auto;gap:6px}
 .amts{display:flex;gap:4px}
 .amts .btn{flex:1;font-size:11px;padding:6px 0}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--panel);border-top:2px solid var(--panel-hi);box-shadow:0 -1px 0 #000;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:var(--gut);padding-right:var(--gutr)}
-nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding-block:6px}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;padding-block:6px}
 nav.tabs button{font-family:var(--f-display);font-size:11px;letter-spacing:.02em;padding:9px 2px;background:var(--panel);border:2px solid;border-color:var(--panel-hi) var(--panel-lo) var(--panel-lo) var(--panel-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mp-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-bottom:8px}.mp-team{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}.mp-team b{font-size:14px;line-height:1.1}.mp-team small{font-size:11px;opacity:.8}
 .mp-vs{font-family:var(--f-display);font-size:26px}.mp-ha{font-size:10px!important;font-weight:700;letter-spacing:.08em;padding:1px 6px;border-radius:3px;opacity:1!important}.mp-ha.h{background:#2f7d32;color:#fff}.mp-ha.v{background:#555;color:#fff}.mp-r{display:grid;grid-template-columns:1fr 90px 1fr;gap:6px;align-items:center;padding:5px 0;border-top:1px solid rgba(0,0,0,.15);font-size:13px}.mp-r span:first-child{text-align:right}.mp-r small{text-align:center;opacity:.75;text-transform:uppercase;font-size:11px}.mp-r span.mpw{font-weight:700;color:#2f9d42}
@@ -342,6 +350,7 @@ body.fm .sw{border-color:#343a7c;border-radius:5px}
     <button data-act="tab" data-v="comp">Torneo</button>
     <button data-act="tab" data-v="campo">Club</button>
     <button data-act="tab" data-v="mister">Míster</button>
+    <button data-act="tab" data-v="online" id="tab-online" hidden>Online</button>
   </div></nav>
 </div>
 
@@ -349,6 +358,7 @@ body.fm .sw{border-color:#343a7c;border-radius:5px}
   <div class="sb"><div class="tn" id="m-home"></div><div><div class="sc" id="m-score">0-0</div><span class="mn" id="m-min">0'</span></div><div class="tn" id="m-away"></div></div>
   <div class="mstats" id="mstats"></div>
   <canvas id="mfield" width="480" height="300"></canvas>
+  <div class="mwait" id="m-wait" hidden></div>
   <div id="mlog" aria-live="polite"></div>
   <div class="mctl" id="mctl">
     <div class="seg">
@@ -712,6 +722,7 @@ function venueOf(m){
   const c=S.comp;
   if(m.a===0)return{n:S.embargo?curField().n:(S.club&&S.club.stadium)||curField().n,d:.8,ours:true,town:HOME,home:true};
   const opp=c.teams[m.b===0?m.a:m.b];
+  if(c.type==="online")return{n:opp.stad||`Campo de ${opp.n}`,d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
   if(c.tier===0&&c.type!=="cup"){const v=VENUES[opp.venue||1];return{n:v.n,d:v.d,ours:false,town:HOME,home:false}}
   return{n:`Campo municipal de ${opp.town}`,d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
 }
@@ -1259,7 +1270,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
+const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}${k==="plantilla"?` (${S.players.length})`:""}</button>`).join("")}</div>`}
 function viewClub(){
@@ -1572,7 +1583,7 @@ function paintDatos(){
     if(d.length<2){c.fillStyle="#777";c.fillRect(0,H/2,W,1);return}const mn=Math.min(...d),mx=Math.max(...d)+.01;c.strokeStyle=d[d.length-1]>=d[0]?"#2fbf5a":"#c8233a";c.lineWidth=1.6;c.beginPath();d.forEach((v,i)=>{const x=i*(W-2)/(d.length-1)+1,y=H-2-(v-mn)/(mx-mn)*(H-4);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()});
 }
 const CREST_SKIP=/^(CD|UD|FC|CF|SD|AD|CE|RC|RCD|CA|Club|Deportivo|Deportiva|Unión|Atlético|de|del|la|las|el|los|y|e|Real|Balompié|Racing)$/i;
-function crestSpec(t){if(t.us&&S&&S.club&&S.club.crest)return S.club.crest;const r=seeded(hashStr(t.n)+5);const pal=["#ffffff","#111111","#e7b923","#1d2f6f","#c8233a","#1f8f4e"];let c2=pal[Math.floor(r()*pal.length)];if(c2===t.col)c2="#ffffff";
+function crestSpec(t){if(t.us&&S&&S.club&&S.club.crest)return S.club.crest;if(t.crest)return t.crest;const r=seeded(hashStr(t.n)+5);const pal=["#ffffff","#111111","#e7b923","#1d2f6f","#c8233a","#1f8f4e"];let c2=pal[Math.floor(r()*pal.length)];if(c2===t.col)c2="#ffffff";
   const w=t.n.split(/\s+/).filter(x=>!CREST_SKIP.test(x));const ini=(w.length?w:t.n.split(/\s+/)).slice(0,3).map(x=>x[0]).join("").toUpperCase();
   return{shape:Math.floor(r()*4),pat:Math.floor(r()*6),c1:t.col||"#888",c2,ini,crown:/^Real\b/.test(t.n),star:r()<.3,ball:r()<.5}}
 function drawUsCrest(cv){const c=cv.getContext("2d");c.save();c.clearRect(0,0,cv.width,cv.height);c.imageSmoothingEnabled=false;const k=Math.min(cv.width,cv.height)/24;c.translate((cv.width-24*k)/2,(cv.height-24*k)/2);c.scale(k,k);drawCrest({getContext:()=>c});c.restore()}
@@ -1601,7 +1612,7 @@ function drawTeamCrest(cv,t){
 }
 function drawKit(cv,t){
   const c=cv.getContext("2d"),W=cv.width,H=cv.height;c.clearRect(0,0,W,H);
-  const us=t&&t.us,sp=us?ourKit():crestSpec(t);const sh=us?ourKit().sh:(sp.c2==="#ffffff"?"#ffffff":"#111111");
+  const us=t&&t.us,sp=us?ourKit():t&&t.kit||crestSpec(t);const sh=us?ourKit().sh:t&&t.kit?(t.kit.sh||"#111111"):(sp.c2==="#ffffff"?"#ffffff":"#111111");
   c.save();c.scale(W/100,H/100);
   const shirt=()=>{c.beginPath();c.moveTo(30,8);c.lineTo(42,4);c.quadraticCurveTo(50,12,58,4);c.lineTo(70,8);c.lineTo(92,22);c.lineTo(84,36);c.lineTo(74,30);c.lineTo(74,64);c.lineTo(26,64);c.lineTo(26,30);c.lineTo(16,36);c.lineTo(8,22);c.closePath()};
   shirt();c.fillStyle=sp.c1;c.fill();c.save();shirt();c.clip();c.fillStyle=sp.c2;
@@ -1981,7 +1992,7 @@ function drawWeather(c,W,H,T){
 /* --- tarjetas, faltas y penaltis --- */
 function spriteOf(side,key){const V=M.vis;if(!V)return null;return side==="us"?V.us.find(s=>s.id===key):V.them.find(s=>s.full===key)}
 function showCard(side,key,col){const s=spriteOf(side,key);if(s)s.card={c:col,until:performance.now()+2600}}
-const VOL=/*VOL*/{"normal": {"intro": ["Buenas tardes y bienvenidos al fútbol de pueblo. Que ruede el balón.", "Muy buenas tardes, amigos. Hoy hay fútbol. Del bueno, o del malo, ya veremos.", "Buenas tardes. Aquí Manolo y Paco, con el partido de la semana.", "Muy buenas, aficionados. Tarde de fútbol con olor a sardinas del bar de al lado.", "Saludos a todos los que nos escuchan, que creo que son tres. Empieza el partido.", "Arranca el encuentro. El campo, como siempre, lleno de piedras y de ilusión.", "Buenas tardes. Hoy el árbitro ha venido en bici y con prisa. Comenzamos."], "shot": ["¡Dispara", "¡Atención, chuta", "¡Prueba suerte", "¡Se la juega", "¡Remata", "¡Chutazo de", "¡Lo intenta", "¡Zapatazo de", "¡Disparo de"], "save": ["¡Paradón de", "¡Qué parada de", "¡Manopla de", "¡Lo saca", "¡Milagro de"], "miss": ["¡Fuera! Por poquito.", "Al tejado de la nave. Otro balón perdido.", "¡Uyyy! ¡Rozando el palo!", "¡Se marcha fuera! Ni con mapa.", "¡Al lateral de la red! Mucha gente lo ha cantado.", "Desviado. Ese balón acaba en la piscina del vecino.", "¡Fuera por centímetros! Qué agonía.", "Ese ha ido directo a la gasolinera.", "Alto, muy alto. Hay que avisar a la NASA.", "¡Uyyyy! La grada ya lo estaba cantando."], "post": ["¡Al palo! ¡Qué mala suerte!", "¡Larguero! ¡Ha temblado hasta la portería!", "¡Poste! ¡El balón ha sonado como una campana!", "¡Madera! Hoy no es nuestro día."], "goalUs": ["¡Gooooool! ¡Gol de los Papas! ¡Esto es increíble, señores!", "¡Golazo! ¡La grada se viene abajo!", "¡Gol, gol, gol! ¡No me lo puedo creer!", "¡Gol! ¡Gol de los nuestros! ¡Que se entere toda la comarca!", "¡Toma, toma, toma! ¡Golazo por la escuadra!", "¡Adentro! ¡El portero no sabe ni dónde está!", "¡Gooool! ¡Esto es Fuentes, señores!", "¡Golazo! ¡Esto lo tienen que poner en Canal Sur!", "¡Gol! ¡Se abrazan hasta con el árbitro!"], "goalThem": ["Gol del rival. Mazazo.", "Gol en contra. El portero no ha visto ni el balón.", "Y marcan ellos. Qué desastre de defensa, por favor.", "Gol de ellos. A ver quién se lo explica al míster.", "Nos la meten. Silencio en el descampado.", "Gol en contra. Hasta el perro se ha ido a casa.", "Y marcan. Esto se está poniendo feo.", "Gol visitante. La defensa estaba hablando de política."], "corner": ["Córner.", "Saque de esquina. Atentos al área.", "Córner. Suben hasta los centrales.", "Saque de esquina. Mucho peligro aquí.", "Córner a favor. Que suba el portero, que es el más alto."], "offside": ["¡Fuera de juego! El linier levanta la bandera.", "Bandera arriba. Fuera de juego.", "Fuera de juego clarísimo. Estaba más adelantado que el autobús de Écija.", "Bandera. El delantero estaba en otra provincia."], "throwin": ["Saque de banda.", "Saque de banda. Lo coge con las dos manos, como manda el reglamento.", "Fuera de banda. Se toma su tiempo para sacar."], "yellow": ["Tarjeta amarilla para", "Amarilla para", "Amarilla, y bien sacada, para", "Cartulina amarilla para", "El árbitro amonesta a"], "red": ["¡Tarjeta roja para", "¡Expulsado", "¡A la calle! Roja directa para", "¡Se va expulsado"], "coachCard": ["¡Al míster le sacan tarjeta! ¡Qué escándalo!"], "pause": ["Parece que el equipo ha pedido tiempo.", "Parón en el partido. El míster quiere hablar.", "El partido se detiene. Hay reunión en la banda.", "Tiempo muerto. El míster saca la pizarra de Mahou."], "arrivals": ["Atención, que llegan los que faltaban. Vienen del viaje hechos polvo."], "halftime": ["Descanso. Bocadillos de mortadela para todos.", "Descanso. Los jugadores se van a la sombra, si es que la encuentran.", "Final de la primera parte. Hay tortilla en la nevera del maletero."], "end": ["Final del partido. El árbitro se va corriendo.", "Se acabó lo que se daba. Final del partido.", "¡Final! Ahora todos al bar a comentarlo.", "Pitido final. Esto ha sido una montaña rusa, amigos."], "penUs": ["¡Penalti! ¡Penalti a favor!"], "penThem": ["Penalti en contra. Qué desastre."], "freekick": ["Falta peligrosa al borde del área."], "pray": ["Atención, que hay un jugador rezando en mitad del campo.", "Uno se ha puesto a rezar. Esto no lo había visto nunca."], "b_prayer": ["Señor, que no nos metan otro.", "Virgencita, que me quede como estoy.", "Dios mío, si marcamos, dejo las latas."], "b_goalUs": ["¡Qué barbaridad, Manolo! ¡Qué barbaridad!", "Eso no lo mete ni Joaquín en sus buenos tiempos.", "Hay que ver, Manolo. Esto es fútbol de verdad.", "Eso ha sido de jugada ensayada, Manolo. O de casualidad, no sé.", "Que lo pongan en las noticias, Manolo.", "Esto merece una ronda de cañas.", "¡Qué bonito es el fútbol cuando se gana, Manolo!", "Mi madre lo está viendo por la radio y estará llorando."], "b_goalThem": ["Ya te lo decía yo, Manolo. Esa defensa es un coladero.", "Así no se puede, hombre. Así no se puede.", "El portero estaba mirando el móvil, seguro.", "Ese gol tiene más culpables que un juicio.", "Yo ya lo veía venir, Manolo. Lo veía venir.", "Así no vamos a ningún sitio, Manolo.", "El central estaba atándose los cordones, seguro.", "Hay que despertar, que esto no es la siesta."], "b_shot": ["Ahí había que pasarla, Manolo.", "Ese balón todavía está subiendo.", "Uy, uy, uy.", "Esa la metía yo con la zurda, Manolo. Y soy diestro.", "Muy alta. Hay que bajar ese balón.", "Le ha pegado con el alma. Y con la espinilla.", "Casi, casi. Pero casi no vale.", "Ese balón lo tenía que haber pasado, Manolo."], "b_card": ["Bien sacada. Le ha pegado una patada que se ha oído en Écija.", "Eso es tarjeta aquí y en Marte.", "El árbitro hoy viene con ganas, Manolo.", "Tarjeta merecida. Esa entrada era de cárcel.", "El árbitro hoy no perdona ni una, Manolo.", "Esa tarjeta la ha visto hasta mi abuela.", "Lleva toda la tarde buscándola."], "b_any": ["Menudo partido, Manolo.", "Esto es lo que le gusta a la gente.", "Yo ya no entiendo nada, Manolo.", "Qué calor hace, Manolo.", "Esto en la tele no lo ponen, Manolo.", "¿Tú has visto la camiseta del número cinco? Lleva una mancha de tomate.", "El campo hoy está más duro que el pan de ayer.", "Mira, mira, que el perro ha vuelto al córner.", "A este partido le falta un poco de todo, Manolo.", "Yo con este equipo me iba a la Champions, Manolo.", "Huele a barbacoa. Alguien está asando en la grada.", "Hay más gente en la cola del pan que aquí.", "Este árbitro pita como si le pagaran por pitido.", "El delantero corre como si llevara la compra.", "Esto es fútbol de verdad, sin VAR y sin vergüenza."]}, "tele": {"intro": ["Bienvenidos a una nueva jornada de Primera División. Todo listo para que ruede el balón.", "Muy buenas noches. Partido grande en el estadio. Las cámaras ya están listas. Empezamos.", "Bienvenidos. Ambiente de las grandes noches. El balón ya está en el centro del campo."], "goalUs": ["¡Goool! ¡Goool! ¡Gol de los Papas Cochero en Primera División! ¡Increíble, señoras y señores!", "¡Golazo! ¡Esto es historia del fútbol español!", "¡Gol! ¡Del descampado a Primera, y marcando!"], "goalThem": ["Gol del rival. Aquí se paga cualquier error.", "Gol. La calidad en Primera se nota, señores."], "miss": ["Se marcha fuera por poco. Ocasión clarísima.", "Desviado. Lo tuvo en la cabeza."]}, "paleto": {"intro": ["Bueno, ¿esto ya ha empezado o qué? Yo he venido por las latas.", "¿Esto es fútbol? Bueno, venga, vale.", "¿Han empezado ya? Yo es que acabo de llegar del bar.", "Venga, a ver si ganamos, que he apostado dos latas.", "Aquí estamos, con la nevera llena y la ilusión vacía."], "shot": ["¡Tira, tira, animal!", "¿Pero dónde va ese?", "¡Dale, dale, dale!", "¡Esa va fuera, seguro!", "¡Pégale, hombre, pégale!"], "save": ["Lo ha parado el gordo. Increíble.", "El portero ese para hasta los aviones.", "Lo ha parado con la cara. Qué valiente."], "miss": ["Fuera. Normal, si no saben.", "Fuera. Como mi cuñado, que no da una.", "Eso no es un tiro, eso es un pase al bar."], "goalUs": ["¡Eh, eh, que ha sido gol! ¿De quién? Me da igual.", "¡Gooool! Bueno, eso creo. No he visto nada, estaba abriendo una lata.", "¡Gol! ¡Gol! ¡Rubio, que hemos metido gol!", "¡Que ha entrado, que ha entrado! ¡Abro otra lata!"], "goalThem": ["¿Han marcado? ¿Quién? Bah, da igual, otra lata.", "Nos han metido otro. Pásame la lata grande.", "Gol de esos. Esto es un robo, un robo."], "yellow": ["Tarjeta para ese. Bien hecho, que es malísimo."], "red": ["¡Fuera, fuera, a la calle!"], "pause": ["¿Qué pasa, que se han parado? Pues me abro otra lata.", "Se han parado. Pues aprovecho y voy al servicio.", "¿Ya se han cansado? Si no han hecho nada."], "halftime": ["Descanso. Rubio, ¿quedan latas?"], "end": ["¿Ya se ha acabado? Pues me voy al bar.", "Se acabó. Mañana hay que madrugar, Rubio.", "Final. Yo me quedo a recoger las latas."], "b_any": ["No sé quién es ese, pero me parece horrible.", "El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.", "Me abro unas latas.", "Pásame otra lata, Rubio.", "Mi cuñado jugaba mejor, y eso que está cojo.", "¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.", "El árbitro es primo del alcalde, eso lo sé yo.", "¿Ese no es el de la carnicería?", "Qué calor, mi arma. Qué calor.", "Eso en mis tiempos se arreglaba a guantazos.", "Mira el de amarillo, que va corriendo como un pato.", "¿Quién ha traído las pipas?", "Ese tiene más barriga que yo, y mira que es difícil.", "Yo es que no veo bien de lejos, pero ese es malísimo.", "Ese de ahí es el del taller, que me debe dinero.", "¿Tú sabes de qué juega el de rojo? Yo tampoco.", "Mi perro juega mejor, y eso que es cojo.", "Esto de las porterías de palé no es reglamentario.", "Me han dicho que el árbitro es de Marchena. Así va la cosa.", "Yo jugué aquí en el ochenta y cinco. Bueno, en la grada.", "Rubio, ¿te has traído el abridor?", "Esto me lo pagan los de la peña, que yo no pongo ni un euro.", "El calvo ese corre como un pato mareado.", "Pues el bocadillo de chorizo estaba buenísimo.", "Esto con un poco de flamenco de fondo mejoraría mucho.", "¿Ese es el hijo de la Paqui? Qué grande está.", "A mí me gustaba más el fútbol de antes. Bueno, este también es de antes.", "Yo me abro unas latas y ya lo veo todo más bonito.", "¿Por qué corren tanto? Si el balón va solo.", "El de la gorra es el entrenador, ¿no? Pues tiene cara de no saber nada.", "Me duele la rodilla solo de verlos.", "Esto lo arreglaba yo con dos de mi pueblo."]}}/*/VOL*/;
+const VOL=/*VOL*/{"normal": {"intro": ["Buenas tardes y bienvenidos al fútbol de pueblo. Que ruede el balón.", "Muy buenas tardes, amigos. Hoy hay fútbol. Del bueno, o del malo, ya veremos.", "Buenas tardes. Aquí Manolo y Paco, con el partido de la semana.", "Muy buenas, aficionados. Tarde de fútbol con olor a sardinas del bar de al lado.", "Saludos a todos los que nos escuchan, que creo que son tres. Empieza el partido.", "Arranca el encuentro. El campo, como siempre, lleno de piedras y de ilusión.", "Buenas tardes. Hoy el árbitro ha venido en bici y con prisa. Comenzamos."], "shot": ["¡Dispara", "¡Atención, chuta", "¡Prueba suerte", "¡Se la juega", "¡Remata", "¡Chutazo de", "¡Lo intenta", "¡Zapatazo de", "¡Disparo de"], "save": ["¡Paradón de", "¡Qué parada de", "¡Manopla de", "¡Lo saca", "¡Milagro de"], "miss": ["¡Fuera! Por poquito.", "Al tejado de la nave. Otro balón perdido.", "¡Uyyy! ¡Rozando el palo!", "¡Se marcha fuera! Ni con mapa.", "¡Al lateral de la red! Mucha gente lo ha cantado.", "Desviado. Ese balón acaba en la piscina del vecino.", "¡Fuera por centímetros! Qué agonía.", "Ese ha ido directo a la gasolinera.", "Alto, muy alto. Hay que avisar a la NASA.", "¡Uyyyy! La grada ya lo estaba cantando."], "post": ["¡Al palo! ¡Qué mala suerte!", "¡Larguero! ¡Ha temblado hasta la portería!", "¡Poste! ¡El balón ha sonado como una campana!", "¡Madera! Hoy no es nuestro día."], "goalUs": ["¡Gooooool! ¡Gol de los Papas! ¡Esto es increíble, señores!", "¡Golazo! ¡La grada se viene abajo!", "¡Gol, gol, gol! ¡No me lo puedo creer!", "¡Gol! ¡Gol de los nuestros! ¡Que se entere toda la comarca!", "¡Toma, toma, toma! ¡Golazo por la escuadra!", "¡Adentro! ¡El portero no sabe ni dónde está!", "¡Gooool! ¡Esto es Fuentes, señores!", "¡Golazo! ¡Esto lo tienen que poner en Canal Sur!", "¡Gol! ¡Se abrazan hasta con el árbitro!"], "goalThem": ["Gol del rival. Mazazo.", "Gol en contra. El portero no ha visto ni el balón.", "Y marcan ellos. Qué desastre de defensa, por favor.", "Gol de ellos. A ver quién se lo explica al míster.", "Nos la meten. Silencio en el descampado.", "Gol en contra. Hasta el perro se ha ido a casa.", "Y marcan. Esto se está poniendo feo.", "Gol visitante. La defensa estaba hablando de política."], "corner": ["Córner.", "Saque de esquina. Atentos al área.", "Córner. Suben hasta los centrales.", "Saque de esquina. Mucho peligro aquí.", "Córner a favor. Que suba el portero, que es el más alto."], "offside": ["¡Fuera de juego! El linier levanta la bandera.", "Bandera arriba. Fuera de juego.", "Fuera de juego clarísimo. Estaba más adelantado que el autobús de Écija.", "Bandera. El delantero estaba en otra provincia."], "throwin": ["Saque de banda.", "Saque de banda. Lo coge con las dos manos, como manda el reglamento.", "Fuera de banda. Se toma su tiempo para sacar."], "yellow": ["Tarjeta amarilla para", "Amarilla para", "Amarilla, y bien sacada, para", "Cartulina amarilla para", "El árbitro amonesta a"], "red": ["¡Tarjeta roja para", "¡Expulsado", "¡A la calle! Roja directa para", "¡Se va expulsado"], "coachCard": ["¡Al míster le sacan tarjeta! ¡Qué escándalo!"], "pause": ["Parece que el equipo ha pedido tiempo.", "Parón en el partido. El míster quiere hablar.", "El partido se detiene. Hay reunión en la banda.", "Tiempo muerto. El míster saca la pizarra de Mahou."], "arrivals": ["Atención, que llegan los que faltaban. Vienen del viaje hechos polvo."], "halftime": ["Descanso. Bocadillos de mortadela para todos.", "Descanso. Los jugadores se van a la sombra, si es que la encuentran.", "Final de la primera parte. Hay tortilla en la nevera del maletero."], "end": ["Final del partido. El árbitro se va corriendo.", "Se acabó lo que se daba. Final del partido.", "¡Final! Ahora todos al bar a comentarlo.", "Pitido final. Esto ha sido una montaña rusa, amigos."], "penUs": ["¡Penalti! ¡Penalti a favor!"], "penThem": ["Penalti en contra. Qué desastre."], "freekick": ["Falta peligrosa al borde del área."], "pray": ["Atención, que hay un jugador rezando en mitad del campo.", "Uno se ha puesto a rezar. Esto no lo había visto nunca."], "b_prayer": ["Señor, que no nos metan otro.", "Virgencita, que me quede como estoy.", "Dios mío, si marcamos, dejo las latas."], "b_goalUs": ["¡Qué barbaridad, Manolo! ¡Qué barbaridad!", "Eso no lo mete ni Joaquín en sus buenos tiempos.", "Hay que ver, Manolo. Esto es fútbol de verdad.", "Eso ha sido de jugada ensayada, Manolo. O de casualidad, no sé.", "Que lo pongan en las noticias, Manolo.", "Esto merece una ronda de cañas.", "¡Qué bonito es el fútbol cuando se gana, Manolo!", "Mi madre lo está viendo por la radio y estará llorando."], "b_goalThem": ["Ya te lo decía yo, Manolo. Esa defensa es un coladero.", "Así no se puede, hombre. Así no se puede.", "El portero estaba mirando el móvil, seguro.", "Ese gol tiene más culpables que un juicio.", "Yo ya lo veía venir, Manolo. Lo veía venir.", "Así no vamos a ningún sitio, Manolo.", "El central estaba atándose los cordones, seguro.", "Hay que despertar, que esto no es la siesta."], "b_shot": ["Ahí había que pasarla, Manolo.", "Ese balón todavía está subiendo.", "Uy, uy, uy.", "Esa la metía yo con la zurda, Manolo. Y soy diestro.", "Muy alta. Hay que bajar ese balón.", "Le ha pegado con el alma. Y con la espinilla.", "Casi, casi. Pero casi no vale.", "Ese balón lo tenía que haber pasado, Manolo."], "b_card": ["Bien sacada. Le ha pegado una patada que se ha oído en Écija.", "Eso es tarjeta aquí y en Marte.", "El árbitro hoy viene con ganas, Manolo.", "Tarjeta merecida. Esa entrada era de cárcel.", "El árbitro hoy no perdona ni una, Manolo.", "Esa tarjeta la ha visto hasta mi abuela.", "Lleva toda la tarde buscándola."], "b_any": ["Menudo partido, Manolo.", "Esto es lo que le gusta a la gente.", "Yo ya no entiendo nada, Manolo.", "Qué calor hace, Manolo.", "Esto en la tele no lo ponen, Manolo.", "¿Tú has visto la camiseta del número cinco? Lleva una mancha de tomate.", "El campo hoy está más duro que el pan de ayer.", "Mira, mira, que el perro ha vuelto al córner.", "A este partido le falta un poco de todo, Manolo.", "Yo con este equipo me iba a la Champions, Manolo.", "Huele a barbacoa. Alguien está asando en la grada.", "Hay más gente en la cola del pan que aquí.", "Este árbitro pita como si le pagaran por pitido.", "El delantero corre como si llevara la compra.", "Esto es fútbol de verdad, sin VAR y sin vergüenza."], "esposa": ["Yo he estado con la esposa del entrenador de los Papas Cochero."], "b_esposa": ["Y yo."]}, "tele": {"intro": ["Bienvenidos a una nueva jornada de Primera División. Todo listo para que ruede el balón.", "Muy buenas noches. Partido grande en el estadio. Las cámaras ya están listas. Empezamos.", "Bienvenidos. Ambiente de las grandes noches. El balón ya está en el centro del campo."], "goalUs": ["¡Goool! ¡Goool! ¡Gol de los Papas Cochero en Primera División! ¡Increíble, señoras y señores!", "¡Golazo! ¡Esto es historia del fútbol español!", "¡Gol! ¡Del descampado a Primera, y marcando!"], "goalThem": ["Gol del rival. Aquí se paga cualquier error.", "Gol. La calidad en Primera se nota, señores."], "miss": ["Se marcha fuera por poco. Ocasión clarísima.", "Desviado. Lo tuvo en la cabeza."]}, "paleto": {"intro": ["Bueno, ¿esto ya ha empezado o qué? Yo he venido por las latas.", "¿Esto es fútbol? Bueno, venga, vale.", "¿Han empezado ya? Yo es que acabo de llegar del bar.", "Venga, a ver si ganamos, que he apostado dos latas.", "Aquí estamos, con la nevera llena y la ilusión vacía."], "shot": ["¡Tira, tira, animal!", "¿Pero dónde va ese?", "¡Dale, dale, dale!", "¡Esa va fuera, seguro!", "¡Pégale, hombre, pégale!"], "save": ["Lo ha parado el gordo. Increíble.", "El portero ese para hasta los aviones.", "Lo ha parado con la cara. Qué valiente."], "miss": ["Fuera. Normal, si no saben.", "Fuera. Como mi cuñado, que no da una.", "Eso no es un tiro, eso es un pase al bar."], "goalUs": ["¡Eh, eh, que ha sido gol! ¿De quién? Me da igual.", "¡Gooool! Bueno, eso creo. No he visto nada, estaba abriendo una lata.", "¡Gol! ¡Gol! ¡Rubio, que hemos metido gol!", "¡Que ha entrado, que ha entrado! ¡Abro otra lata!"], "goalThem": ["¿Han marcado? ¿Quién? Bah, da igual, otra lata.", "Nos han metido otro. Pásame la lata grande.", "Gol de esos. Esto es un robo, un robo."], "yellow": ["Tarjeta para ese. Bien hecho, que es malísimo."], "red": ["¡Fuera, fuera, a la calle!"], "pause": ["¿Qué pasa, que se han parado? Pues me abro otra lata.", "Se han parado. Pues aprovecho y voy al servicio.", "¿Ya se han cansado? Si no han hecho nada."], "halftime": ["Descanso. Rubio, ¿quedan latas?"], "end": ["¿Ya se ha acabado? Pues me voy al bar.", "Se acabó. Mañana hay que madrugar, Rubio.", "Final. Yo me quedo a recoger las latas."], "b_any": ["No sé quién es ese, pero me parece horrible.", "El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.", "Me abro unas latas.", "Pásame otra lata, Rubio.", "Mi cuñado jugaba mejor, y eso que está cojo.", "¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.", "El árbitro es primo del alcalde, eso lo sé yo.", "¿Ese no es el de la carnicería?", "Qué calor, mi arma. Qué calor.", "Eso en mis tiempos se arreglaba a guantazos.", "Mira el de amarillo, que va corriendo como un pato.", "¿Quién ha traído las pipas?", "Ese tiene más barriga que yo, y mira que es difícil.", "Yo es que no veo bien de lejos, pero ese es malísimo.", "Ese de ahí es el del taller, que me debe dinero.", "¿Tú sabes de qué juega el de rojo? Yo tampoco.", "Mi perro juega mejor, y eso que es cojo.", "Esto de las porterías de palé no es reglamentario.", "Me han dicho que el árbitro es de Marchena. Así va la cosa.", "Yo jugué aquí en el ochenta y cinco. Bueno, en la grada.", "Rubio, ¿te has traído el abridor?", "Esto me lo pagan los de la peña, que yo no pongo ni un euro.", "El calvo ese corre como un pato mareado.", "Pues el bocadillo de chorizo estaba buenísimo.", "Esto con un poco de flamenco de fondo mejoraría mucho.", "¿Ese es el hijo de la Paqui? Qué grande está.", "A mí me gustaba más el fútbol de antes. Bueno, este también es de antes.", "Yo me abro unas latas y ya lo veo todo más bonito.", "¿Por qué corren tanto? Si el balón va solo.", "El de la gorra es el entrenador, ¿no? Pues tiene cara de no saber nada.", "Me duele la rodilla solo de verlos.", "Esto lo arreglaba yo con dos de mi pueblo."], "esposa": ["Pues yo he estado con la esposa del entrenador de los Papas Cochero."], "b_esposa": ["Y yo, Curro. Y yo."]}}/*/VOL*/;
 const VOX={man:null,base:null,ctx:null,buf:{},q:[],cur:null,busyUntil:0};
 function vslug(t){return String(t).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}
 function voxKeys(){const k=new Set();for(const st in VOL)for(const ev in VOL[st])VOL[st][ev].forEach((_,i)=>k.add(`${st}_${ev}_${i}`));[...MALE,...FEM,...MOTE,"el entrenador"].forEach(n=>k.add("n_"+vslug(n)));return k}
@@ -1999,8 +2010,11 @@ async function voxPlay(keys,important){
     try{await voxEl(k);VOX.ok=true}catch(e){VOX.elFail=(VOX.elFail||0)+1;if(VOX.elFail>=3&&!VOX.ok)VOX.dead=true}VOX.curEl=null}
   VOX.busy=false;
 }
-function vo(ev,name,important){
-  if(!S||S.comm===false||(M&&M.skipping))return;const st=castStyle();const style=st==="paleto"?"paleto":(st==="tele"&&VOL.tele[ev]?"tele":"normal");
+function wifeJoke(){const nm=castNames(),st=castStyle()==="paleto"?"paleto":"normal",l1=VOL[st].esposa[0].replace("los Papas Cochero",clubName()),l2=VOL[st].b_esposa[0];addLog(M?M.min:0,`${nm[0]}: «${l1}»`,"ev");setTimeout(()=>{if(M)addLog(M.min,`${nm[1]}: «${l2}»`,"ev")},3200);
+  if(clubName()==="Los Papas Cochero"||!voxReady()){vo("esposa",null,true,1);setTimeout(()=>vo("b_esposa",null,true,1),3400)}else{speak(l1,true,0);setTimeout(()=>vo("b_esposa",null,true,1),3600)}}
+function vo(ev,name,important,nojoke){
+  if(!S||S.comm===false||(M&&M.skipping))return;
+  if(!nojoke&&M&&!M.wifeJ&&!/goal|pen|red|end|intro/.test(ev)&&Math.random()<.01){M.wifeJ=1;return wifeJoke()}const st=castStyle();const style=st==="paleto"?"paleto":(st==="tele"&&VOL.tele[ev]?"tele":"normal");
   const lines=VOL[style][ev]||(style==="paleto"?null:VOL.normal[ev]);if(!lines){if(style==="paleto"&&Math.random()<.3)vo("b_any");return}
   const realStyle=VOL[style][ev]?style:"normal";VOX.recent=VOX.recent||{};const rk=realStyle+ev,rec=VOX.recent[rk]||(VOX.recent[rk]=[]);let pool=[...lines.keys()].filter(x=>!rec.includes(x));if(!pool.length){rec.length=0;pool=[...lines.keys()]}const i=pick(pool);rec.push(i);if(rec.length>Math.max(1,Math.floor(lines.length*.7)))rec.shift();const txt=lines[i];if(!important&&(VOX.busy||(window.speechSynthesis&&speechSynthesis.speaking)))return;const spk=(realStyle==="paleto"&&ev==="b_any")?i%2:(ev.startsWith("b_")?1:0);
   if(/latas?/.test(txt))setTimeout(()=>SFX.can(),txt.length*55);
@@ -2023,7 +2037,7 @@ function commentLabel(t){
 function banter(kind){vo("b_"+kind)}
 function paletoSay(force){if(force||Math.random()<.5)vo("b_any")}
 
-function cardShow(col,txt){if(!M||M.skipping)return;const now=performance.now();M.cardShow={c:col,t:txt,until:now+2200};M.busyUntil=Math.max(M.busyUntil||0,now+2000);(txt==="el entrenador"?vo("coachCard",null,true):vo(col==="#e02020"?"red":"yellow",txt,true));setTimeout(()=>banter("card"),500)}
+function cardShow(col,txt){if(M&&M.online&&txt!=="el entrenador")olEmit(col==="#e02020"?`¡Roja para ${txt}!`:`Amarilla para ${txt}.`,col==="#e02020"?"goal":"ev");if(!M||M.skipping)return;const now=performance.now();M.cardShow={c:col,t:txt,until:now+2200};M.busyUntil=Math.max(M.busyUntil||0,now+2000);(txt==="el entrenador"?vo("coachCard",null,true):vo(col==="#e02020"?"red":"yellow",txt,true));setTimeout(()=>banter("card"),500)}
 function coachProtest(m){
   if(!M||M.coachOut||Math.random()>.45)return;coachSay("card");const ref=M.ref||{t:"normal"};
   if(Math.random()<({estricto:.4,comprado:.45,casero:M.m.a===0?.05:.3}[ref.t]||.2)){
@@ -2043,7 +2057,7 @@ function prayTick(m){
 function foulTick(m){
   if(M.skipping&&Math.random()<.5)return false;
   if(Math.random()>.08*(M.weather==="lluvia"?1.3:1))return false;
-  const byUs0=Math.random()<.5;M.st&&M.st.fouls[byUs0?"us":"them"]++;SFX.whistle(1);
+  const byUs0=Math.random()<.5;if(M.online&&!M.online.solo&&!byUs0)return false;M.st&&M.st.fouls[byUs0?"us":"them"]++;SFX.whistle(1);
   const ref=M.ref||{t:"normal"};const usHome=M.m.a===0;
   const byUs=byUs0;const homeFoul=byUs===usHome;
   let cardP={normal:.35,casero:homeFoul?.15:.6,ciego:.18,estricto:.65,comprado:byUs?.65:.1}[ref.t];
@@ -2055,13 +2069,13 @@ function foulTick(m){
       if(direct||yc[p.id]){addLog(m,direct?`¡ROJA DIRECTA para ${short(p)}! Entrada a la altura de la rodilla.`:`Segunda amarilla para ${short(p)}. A la calle.`,"bad");showCard("us",p.id,"#e02020");cardShow("#e02020",short(p));removeAt(i,"roja",`${short(p)} se va a la ducha (que no hay).`);M.vis&&setLabel(`Roja a ${short(p)}`,1800);coachProtest(m);return false}
       yc[p.id]=1;addLog(m,`Amarilla para ${short(p)} por una entrada de las de antes.`,"ev");showCard("us",p.id,"#ffd23f");cardShow("#ffd23f",short(p));M.vis&&setLabel(`Amarilla a ${short(p)}`,1600);coachProtest(m)}
     else addLog(m,`Falta de ${short(p)}. ${ref.t==="ciego"?"El árbitro ni la ve.":"El árbitro pita."}`);
-    if(Math.random()<penP)return setPiece("penThem",m);if(Math.random()<.1)return setPiece("fkThem",m);return false}
+    if(M.online)return false;if(Math.random()<penP)return setPiece("penThem",m);if(Math.random()<.1)return setPiece("fkThem",m);return false}
   const T=M.vis&&M.vis.them.filter(s=>s.role!=="POR");const s=T&&T.length?pick(T):null;const nm=s?s.full:"un rival";const yc=(M.ryel=M.ryel||{});
   const direct=Math.random()<redP;
   if(direct||Math.random()<cardP){if(direct||yc[nm]){addLog(m,direct?`¡ROJA DIRECTA para ${nm}! Se quedan con uno menos.`:`¡Segunda amarilla para ${nm}! Se quedan con uno menos.`,"goal");M.omod*=.9;showCard("them",nm,"#e02020");cardShow("#e02020",nm);M.vis&&setLabel(`Roja a ${nm.split(" ")[0]}`,1800);if(s)setTimeout(()=>{if(M&&M.vis)M.vis.them=M.vis.them.filter(x=>x!==s)},2200)}
     else{yc[nm]=1;addLog(m,`Amarilla para ${nm}.`,"ev");showCard("them",nm,"#ffd23f");cardShow("#ffd23f",nm);M.vis&&setLabel(`Amarilla a ${nm.split(" ")[0]}`,1600)}}
   else{addLog(m,`Falta de ${nm} sobre uno de los vuestros.${ref.t==="casero"&&!usHome?" Ni amarilla. Qué casualidad.":""}`);if(Math.random()<.3)coachProtest(m)}
-  if(Math.random()<penP)return setPiece("penUs",m);if(Math.random()<.18)return setPiece("fkUs",m);return false;
+  if(M.online)return false;if(Math.random()<penP)return setPiece("penUs",m);if(Math.random()<.18)return setPiece("fkUs",m);return false;
 }
 
 const ZONES=["↖","⬆","↗","↙","⬇","↘"];
@@ -2167,6 +2181,7 @@ function configBox(){
    ${tg("voxtoggle",S.voxOff!==true,"Voces grabadas de hombre (si no, la voz del móvil)")}
    ${tg("sound",S.sound!==false,"Sonido ambiente del partido (público, silbato, bombo)")}
    ${tg("skin",document.body.classList.contains("fm"),"Aspecto Football Manager")}
+   ${tg("olon",olEnabled(),"Habilitar modos online (liga con amigos)")}
   </div>
   <div class="pc-act"><button class="btn" data-act="ttstest">Probar los comentaristas</button><button class="btn" data-act="updcheck">Buscar actualizaciones</button></div>
   <p class="hint">${esc(updLabel())} · ${VOX.dead?"las voces grabadas no han podido sonar en este dispositivo: se usa la voz del móvil":VOX.ok?"voces grabadas funcionando":"las voces grabadas se descargan de internet al hablar"}</p>
@@ -2321,7 +2336,7 @@ function viewMister(){
 }
 
 /* ================= preparar partido ================= */
-const prepLocked=()=>!!(S&&S.prep&&S.prep.step!=="conv");
+const prepLocked=()=>!!(S&&(S.olSwap||(S.prep&&S.prep.step!=="conv")));
 function startPrep(){
   if(S.prep){S.tab="prep";save();render();window.scrollTo(0,0);return}
   const m=ourFixture();if(!m)return;const v=venueOf(m);
@@ -2345,7 +2360,12 @@ function optLabel(p,v){
 function viewPrep(){
   const P=S.prep;const m=ourFixture();if(!m){S.prep=null;return viewClub()}
   const c=S.comp;const opp=c.teams[m.a===0?m.b:m.a];
-  const head=`<section class="win"><div class="bar">${esc(c.stage[c.r])} <small>vs ${esc(opp.n)}</small></div><div class="body"><p><span class="mp-ha ${m.a===0?"h":"v"}">${m.a===0?"LOCAL":"VISITANTE"}</span> ${m.a===0?"Jugáis en casa.":"Jugáis fuera."}</p><p class="hint">Domingo 11:00 en <b>${esc(P.venue.n)}</b>${P.venue.town!==HOME?`, ${esc(P.venue.town)} (${km(P.venue.d)} km)`:""}.</p></div></section>`;
+  const OLc=c.ol;
+  const head=`<section class="win"><div class="bar">${esc(c.stage[c.r])} <small>vs ${esc(opp.n)}</small></div><div class="body"><p><span class="mp-ha ${m.a===0?"h":"v"}">${m.a===0?"LOCAL":"VISITANTE"}</span> ${m.a===0?"Jugáis en casa.":"Jugáis fuera."}${OLc?` <b>Liga online</b>${OLc.human?" contra un jugador de verdad":" contra un bot"}.`:""}</p><p class="hint">${OLc?"Partido":"Domingo 11:00"} en <b>${esc(P.venue.n)}</b>${P.venue.town!==HOME?`, ${esc(P.venue.town)} (${km(P.venue.d)} km)`:""}.</p>${OLc?`<div class="row"><button class="btn mini" data-act="olcancel">Dejarlo para luego</button></div>`:""}</div></section>`+(P.ol&&P.ol.go&&!P.ol.kicked?`<div class="olcd"><span>${P.step==="apuestas"?"Saltáis al campo en":"Tiempo para preparar el viaje"}</span><b id="olcd">30 s</b></div>`:"");
+  if(P.ol&&!P.ol.go){const lv=olLobbyState(),fresh=t=>typeof t==="number"&&olNow()-t<20000,oth=fresh(lv[OLc.home?"g":"h"]);
+    return head+`<section class="win"><div class="bar">Esperando a ${esc(OLc.oppN)}</div><div class="body"><p>${oth?"¡Ya está aquí! Empezáis en un momento…":`Le hemos avisado. En cuanto entre, tendréis los dos <b>30 segundos</b> para convocar y subir a la gente a los coches, y luego otros 30 para el once y las apuestas.`}</p>
+     <p class="hint">Si no aparece en <b id="olwait">${olFmtLeft(OLc.deadline-olNow())}</b>, el partido se simula. También puedes jugar ya contra su equipo manejado por la máquina.</p>
+     <div class="pc-act"><button class="btn" data-act="olbot">Jugar ya contra la máquina</button></div></div></section>`}
   if(P.step==="conv"){
     const av=S.players.filter(p=>!p.injured);const n=av.filter(p=>P.conv[p.id]).length;
     const rows=av.sort((a,b)=>(!!P.conv[b.id]-!!P.conv[a.id])||(shownOvr(b)-shownOvr(a))).map(p=>`<div class="crow ${P.conv[p.id]?"on":""}"><button class="tb" data-act="conv" data-id="${p.id}" aria-pressed="${!!P.conv[p.id]}">${P.conv[p.id]?"VA":"NO VA"}</button>
@@ -2355,7 +2375,7 @@ function viewPrep(){
     return head+`<section class="win"><div class="bar">1 · Convocatoria <small>${n} avisados · ${seats} plazas en vehículos</small></div><div class="body">
      <p class="hint">Elige a quién avisas. Fíjate en quién trae coche: luego hay que subir a todos. ${inj.length?`Lesionados: ${inj.map(p=>esc(short(p))).join(", ")}.`:""}</p>
      <div class="list">${rows}</div>
-     <div class="row"><button class="btn" data-act="tab" data-v="club">Volver</button><button class="btn primary" data-act="conv-ok" style="flex:1">Avisar a los ${n}</button></div></div></section>`;
+     <div class="row"><button class="btn" data-act="${OLc?"olcancel":"tab"}" data-v="club">Volver</button><button class="btn primary" data-act="conv-ok" style="flex:1">Avisar a los ${n}</button></div></div></section>`;
   }
   if(P.step==="bajas"){
     const abs=Object.keys(P.absent).map(id=>pById(+id)).filter(Boolean);const g=goers();
@@ -2402,26 +2422,375 @@ function viewPrep(){
      <div class="bet2"><select id="sc-pick" aria-label="Goleador">${scorerOpts}</select><button class="btn" data-act="betsc">Que marca</button></div>
      <p class="hint">Tienes <b>${eur(S.money)}</b>. Cada toque en un botón es una apuesta de <b>${P.amt} €</b>, que se paga en el momento.</p>
      ${P.bets.length?`<div class="betok"><b>✔ TUS APUESTAS (${P.bets.length}) · ${P.bets.reduce((a,b)=>a+b.amt,0)} € apostados, ya descontados</b>${P.bets.map((b,i)=>`<div><span>${b.amt} € a ${esc(b.label)} · x${b.odds} → cobras ${Math.round(b.amt*b.odds)} €</span><button class="btn mini" data-act="unbet" data-v="${i}">Quitar</button></div>`).join("")}</div>`:`<p class="hint" style="text-align:center">Todavía no has apostado nada.</p>`}
-     <button class="btn play" data-act="kick">Saltar al campo</button></div></section>`;
+     ${P.ol?(P.ol.ready?`<p class="hint" style="text-align:center">Listos. Esperando a ${esc(OLc.oppN)} (o a que se acabe el tiempo)…</p>`:`<button class="btn play" data-act="olready">¡Listos para jugar!</button>`):`<button class="btn play" data-act="kick">Saltar al campo</button>`}</div></section>`;
   }
   return head;
 }
+
+/* ================= LIGA ONLINE ================= */
+const PC_DB="";
+const OLK="pc_online";
+const OL={es:{},off:0,me:null,lg:{},users:{},tickT:0,pubT:0,err:"",live:null,lobbyT:0};
+const OLW=[[60,"1 minuto"],[300,"5 minutos"],[900,"15 minutos"],[1800,"30 minutos"],[86400,"1 día"]];
+const TS={".sv":"timestamp"};
+function olCfg(){try{return JSON.parse(localStorage.getItem(OLK))||{}}catch(e){return{}}}
+function olSetCfg(o){const c=Object.assign(olCfg(),o);try{localStorage.setItem(OLK,JSON.stringify(c))}catch(e){}return c}
+function olDB(){let u=(olCfg().db||PC_DB||"").trim();if(u&&!/\/$/.test(u))u+="/";return u}
+function olEnabled(){return !!olCfg().on}
+function olOn(){return olEnabled()&&!!olDB()}
+function olCode(){const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let s="";for(let i=0;i<6;i++)s+=A[Math.floor(Math.random()*A.length)];return s}
+function olMe(){const c=olCfg();if(c.uid)return c.uid;return olSetCfg({uid:olCode()}).uid}
+const olNow=()=>Date.now()+OL.off;
+const arr=x=>Array.isArray(x)?x.filter(v=>v!=null):x&&typeof x==="object"?Object.keys(x).sort((a,b)=>a-b).map(k=>x[k]).filter(v=>v!=null):[];
+async function fb(path,method,body){
+  const r=await fetch(olDB()+"pc/"+path+".json",{method:method||"GET",headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
+  if(!r.ok)throw new Error("servidor "+r.status);return r.json()}
+const fbq=(path,method,body)=>fb(path,method,body).catch(e=>{OL.err=String(e.message||e);return null});
+function fbListen(key,path,cb){
+  fbUnlisten(key);if(!window.EventSource||!olDB())return null;
+  const st={data:null,seen:Date.now()};let es;
+  try{es=new EventSource(olDB()+"pc/"+path+".json")}catch(e){return null}
+  const setAt=(p,d,patch)=>{
+    if(p==="/"||p===""){if(patch){if(!st.data||typeof st.data!=="object")st.data={};Object.entries(d||{}).forEach(([k,v])=>{if(v===null)delete st.data[k];else st.data[k]=v})}else st.data=d;return}
+    const ks=p.split("/").filter(Boolean);if(!st.data||typeof st.data!=="object")st.data={};let o=st.data;
+    for(let i=0;i<ks.length-1;i++){if(!o[ks[i]]||typeof o[ks[i]]!=="object")o[ks[i]]={};o=o[ks[i]]}
+    const k=ks[ks.length-1];
+    if(patch){if(!o[k]||typeof o[k]!=="object")o[k]={};Object.entries(d||{}).forEach(([a,b])=>{if(b===null)delete o[k][a];else o[k][a]=b})}
+    else if(d===null)delete o[k];else o[k]=d};
+  const h=patch=>e=>{try{const m=JSON.parse(e.data);setAt(m.path,m.data,patch);st.seen=Date.now();cb(st.data)}catch(x){}};
+  es.addEventListener("put",h(false));es.addEventListener("patch",h(true));es.addEventListener("keep-alive",()=>{st.seen=Date.now()});
+  es.onerror=()=>{};st.es=es;OL.es[key]=st;return st}
+function fbUnlisten(key){const s=OL.es[key];if(s){try{s.es.close()}catch(e){}delete OL.es[key]}}
+async function olClock(){try{const t0=Date.now();const v=await fb("clock/"+olMe(),"PUT",TS);const t1=Date.now();if(typeof v==="number")OL.off=Math.round(v-(t0+t1)/2)}catch(e){OL.err=String(e.message||e)}}
+function olTown(n){const ks=Object.keys(GEO).filter(t=>t!==HOME);return ks[hashStr(n||"x")%ks.length]}
+function olSpon(){return (S.sponsors||[]).reduce((a,n)=>a+((S.sponsorPay||{})[n]||0),0)}
+function olSnap(){
+  const L=S.lineup.map((id,i)=>id?{p:pById(id),i}:null).filter(x=>x&&x.p);
+  const pw=L.length?power(L.map(({p,i})=>({p:{...p,mE:p.energy},role:FORMS[S.formation][i]})),S.formation,{home:true}):{a:10,d:10};
+  const pool=S.players.filter(p=>!p.injured).sort((a,b)=>ovr(b)-ovr(a));
+  return{n:clubName(),coach:S.coach?S.coach.name:"",col:ourKit().c1,kit:ourKit(),crest:(S.club&&S.club.crest)||null,stad:(S.club&&S.club.stadium)||null,
+    str:+Math.max(6,(pw.a+pw.d)/2).toFixed(1),form:S.formation,tier:curTier(),spon:olSpon(),
+    ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.known?p.pos:p.pos})),t:TS}}
+async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<180000)return;OL.pubT=Date.now();await fbq(`u/${olMe()}/p`,"PUT",olSnap())}
+function olStart(){
+  if(!olOn()){Object.keys(OL.es).forEach(fbUnlisten);return}
+  olClock();olPublish(true);
+  OL.meSt=fbListen("me",`u/${olMe()}`,d=>{OL.me=d||{};olSyncLeagues();olRefresh()});
+  clearInterval(OL.tickT);OL.tickT=setInterval(olTick,4000);
+}
+function olSyncLeagues(){
+  const want=Object.keys((OL.me&&OL.me.lg)||{});
+  want.forEach(lid=>{if(!OL.es["l_"+lid])fbListen("l_"+lid,`l/${lid}`,d=>{if(d)OL.lg[lid]=d;else delete OL.lg[lid];olRefresh()})});
+  Object.keys(OL.es).filter(k=>k.startsWith("l_")&&!want.includes(k.slice(2))).forEach(k=>{fbUnlisten(k);delete OL.lg[k.slice(2)]})}
+let olRefT=0;
+function olRefresh(){clearTimeout(olRefT);olRefT=setTimeout(()=>{if(!S||M)return;if(S.tab==="online"||S.olSwap){const y=window.scrollY;const ae=document.activeElement;if(ae&&(ae.tagName==="INPUT"||ae.tagName==="SELECT"||ae.tagName==="TEXTAREA")&&S.tab==="online")return;render();window.scrollTo(0,y)}else olBanner()},250)}
+/* ---------- avisos ---------- */
+function olNotify(title,text,tag){
+  const seen=olCfg().seen||{};if(tag&&seen[tag])return;if(tag){seen[tag]=Date.now();const k=Object.keys(seen);if(k.length>200)k.sort((a,b)=>seen[a]-seen[b]).slice(0,100).forEach(x=>delete seen[x]);olSetCfg({seen})}
+  try{if(window.AndroidBridge&&AndroidBridge.notify){AndroidBridge.notify(title,text);}else if(window.Notification&&Notification.permission==="granted"&&document.hidden)new Notification(title,{body:text})}catch(e){}
+  try{SFX.init();SFX.whistle(2)}catch(e){}
+  toast(title+" · "+text);olBanner()}
+function olAskPerm(){try{if(window.AndroidBridge&&AndroidBridge.perm)AndroidBridge.perm();else if(window.Notification&&Notification.permission==="default")Notification.requestPermission()}catch(e){}}
+function olBanner(){
+  let b=$("#olban");const p=olPending();
+  if(!p||!S||M||S.olSwap||!olOn()){if(b)b.remove();return}
+  if(!b){b=document.createElement("div");b.id="olban";b.className="olban";const v=$("#view");v.parentNode.insertBefore(b,v)}
+  b.innerHTML=`<span>⚽ <b>Liga online «${esc(p.L.n)}»</b>: te toca contra <b>${esc(p.opp.n)}</b>${p.human?" (jugador de verdad)":""}.</span><button class="btn mini primary" data-act="olplay" data-v="${p.lid}">Ir</button>`}
+/* ---------- calendario ---------- */
+function olRR(n,two){const N=n%2?n+1:n;const t=[...Array(N).keys()];const out=[];
+  for(let r=0;r<N-1;r++){const m=[];for(let i=0;i<N/2;i++){let a=t[i],b=t[N-1-i];if((i===0&&r%2)||(i>0&&i%2))[a,b]=[b,a];m.push([a>=n?-1:a,b>=n?-1:b])}out.push(m);t.splice(1,0,t.pop())}
+  return two?out.concat(out.map(r=>r.map(([a,b])=>[b,a]))):out}
+const olRound=(L,r)=>String(arr(L.fx)[r]||"").split(",").filter(Boolean).map(s=>s.split("_").map(Number));
+const olTeams=L=>arr(L.teams);
+const olMyIdx=L=>olTeams(L).findIndex(t=>t.u===olMe());
+function olTable(L){
+  const T=olTeams(L).map((t,i)=>({i,n:t.n,u:t.u,pj:0,g:0,e:0,p:0,gf:0,gc:0,pts:0}));
+  const R=L.res||{};Object.keys(R).forEach(k=>{const x=R[k];if(!x||x.bye)return;const[r,i]=k.split("_").map(Number);const m=olRound(L,r)[i];if(!m)return;const[a,b]=m;const A=T[a],B=T[b];if(!A||!B)return;
+    A.pj++;B.pj++;A.gf+=x.a;A.gc+=x.b;B.gf+=x.b;B.gc+=x.a;if(x.a>x.b){A.g++;B.p++;A.pts+=3}else if(x.a<x.b){B.g++;A.p++;B.pts+=3}else{A.e++;B.e++;A.pts++;B.pts++}});
+  return T.sort((a,b)=>b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf||a.i-b.i)}
+const olJoinWin=L=>Math.max(L.wait||60,240)*1000;
+function olPoisR(R,l){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=R()}while(p>L&&k<12);return k-1}
+function olSim(lid,L,r,i){
+  const T=olTeams(L),[a,b]=olRound(L,r)[i];const R=seeded(hashStr(lid+"_"+r+"_"+i));const sa=T[a].str||14,sb=T[b].str||14;
+  const ga=olPoisR(R,1.3*Math.pow(sa/sb,1.3)),gb=olPoisR(R,1.15*Math.pow(sb/sa,1.3));
+  const sc=(t,n)=>{const ro=arr(t.ro);const out=[];for(let k=0;k<n;k++){if(!ro.length)break;let w=0;const ws=ro.map(p=>{const x={DEL:5,MED:2.5,DEF:.7,POR:.05}[p.pos]||1;w+=x;return x});let q=R()*w,j=0;while(q>ws[j]&&j<ws.length-1){q-=ws[j];j++}out.push(ro[j].n)}return out};
+  return{a:ga,b:gb,sa:sc(T[a],ga),sb:sc(T[b],gb),au:1,t:TS}}
+const olHumanT=(L,i)=>{const t=olTeams(L)[i];return t&&t.u?t:null};
+async function olAdvance(lid,L){
+  if(!L||L.st!=="run")return;const FX=arr(L.fx),r=L.r||0;if(r>=FX.length)return;
+  if(olNow()<(L.rt||0))return;
+  const ms=olRound(L,r);let all=true,lastT=L.rt||0;const w={};
+  ms.forEach(([a,b],i)=>{const k=r+"_"+i;const x=L.res&&L.res[k];if(x){lastT=Math.max(lastT,typeof x.t==="number"?x.t:0);return}all=false;
+    if(a<0||b<0){w[k]={bye:1,t:TS};return}
+    const ha=olHumanT(L,a),hb=olHumanT(L,b);
+    if(!ha&&!hb){w[k]=olSim(lid,L,r,i);return}
+    const lv=(L.live||{})[k]||{};const busy=lv.on&&olNow()-lv.on<60000;
+    if(olNow()>(L.rt||0)+olJoinWin(L)&&!busy)w[k]=olSim(lid,L,r,i)});
+  if(Object.keys(w).length){const up={};Object.entries(w).forEach(([k,v])=>up["res/"+k]=v);await fbq(`l/${lid}`,"PATCH",up);return}
+  if(all){if(r+1<FX.length)await fbq(`l/${lid}`,"PATCH",{r:r+1,rt:lastT+(L.wait||60)*1000});else await fbq(`l/${lid}`,"PATCH",{st:"done",end:lastT})}
+}
+function olMyMatch(lid,L){
+  if(!L||L.st!=="run")return null;const me=olMyIdx(L);if(me<0)return null;const r=L.r||0;if(olNow()<(L.rt||0))return null;
+  const ms=olRound(L,r);const i=ms.findIndex(([a,b])=>a===me||b===me);if(i<0)return null;const k=r+"_"+i;if(L.res&&L.res[k])return null;
+  const[a,b]=ms[i];if(a<0||b<0)return null;const oi=a===me?b:a;const opp=olTeams(L)[oi];
+  if(olNow()>(L.rt||0)+olJoinWin(L)&&!((L.live||{})[k]||{}).on)return null;
+  return{lid,L,r,i,k,a,b,home:a===me,oi,opp,human:!!opp.u,me}}
+function olPending(){for(const lid of Object.keys(OL.lg)){const m=olMyMatch(lid,OL.lg[lid]);if(m)return m}return null}
+async function olTick(){
+  if(!olOn())return;olPublish();
+  for(const lid of Object.keys(OL.lg)){const L=OL.lg[lid];try{await olAdvance(lid,L)}catch(e){}
+    const m=olMyMatch(lid,L);if(m&&!S.olSwap)olNotify(`«${L.n}»: ¡te toca!`,`Jornada ${m.r+1} contra ${m.opp.n}. ${m.human?"Es un jugador de verdad: prepara el viaje.":"Juega cuando quieras antes de que se cierre."}`,`m_${lid}_${m.k}`);
+    if(L.st==="done")olClaim(lid,L)}
+  for(const[lid,v]of Object.entries((OL.me&&OL.me.in)||{}))olNotify("Invitación a una liga online",`${v.from} te invita a «${v.n}».`,`inv_${lid}`);
+  if(S&&S.olSwap&&S.prep)olPrepTick();
+  olBanner();
+}
+/* ---------- amigos y ligas ---------- */
+async function olAddFriend(code){
+  code=(code||"").trim().toUpperCase();if(!code)return;if(code===olMe()){toast("Ese es tu propio código.");return}
+  const p=await fbq(`u/${code}/p`);if(!p){toast("No existe ningún jugador con ese código"+(OL.err?` (${OL.err})`:"")+".");return}
+  const mine=olSnap();await fbq(`u/${olMe()}/f/${code}`,"PUT",p.n||code);await fbq(`u/${code}/f/${olMe()}`,"PUT",mine.n);toast(`${p.n} añadido a tus amigos.`)}
+async function olCreate(){
+  const n=($("#ol-n")&&$("#ol-n").value.trim())||`Liga de ${clubName()}`;
+  const fr=[...document.querySelectorAll("[data-olf]")].filter(x=>x.checked).map(x=>x.dataset.olf);
+  const wait=+($("#ol-w")&&$("#ol-w").value)||300;const bots=+($("#ol-b")&&$("#ol-b").value)||0;const two=!!($("#ol-2")&&$("#ol-2").checked);
+  if(fr.length+1+bots<2){toast("Hace falta al menos un rival: invita a alguien o añade bots.");return}
+  if(fr.length+1+bots>16){toast("Máximo 16 equipos en total.");return}
+  const lid=Date.now().toString(36)+olCode().slice(0,3).toLowerCase();const me=olSnap();const F=(OL.me&&OL.me.f)||{};
+  const mem={[olMe()]:{n:me.n,ok:1}};fr.forEach(u=>mem[u]={n:F[u]||u,ok:0});
+  await fbq(`l/${lid}`,"PUT",{n,org:olMe(),orgN:me.n,wait,bots,two:two?1:0,st:"lobby",c:TS,mem});
+  if(OL.err&&!(await fbq(`l/${lid}/n`))){toast("No se ha podido crear la liga: "+OL.err);return}
+  await fbq(`u/${olMe()}/lg/${lid}`,"PUT",1);
+  for(const u of fr){await fbq(`u/${u}/in/${lid}`,"PUT",{from:me.n,n});await fbq(`u/${u}/lg/${lid}`,"PUT",1)}
+  S.sub=S.sub||{};S.sub.online="ligas";OL.sel=lid;save();render();toast(`Liga «${n}» creada. Invitaciones enviadas.`)}
+async function olAnswer(lid,yes){await fbq(`l/${lid}/mem/${olMe()}/ok`,"PUT",yes?1:-1);await fbq(`u/${olMe()}/in/${lid}`,"DELETE");if(!yes)await fbq(`u/${olMe()}/lg/${lid}`,"DELETE");else OL.sel=lid;toast(yes?"Te has apuntado a la liga.":"Invitación rechazada.")}
+const olBotNames=n=>{let pool=[];try{pool=tierTeams(curTier()).map(x=>x[0])}catch(e){}pool=pool.filter(x=>x!==clubName());if(pool.length<n)pool=pool.concat(LOCAL_TEAMS,COMARCA_TEAMS).filter((x,i,a)=>a.indexOf(x)===i&&x!==clubName());const r=seeded(hashStr(String(Date.now())));return shufR(pool,r).slice(0,n)};
+function shufR(a,R){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+async function olBegin(lid){
+  const L=OL.lg[lid];if(!L||L.org!==olMe()||L.st!=="lobby")return;
+  const humans=Object.entries(L.mem||{}).filter(([,m])=>m.ok===1).map(([u])=>u);
+  const snaps=[];for(const u of humans){const p=u===olMe()?olSnap():await fbq(`u/${u}/p`);if(p)snaps.push(Object.assign({},p,{u,t:null}))}
+  const bots=Math.min(L.bots||0,16-snaps.length);if(snaps.length+bots<2){toast("Nadie más ha aceptado todavía. Añade bots o espera.");return}
+  const avg=snaps.reduce((a,p)=>a+(p.str||14),0)/Math.max(1,snaps.length);const R=seeded(hashStr(lid));
+  const bn=olBotNames(bots);const teams=snaps.concat(bn.map((n,i)=>({n,u:"",bot:1,str:+(avg*(.75+R()*.45)).toFixed(1),col:RIVC[i%RIVC.length],form:pick(NORMAL_FORMS),ro:rosterFor(n),tier:snaps[0]?snaps[0].tier:0})));
+  const order=shufR([...teams.keys()],R);const T=order.map(i=>teams[i]);
+  const fx=olRR(T.length,L.two).map(r=>r.map(([a,b])=>a+"_"+b).join(","));
+  const pot=Math.round(60+snaps.reduce((a,p)=>a+(p.spon||0)*6+20,0)+bots*12);
+  await fbq(`l/${lid}`,"PATCH",{teams:T,fx,r:0,rt:TS,st:"run",pot});toast("¡Arranca la liga!")}
+async function olLeave(lid){const L=OL.lg[lid];if(L&&L.org===olMe()&&L.st==="lobby"){await fbq(`l/${lid}`,"PATCH",{st:"off"})}await fbq(`u/${olMe()}/lg/${lid}`,"DELETE");OL.sel=null;toast("Has salido de la liga.")}
+async function olClaim(lid,L){
+  if(!L.claim||!L.claim[olMe()]){const tb=olTable(L);const pos=tb.findIndex(t=>t.u===olMe());if(pos<0||pos>1){if(pos>=0&&!(L.claim||{})[olMe()])await fbq(`l/${lid}/claim/${olMe()}`,"PUT",-1);return}
+    const share=Math.round((L.pot||0)*(pos===0?.65:.35));await fbq(`l/${lid}/claim/${olMe()}`,"PUT",share);
+    ledSync();S.money+=share;led(`Premio liga online «${L.n}» (${pos+1}º)`,share);if(pos===0)S.trophies.push(`Liga online ${L.n}`);save();
+    olCine(L,pos,share)}}
+/* ---------- cinemática de premio ---------- */
+function olCine(L,pos,money){
+  modal(pos===0?"¡CAMPEONES!":"¡SUBCAMPEONES!",`<canvas class="cinecv" id="olcv" width="640" height="400"></canvas><p><b>${esc(clubName())}</b> acaba ${pos+1}º en la liga online «${esc(L.n)}». El bote de los patrocinadores se reparte entre los dos primeros: te llevas <b>${money} €</b>.</p><button class="btn play" data-act="close">¡A celebrarlo!</button>`);
+  const cv=$("#olcv");if(!cv)return;const c=cv.getContext("2d"),W=640,H=400,t0=performance.now();const conf=Array.from({length:120},()=>({x:Math.random()*W,y:-Math.random()*H,v:60+Math.random()*120,c:["#ffd23f","#c8233a","#2a5bd7","#fff","#1f8f4e"][Math.floor(Math.random()*5)],r:Math.random()*6}));
+  try{SFX.init();SFX.start();SFX.swell(.25,3);SFX.whistle(3,true)}catch(e){}
+  const draw=now=>{if(!$("#olcv"))return;const t=(now-t0)/1000;c.fillStyle="#10163a";c.fillRect(0,0,W,H);
+    const g=c.createRadialGradient(W/2,H*.45,10,W/2,H*.45,300);g.addColorStop(0,"rgba(255,210,63,.45)");g.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=g;c.fillRect(0,0,W,H);
+    const s=Math.min(1,t/0.8),bob=Math.sin(t*3)*6;c.save();c.translate(W/2,H*.5+bob);c.scale(s,s);
+    c.fillStyle=pos===0?"#ffd23f":"#c9ced6";c.strokeStyle="#5a4300";c.lineWidth=4;
+    c.beginPath();c.moveTo(-70,-110);c.lineTo(70,-110);c.quadraticCurveTo(70,-20,0,0);c.quadraticCurveTo(-70,-20,-70,-110);c.fill();c.stroke();
+    c.beginPath();c.arc(-78,-70,26,Math.PI*.5,Math.PI*1.5);c.stroke();c.beginPath();c.arc(78,-70,26,-Math.PI*.5,Math.PI*.5);c.stroke();
+    c.fillRect(-12,0,24,40);c.fillRect(-50,40,100,24);c.strokeRect(-50,40,100,24);
+    c.fillStyle="#111";c.font="bold 30px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText(pos===0?"1º":"2º",0,-60);c.restore();
+    c.textAlign="center";c.font="28px Bungee, Impact, sans-serif";c.fillStyle="#fff";c.fillText(pos===0?"¡CAMPEONES!":"¡SUBCAMPEONES!",W/2,52);
+    c.font="20px Archivo Narrow, sans-serif";c.fillStyle="#ffd23f";c.fillText(L.n,W/2,80);
+    const m=Math.round(money*Math.min(1,Math.max(0,(t-1)/1.5)));c.font="40px Bungee, Impact, sans-serif";c.fillStyle="#7dff7a";c.fillText(`+${m} €`,W/2,H-28);
+    conf.forEach(p=>{p.y+=p.v/60;p.x+=Math.sin(t*2+p.r)*1.2;if(p.y>H)p.y=-10;c.fillStyle=p.c;c.save();c.translate(p.x,p.y);c.rotate(t*3+p.r);c.fillRect(-3,-5,6,10);c.restore()});
+    requestAnimationFrame(draw)};requestAnimationFrame(draw)}
+/* ---------- vista ---------- */
+function olFmtLeft(ms){if(ms<=0)return "ya";const s=Math.round(ms/1000);if(s<60)return s+" s";if(s<3600)return Math.round(s/60)+" min";if(s<86400)return Math.round(s/3600)+" h";return Math.round(s/86400)+" d"}
+function viewOnline(){
+  if(!olEnabled())return `<section class="win"><div class="bar">Liga online</div><div class="body"><p>Actívala en Míster › Configuración › «Habilitar modos online».</p></div></section>`;
+  const k=sub("online");const err=OL.err?`<p class="hint" style="color:#c8233a">Último error de conexión: ${esc(OL.err)}</p>`:"";
+  if(!olDB())return `<section class="win"><div class="bar">Servidor de la liga online</div><div class="body"><p>Falta la dirección de la base de datos (Firebase) que guarda las ligas.</p>
+    <input class="inp" id="ol-db" placeholder="https://….firebasedatabase.app/" style="width:100%"><div class="pc-act"><button class="btn primary" data-act="oldb">Guardar</button></div></div></section>`;
+  if(k==="amigos"){const F=(OL.me&&OL.me.f)||{};
+    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
+     <section class="win"><div class="bar">Añadir amigo</div><div class="body"><div class="row"><input class="inp" id="ol-fc" placeholder="Código (6 letras)" maxlength="6" style="text-transform:uppercase"><button class="btn primary" data-act="oladdf">Añadir</button></div></div></section>
+     <section class="win"><div class="bar">Amigos <small>${Object.keys(F).length}</small></div><div class="body">${Object.keys(F).length?`<div class="list">${Object.entries(F).map(([u,n])=>`<div class="offer"><div><b>${esc(n)}</b><small>${u}</small></div></div>`).join("")}</div>`:`<p class="hint">Todavía no tienes amigos añadidos.</p>`}${err}</div></section>`}
+  if(k==="crear"){const F=(OL.me&&OL.me.f)||{};const fl=Object.entries(F);
+    return `<section class="win"><div class="bar">Organizar liga online</div><div class="body">
+     <p class="pc-h">Nombre de la liga</p><input class="inp" id="ol-n" style="width:100%" value="${esc("Liga "+clubName())}">
+     <p class="pc-h">Amigos que invitas</p>${fl.length?`<div class="list">${fl.map(([u,n])=>`<label class="offer"><div><b>${esc(n)}</b><small>${u}</small></div><input type="checkbox" data-olf="${u}" checked></label>`).join("")}</div>`:`<p class="hint">No tienes amigos añadidos: añádelos en «Amigos» o juega solo contra bots.</p>`}
+     <p class="pc-h">Tiempo de espera entre jornadas</p><select class="inp" id="ol-w">${OLW.map(([s,n])=>`<option value="${s}" ${s===300?"selected":""}>${n}</option>`).join("")}</select>
+     <p class="pc-h">Bots para rellenar</p><select class="inp" id="ol-b">${[...Array(16).keys()].map(b=>`<option value="${b}" ${b===Math.max(0,15-fl.length)?"selected":""}>${b===0?"Sin bots (solo humanos)":b+" bot"+(b>1?"s":"")} · ${fl.length+1+b>16?"demasiados":`${fl.length+1+b} equipos si aceptan todos`}</option>`).join("")}</select>
+     <label class="offer"><div><b>Ida y vuelta</b><small>Si no, solo ida (más corta).</small></div><input type="checkbox" id="ol-2"></label>
+     <p class="hint">El bote sale de los patrocinadores de todos y se reparte entre los dos primeros (65 % y 35 %). Si un partido entre dos personas no se juega a tiempo, se simula.</p>
+     <button class="btn play" data-act="olcreate">Enviar invitaciones</button>${err}</div></section>`}
+  // ligas
+  const inv=Object.entries((OL.me&&OL.me.in)||{});
+  const ids=Object.keys(OL.lg).filter(l=>OL.lg[l].st!=="off");const sel=OL.sel&&OL.lg[OL.sel]?OL.sel:ids[0];
+  let h=inv.length?`<section class="win"><div class="bar">Invitaciones</div><div class="body">${inv.map(([lid,v])=>`<div class="offer"><div><b>${esc(v.n)}</b><small>Te invita ${esc(v.from)}</small></div><div class="row"><button class="btn mini primary" data-act="olyes" data-v="${lid}">Aceptar</button><button class="btn mini" data-act="olno" data-v="${lid}">No</button></div></div>`).join("")}</div></section>`:"";
+  if(!ids.length)return h+`<section class="win"><div class="bar">Tus ligas online</div><div class="body"><p class="hint">No estás en ninguna liga. Organiza una en «Organizar liga» o espera una invitación.</p><p class="hint">Tu código: <b>${olMe()}</b></p>${err}</div></section>`;
+  h+=ids.length>1?`<div class="subtabs">${ids.map(l=>`<button class="${l===sel?"sel":""}" data-act="olsel" data-v="${l}">${esc(OL.lg[l].n)}</button>`).join("")}</div>`:"";
+  return h+olLeagueView(sel,OL.lg[sel])+err}
+function olLeagueView(lid,L){
+  const org=L.org===olMe();const W=(OLW.find(x=>x[0]===L.wait)||[0,L.wait+" s"])[1];
+  const head=`<section class="win"><div class="bar">${esc(L.n)} <small>${L.st==="lobby"?"esperando a que acepten":L.st==="run"?`jornada ${(L.r||0)+1} de ${arr(L.fx).length}`:"terminada"}</small></div><div class="body">
+   <p class="hint">Organiza ${esc(L.orgN||"")} · espera entre jornadas: ${W} · ${L.two?"ida y vuelta":"solo ida"}${L.pot?` · bote: <b>${L.pot} €</b>`:""}</p>`;
+  if(L.st==="lobby"){const mem=Object.entries(L.mem||{});const ok=mem.filter(([,m])=>m.ok===1).length;
+    return head+`<div class="list">${mem.map(([u,m])=>`<div class="offer"><div><b>${esc(m.n)}</b><small>${u===L.org?"organiza":u}</small></div><span class="tag ${m.ok===1?"":"bad"}">${m.ok===1?"Dentro":m.ok===-1?"No juega":"Pendiente"}</span></div>`).join("")}</div>
+     <p class="hint">${L.bots?`Se rellenará con ${Math.min(L.bots,16-ok)} bots.`:"Sin bots."} Total: ${ok+Math.min(L.bots||0,16-ok)} equipos con los que han aceptado.</p>
+     <div class="pc-act">${org?`<button class="btn play" data-act="olbegin" data-v="${lid}">Empezar la liga ya</button>`:`<p class="hint">Espera a que ${esc(L.orgN||"el organizador")} la empiece.</p>`}<button class="btn" data-act="olleave" data-v="${lid}">${org?"Cancelar liga":"Salir"}</button></div></div></section>`}
+  const T=olTeams(L),tb=olTable(L),me=olMyIdx(L);const r=Math.min(L.r||0,arr(L.fx).length-1);
+  const ms=olRound(L,r);const open=olNow()>=(L.rt||0);
+  const mm=olMyMatch(lid,L);
+  const fxh=ms.map(([a,b],i)=>{const k=r+"_"+i;const x=(L.res||{})[k];if(a<0||b<0){const t=T[a<0?b:a];return `<div class="olfx"><span>${esc(t?t.n:"")}</span><b>descansa</b><span></span></div>`}
+    const mine=a===me||b===me;const lv=(L.live||{})[k]||{};return `<div class="olfx ${mine?"me":""}"><span>${esc(T[a].n)}${T[a].u?" 👤":""}</span><b>${x?`${x.a}-${x.b}${x.au?" *":""}`:lv.on&&olNow()-lv.on<60000?"EN JUEGO":"–"}</b><span>${esc(T[b].n)}${T[b].u?" 👤":""}</span></div>`}).join("");
+  let status="";
+  if(L.st==="run"){if(!open)status=`<p>Próxima jornada en <b>${olFmtLeft((L.rt||0)-olNow())}</b>.</p>`;
+    else if(mm)status=`<div class="olgo"><p><b>¡Te toca!</b> Contra <b>${esc(mm.opp.n)}</b> ${mm.home?"en casa":"fuera"}${mm.human?" · es un jugador de verdad: tendréis 30 s para preparar el viaje y luego el partido en directo":""}. Tienes ${olFmtLeft((L.rt||0)+olJoinWin(L)-olNow())} para jugarlo; si no, se simula.</p><button class="btn play" data-act="olplay" data-v="${lid}">${mm.human?"Ir al partido":"Jugar"}</button></div>`;
+    else status=`<p class="hint">Esperando a que se jueguen los demás partidos de la jornada.</p>`}
+  else{const pos=tb.findIndex(t=>t.u===olMe());status=`<p><b>Liga terminada.</b> Campeón: <b>${esc(tb[0].n)}</b>${tb[1]?`, segundo: ${esc(tb[1].n)}`:""}. ${pos>=0?`Acabas ${pos+1}º.`:""}${(L.claim||{})[olMe()]>0?` Cobraste ${L.claim[olMe()]} €.`:""}</p>`}
+  return head+status+`</div></section>
+   <section class="win"><div class="bar">Jornada ${r+1} <small>* = simulado</small></div><div class="body">${fxh}</div></section>
+   <section class="win"><div class="bar">Clasificación</div><div class="body"><table class="tbl oltb"><tr><th>#</th><th>Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr>${tb.map((t,i)=>`<tr class="${t.u===olMe()?"me":""} ${i<2?"pz":""}"><td>${i+1}</td><td>${esc(t.n)}${t.u?" 👤":""}</td><td>${t.pj}</td><td>${t.gf-t.gc}</td><td><b>${t.pts}</b></td></tr>`).join("")}</table>
+   <p class="hint">👤 = jugador de verdad. Los dos primeros se reparten el bote (${L.pot||0} €).</p><div class="pc-act"><button class="btn" data-act="olleave" data-v="${lid}">Salir de la liga</button></div></div></section>`}
+/* ---------- jugar un partido online ---------- */
+function olPlay(lid){
+  const L=OL.lg[lid];const mm=olMyMatch(lid,L);if(!mm){toast("Ese partido ya no está disponible.");return}
+  if(M){toast("Termina antes el partido que estás jugando.");return}
+  const o=mm.opp;const oppT=Object.assign({n:o.n,str:o.str||14,col:o.col||"#888",kit:o.kit||null,crest:o.crest||null,stad:o.stad||null,roster:arr(o.ro).length?arr(o.ro):rosterFor(o.n),form:o.form||"4-4-2",town:olTown(o.n),tierOf:o.tier||0,venue:1},z());
+  if(oppT.col===ourKit().c1)oppT.col=oppT.kit&&oppT.kit.c2&&oppT.kit.c2!==ourKit().c1?oppT.kit.c2:"#f2f2f2";
+  const meT=Object.assign({n:clubName(),town:HOME,str:0,us:1,col:ourKit().c1},z());
+  const m=mm.home?{a:0,b:1}:{a:1,b:0};
+  const comp={type:"online",tier:curTier(),ed:0,name:L.n,teams:[meT,oppT],rounds:[[m]],r:0,stage:[`${L.n} · Jornada ${mm.r+1}`],results:[],done:false,
+    ol:{lid,k:mm.k,r:mm.r,i:mm.i,home:mm.home,human:mm.human,opp:o.u||null,oppN:o.n,deadline:(L.rt||0)+olJoinWin(L)}};
+  S.olSwap={comp:S.comp,league:S.league,prep:S.prep,tab:S.tab,lineup:S.lineup.slice(),formation:S.formation,phase:S.phase};
+  S.comp=comp;S.league=null;S.prep=null;S.phase="season";
+  const b=$("#olban");if(b)b.remove();
+  startPrep();if(mm.human){S.prep.ol={side:mm.home?"h":"g"};olLobbyHere();}save();render();window.scrollTo(0,0)}
+function olResumeLobby(){if(S&&S.olSwap&&S.prep&&S.prep.ol&&!OL.lobbyT)olLobbyHere()}
+function olRestore(){const w=S.olSwap;if(!w)return;S.comp=w.comp;S.league=w.league;S.prep=w.prep;S.lineup=w.lineup||S.lineup;S.formation=w.formation||S.formation;S.phase=w.phase||S.phase;S.olSwap=null;S.tab="online";S.sub=S.sub||{};S.sub.online="ligas";clearInterval(OL.lobbyT);OL.lobbyT=0;save()}
+function olCancel(){const ol=S.comp&&S.comp.ol;if(ol&&S.prep&&S.prep.bets&&S.prep.bets.length){ledSync();S.prep.bets.forEach(b=>{S.money+=b.amt;led(`Apuesta anulada: ${b.label}`,b.amt)})}olRestore();render();window.scrollTo(0,0)}
+/* lobby humano contra humano */
+function olLiveKey(){const ol=S.comp.ol;return `${ol.lid}_${ol.k}`}
+function olLobbyHere(){const ol=S.comp&&S.comp.ol;if(!ol)return;const side=ol.home?"h":"g";let n=0;const ping=()=>{if(!S.olSwap||!S.comp||!S.comp.ol)return;fbq(`l/${ol.lid}/live/${ol.k}/${side}`,"PUT",TS)};ping();clearInterval(OL.lobbyT);OL.lobbyT=setInterval(()=>{if(!S.olSwap){clearInterval(OL.lobbyT);return}if(++n%5===0&&!(S.prep&&S.prep.ol&&S.prep.ol.kicked))ping();olPrepTick()},1000);}
+function olLobbyState(){const ol=S.comp&&S.comp.ol;if(!ol)return{};const L=OL.lg[ol.lid];return((L&&L.live)||{})[ol.k]||{}}
+function olPrepTick(){
+  const ol=S.comp&&S.comp.ol,P=S.prep;if(!ol||!P||!P.ol||M)return;
+  const lv=olLobbyState(),now=olNow();
+  const fresh=t=>typeof t==="number"&&now-t<20000;
+  if(!lv.go&&ol.home&&fresh(lv.h)&&fresh(lv.g)){lv.go=1;fbq(`l/${ol.lid}/live/${ol.k}`,"PATCH",{go:TS})}
+  if(lv.go>1&&!P.ol.go){P.ol.go=lv.go+4000;save();render()}
+  if(P.ol.go){const t1=P.ol.go+30000,t2=P.ol.go+60000;
+    if(now>=t1&&P.step!=="apuestas"&&!P.ol.auto1){P.ol.auto1=1;olAutoTrip()}
+    if(now>=t2&&!P.ol.kicked)olKick();
+    const el=$("#olcd");if(el){const left=P.step!=="apuestas"?t1-now:t2-now;el.textContent=left>0?Math.ceil(left/1000)+" s":"0 s";el.parentNode.classList.toggle("hurry",left<10000)}}
+  else{const el=$("#olwait");if(el)el.textContent=olFmtLeft(ol.deadline-now)}
+  const ready=lv[(ol.home?"g":"h")+"r"];if(P.ol.ready&&ready&&!P.ol.kicked&&P.ol.go)olKick();
+}
+function olAutoTrip(){const P=S.prep;closeModal();if(P.step==="conv")A["conv-ok"]();if(S.prep.step==="bajas")A["to-trip"]();if(S.prep.step==="viaje"){if(!goers().some(p=>P.assign[p.id]&&P.assign[p.id]!=="casa"))autoAssign();vehicles().forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true});A.trip();setTimeout(()=>{if($("#modal")&&!$("#modal").hidden&&$("#mod-t").textContent==="El trayecto")closeModal()},4000)}toast("¡Se acabó el tiempo! Salís con lo que hay.")}
+function olBot(){const P=S.prep,ol=S.comp.ol;ol.human=false;P.ol=null;clearInterval(OL.lobbyT);OL.lobbyT=0;fbq(`l/${ol.lid}/live/${ol.k}/${ol.home?"h":"g"}`,"DELETE");save();render();toast(`Juegas contra el equipo de ${ol.oppN} manejado por la máquina.`)}
+async function olKick(){
+  const P=S.prep,ol=S.comp.ol;if(!P||!P.ol||P.ol.kicked)return;P.ol.kicked=1;
+  const side=ol.home?"h":"g",oside=ol.home?"g":"h",key=olLiveKey();
+  const arrived=goers().filter(p=>P.arrive&&P.arrive[p.id]&&P.arrive[p.id].min<90);
+  const L=S.lineup.map((id,i)=>id&&arrived.some(p=>p.id===id)?{p:{...pById(id),mE:pById(id).energy},role:FORMS[S.formation][i]}:null).filter(Boolean);
+  const pw=L.length?power(L,S.formation,{home:ol.home}):{a:5,d:5};
+  await fbq(`lv/${key}/${side}q`,"PUT",{n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
+  modal("Saltando al campo",`<p>Esperando a que ${esc(ol.oppN)} salga del vestuario…</p><p class="hint">Si tarda más de 20 segundos, empezáis igual.</p>`);
+  const t0=Date.now();let q=null;while(Date.now()-t0<20000){q=await fbq(`lv/${key}/${oside}q`);if(q)break;await new Promise(r=>setTimeout(r,1200))}
+  closeModal();const T=S.comp.teams[1];
+  if(q){T.roster=arr(q.ro).length?arr(q.ro):T.roster;T.form=q.form||T.form;T.str=q.str||T.str;if(q.col&&q.col!==ourKit().c1)T.col=q.col}
+  const online=q?{role:side,key,peerOk:true}:null;if(!q)toast(`${ol.oppN} no aparece. Su equipo lo maneja la máquina.`);
+  S.prep.ol.kicked=2;startMatch(online)}
+/* ---------- partido en directo (el local manda, el visitante sigue) ---------- */
+function olLiveInit(o){
+  M.online={role:o.role,key:o.key,seq:0,q:{},peer:{pw:null,on:[],paused:false,seen:Date.now()},evs:[],emit:[],eid:0,peerEid:0,lastPub:0};
+  const peer=o.role==="h"?"g":"h";
+  fbListen("live",`lv/${o.key}`,d=>{if(!M||!M.online||!d)return;const O=M.online;
+    const st=d[peer+"s"];if(st){O.peer=Object.assign(O.peer,st,{seen:Date.now()});(arr(st.ev)).forEach(e=>{if(e.i>O.peerEid){O.peerEid=e.i;addLog(e.m,`${S.comp.teams[1].n}: ${e.t}`,e.c||"ev")}})}
+    if(O.role==="g"&&d.hm){Object.entries(d.hm).forEach(([k,v])=>{O.q[+k]=v})}});
+  const ol=S.comp.ol;fbq(`l/${ol.lid}/live/${ol.k}/on`,"PUT",TS);
+  olLivePub(true)}
+function olEmit(t,c){if(!M||!M.online)return;const O=M.online;O.emit.push({i:++O.eid,m:M.min,t,c:c||"ev"});O.emit=O.emit.slice(-12);olLivePub(true)}
+function olLivePub(force){const O=M&&M.online;if(!O||O.solo)return;const now=Date.now();if(!force&&now-O.lastPub<2500)return;O.lastPub=now;
+  const pw=myPower();const st={pw:{a:+pw.a.toFixed(2),d:+pw.d.toFixed(2),n:onList().length},on:onList().map(x=>({id:x.p.id,n:fullName(x.p),pos:x.role,a:x.p.atk})),paused:!!M.paused,hold:!!M.hold,ack:O.seq,ev:O.emit,end:M.ended?1:0,t:TS};
+  fbq(`lv/${O.key}/${O.role}s`,"PUT",st);if(O.role==="h"&&S.comp&&S.comp.ol&&now-(O.onT||0)>15000){O.onT=now;fbq(`l/${S.comp.ol.lid}/live/${S.comp.ol.k}/on`,"PUT",TS)}}
+function olWaitTxt(t){const e=$("#m-wait");if(e){e.textContent=t||"";e.hidden=!t}}
+/* devuelve true si se puede jugar el siguiente minuto */
+function olGate(){
+  const O=M.online;if(!O||O.solo)return true;const now=Date.now();
+  if(O.role==="h"){const g=O.peer;
+    if(now-g.seen>30000){O.solo=true;olWaitTxt("");addLog(M.min,`${S.comp.teams[1].n} se ha desconectado. Su equipo lo lleva la máquina.`,"bad");return true}
+    if((g.ack||0)<O.seq||g.paused||g.hold){olWaitTxt(g.paused?`${S.comp.teams[1].n} ha pedido tiempo…`:g.hold?`${S.comp.teams[1].n} está haciendo cambios…`:`Esperando a ${S.comp.teams[1].n}…`);olLivePub();M.timer=setTimeout(run,150);return false}
+    olWaitTxt("");return true}
+  const nx=O.q[O.seq+1];
+  if(!nx){if(now-O.peer.seen>30000&&now-(O.lastMsg||now)>30000){O.solo=true;olWaitTxt("");addLog(M.min,`${S.comp.teams[1].n} se ha desconectado. Seguís contra la máquina.`,"bad");return true}
+    olWaitTxt(O.peer.paused?`${S.comp.teams[1].n} ha pedido tiempo…`:O.peer.hold?`${S.comp.teams[1].n} está haciendo cambios…`:"");olLivePub();M.timer=setTimeout(run,120);return false}
+  O.lastMsg=now;olWaitTxt("");O.cur=nx;return true}
+function olAfterTick(){const O=M&&M.online;if(!O||O.solo)return;
+  if(O.role==="h"){O.seq++;fbq(`lv/${O.key}/hm/${O.seq}`,"PUT",{m:M.min,x:M.addN,a1:M.a1||0,a2:M.a2||0,e:O.evs,end:M.ended?1:0});O.evs=[];olLivePub(true)}
+  else{O.seq=O.cur?O.cur.seq||O.seq+1:O.seq+1;O.cur=null;olLivePub(true)}}
+function olGuestApply(){const O=M.online;if(!O||O.role!=="g"||O.solo||!O.cur)return;const evs=arr(O.cur.e);O.cur.seq=O.seq+1;
+  evs.forEach(ev=>withVis(()=>{if(ev.s==="g")olShot(ev.g,ev.id);else olTheir(ev.g,ev.nm)}))}
+function olHostChance(){
+  const O=M.online;const me=myPower(),nMe=onList().length;
+  const pe=(O.peer&&O.peer.pw)||{a:M.oppStr*M.omod,d:M.oppStr*M.omod,n:M.oppN||11};
+  const pc=.2+.25*(1-nMe/11)+.25*(1-(pe.n||11)/11);if(Math.random()>=pc)return;
+  const our=(me.a+me.d)/2,th=(pe.a+pe.d)/2;
+  if(nMe&&Math.random()<our/(our+th)){const pg=Math.min(.85,me.a/(me.a+pe.d*1.2)*(.33+.45*(1-(pe.n||11)/11)));const L=onList();const att=L.filter(x=>x.role!=="POR");const sh=wpick(att.length?att:L,x=>(x.p.atk+1)*(WA[x.role]+.2)).p;const g=Math.random()<pg;
+    const ev={s:"h",g:g?1:0,id:sh.id,nm:fullName(sh)};if(O.role==="g")ev.s="g";
+    withVis(()=>olShot(ev.g,sh.id));if(!O.solo)O.evs.push(O.role==="h"?ev:Object.assign(ev,{s:"g"}))}
+  else{const pg=Math.min(.85,pe.a/(pe.a+me.d*1.2)*(.33+.45*(1-nMe/11)));const on=arr(O.peer&&O.peer.on);let nm,id=null;
+    if(on.length){const att=on.filter(x=>x.pos!=="POR");const p=wpick(att.length?att:on,x=>(x.a||10)+1);nm=p.n;id=p.id}else nm=rivPlayer().n;
+    const g=Math.random()<pg;withVis(()=>olTheir(g?1:0,nm));if(!O.solo)O.evs.push({s:"g",g:g?1:0,id,nm})}}
+function olShot(goal,id){
+  const L=onList();if(!L.length)return;const x=L.find(o=>o.p.id===id)||L.find(o=>o.role!=="POR")||L[0];const sh=x.p;
+  if(goal){M.us++;M.lastChance={side:"us",id:sh.id,res:"goal"};M.goals[sh.id]=(M.goals[sh.id]||0)+1;{const al=L.map(o=>o.p).filter(p=>p.id!==sh.id);if(al.length&&Math.random()<.65){const a=wpick(al,p=>p.atk+5);M.ast=M.ast||{};M.ast[a.id]=(M.ast[a.id]||0)+1}}M.scorers.push(`${short(sh)} ${M.min}'`);M.ballT={x:154,y:50};M.net={side:1,until:performance.now()+1500};addLog(M.min,pick(GOAL_US)(short(sh)),"goal");goalCine(sh)}
+  else{M.lastChance={side:"us",id:sh.id,res:Math.random()<.5?"save":"wide"};addLog(M.min,pick(MISS_US)(short(sh)))}}
+function olTheir(goal,name){
+  const L=onList();const gkS=L.find(x=>x.role==="POR")||L.find(x=>x.role==="DEF");const d=L.length?pick(L).p:null;const g=gkS?short(gkS.p):"Nadie",dn=d?short(d):"el aire";name=name||"un rival";
+  if(goal){M.them++;M.lastChance={side:"them",name,res:"goal"};M.rivScorers.push(name);M.ballT={x:6,y:50};M.net={side:0,until:performance.now()+1500};addLog(M.min,pick(GOAL_THEM)(name,g,dn),"bad")}
+  else{M.lastChance={side:"them",name,res:Math.random()<.5?"save":"wide"};addLog(M.min,pick(MISS_THEM)(name,g,dn))}}
+const olA=n=>{const O=M&&M.online;return O&&O.role==="g"&&!O.solo&&O.cur?O.cur["a"+n]||0:0};
+/* final del partido online */
+function olEndMatch(res){
+  const c=S.comp,ol=c.ol,m=M.m;const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
+  const bets=S.prep.bets.map(b=>{let won=false;if(b.type==="res")won=b.pick===res;else if(b.side==="u")won=!!M.goals[b.id];else won=M.rivScorers.includes(b.name);return{...b,won,pay:won?Math.round(b.amt*b.odds):0}});
+  const betWin=bets.reduce((a,b)=>a+b.pay,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
+  const opN=c.teams[1].n;const usN=M.scorers.slice(),thN=M.rivScorers.slice();
+  const O=M.online;const writer=!O||O.solo||O.role==="h";
+  if(writer)fbq(`l/${ol.lid}/res/${ol.k}`,"PUT",{a:ga,b:gb,sa:m.a===0?usN:thN,sb:m.a===0?thN:usN,t:TS});
+  else setTimeout(async()=>{const x=await fbq(`l/${ol.lid}/res/${ol.k}`);if(!x)fbq(`l/${ol.lid}/res/${ol.k}`,"PUT",{a:ga,b:gb,sa:m.a===0?usN:thN,sb:m.a===0?thN:usN,t:TS})},8000);
+  fbq(`l/${ol.lid}/live/${ol.k}/on`,"DELETE");
+  if(res==="W"){S.coach.moral=clamp(S.coach.moral+5,0,100)}
+  M.report={online:1,home:m.a===0,res,us:M.us,them:M.them,opN,scorers:M.scorers,riv:M.rivScorers,own:M.own,bets,betWin,lname:c.name};
+  if(O){setTimeout(()=>{fbUnlisten("live")},3000);olLivePub(true)}
+  S.tab="online";save();
+  $("#mctl").hidden=true;const d=$("#m-done");d.hidden=false;d.textContent="Ver el resultado";d.dataset.act="olpost";renderSquad();olWaitTxt("")}
+function olPost(){
+  const R=M.report;const lbl={W:"VICTORIA",D:"EMPATE",L:"DERROTA"}[R.res];const li=a=>a.map(s=>`<li>${esc(s)}</li>`).join("");
+  const eco=R.bets.map(b=>[b.won?`Apuesta ACERTADA: ${b.label} (${b.amt} € → ${b.pay} €)`:`Apuesta PERDIDA: ${b.label}`,b.pay-b.amt]);
+  modal("Liga online · resultado",`<div class="res ${R.res==="W"?"w":""}"><em>${lbl}</em>${R.home?`${clubName()} ${R.us} – ${R.them} ${esc(R.opN)}`:`${esc(R.opN)} ${R.them} – ${R.us} ${clubName()}`}</div>
+   <p class="hint" style="text-align:center">${esc(R.lname)}. Este partido no cansa ni lesiona a tu plantilla de la liga normal.</p>
+   <div class="sec"><h4>GOLES</h4><ul>${R.scorers.length||R.riv.length?li(R.scorers.concat(R.riv.map(n=>n+" (rival)"))):"<li>Ninguno.</li>"}</ul></div>
+   ${R.bets.length?`<div class="sec"><h4>APUESTAS</h4><ul>${li(R.bets.map(b=>`${b.won?"✔":"✘"} ${b.amt} € a ${b.label}: ${b.won?`ACERTADA, cobras ${b.pay} €`:`PERDIDA (−${b.amt} €)`}`))}</ul></div><div class="sec"><h4>CUENTAS</h4>${ecoHTML(eco)}</div>`:""}
+   ${heatHTML()}<button class="btn play" data-act="olafter">Volver a la liga online</button>`);setTimeout(drawHeat,50)}
+function olAfter(){closeModal();$("#match").hidden=true;const d=$("#m-done");d.dataset.act="post1";d.textContent="Rueda de prensa";M=null;olRestore();render();window.scrollTo(0,0)}
 
 /* ================= render ================= */
 function render(){
   const v=$("#view");
   if(!S){$("#top").hidden=true;$("#tabs").hidden=true;v.innerHTML=viewCreator();paintFaces(v);return}
   $("#top").hidden=false;$("#tabs").hidden=false;cupCheck();{const ct=$("#club-title");if(ct&&ct.textContent!==clubName())ct.textContent=clubName();const hc=$("#crest");if(hc&&!hc.dataset.v||hc&&hc.dataset.v!==JSON.stringify(S.club||0)){hc.dataset.v=JSON.stringify(S.club||0);hc.width=48;hc.height=48;hc.style.imageRendering=S.club&&S.club.crest?"auto":"pixelated";drawTeamCrest(hc,{us:1,n:clubName(),col:ourKit().c1})}}
-  if(S.tab==="prep"&&!S.prep)S.tab="club";
+  if(S.tab==="prep"&&!S.prep)S.tab="club";olResumeLobby();
   $("#sub").textContent=S.phase==="pre"||!S.comp?`Temporada ${S.season} · pretemporada`:`T${S.season} · ${S.comp.name} · ${S.comp.stage[Math.min(S.comp.r,S.comp.stage.length-1)].split(" · ")[0]}`;
   const ca=$("#cash");ca.textContent=S.money+" €";ca.classList.toggle("neg",S.money<0);
   if(prepLocked())S.tab="prep";
+  {const to=$("#tab-online");if(to)to.hidden=!olEnabled();if(S.tab==="online"&&!olEnabled())S.tab="club"}
   document.querySelectorAll("nav.tabs button").forEach(b=>{b.classList.toggle("sel",b.dataset.v===(S.tab==="prep"?"club":S.tab));b.disabled=prepLocked()&&b.dataset.v!=="club"});
   if(S.tab==="pueblo"){S.tab="squad";sub("squad");S.sub.squad="fichar"}if(S.tab==="datos"){S.tab="comp";sub("comp");S.sub.comp="datos"}
   const VIEWS={club:viewClub,squad:viewSquad,comp:()=>{const k=sub("comp");return k==="historia"?historyBox():k==="datos"?viewDatos():k==="copa"?(S.cup?cupSection():`<section class="win"><div class="bar">Copa del Rey</div><div class="body"><p class="hint">La copa se sortea al empezar la temporada.</p></div></section>`):viewComp()},
+    online:viewOnline,
     campo:()=>{const k=sub("campo");return k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
   v.innerHTML=(S.tab!=="prep"?subBar(S.tab):"")+(VIEWS[S.tab]||viewClub)();
-  paintFaces(v);paintCrests(v);
+  paintFaces(v);paintCrests(v);olBanner();
   const fc=$("#fieldcv");if(fc)drawCampo(fc);
   const pc=$("#pitchcv");if(pc)drawPitch(pc);
   const mc=$("#mapcv");if(mc)drawMap(mc);
@@ -2563,7 +2932,7 @@ function withVis(fn){
 }
 function chance(){withVis(()=>{const P=myPower(),O=M.oppStr*M.omod;const our=(P.a+P.d)/2;if(onList().length&&Math.random()<our/(our+O))return shot(false);theirChance()})}
 function weird(){
-  const list=WEIRD.filter(w=>!M.used.has(w.id)&&(!w.ours||M.ours)&&(!w.c||w.c())&&(!w.end||M.min>20));
+  const list=WEIRD.filter(w=>!(M.online&&!M.online.solo&&(w.end||w.id==="portero"))&&!M.used.has(w.id)&&(!w.ours||M.ours)&&(!w.c||w.c())&&(!w.end||M.min>20));
   if(!list.length)return false;
   const w=wpick(list,x=>x.w||1);M.used.add(w.id);
   addLog(M.min,w.t,w.end?"bad":"ev");if(w.e)w.e();
@@ -2571,11 +2940,12 @@ function weird(){
   return false;
 }
 const maxOn=()=>11-(M.reds||0);
-function removeAt(i,why,txt){const id=M.slots[i];if(why==="lesión")try{injuredDown(id)}catch(e){}M.slots[i]=null;if(why==="roja"){M.reds=(M.reds||0)+1}else M.outHoles=(M.outHoles||0)+1;M.out.set(id,why);addLog(M.min,txt,"bad");if(M.sel===i)M.sel=null}
+function removeAt(i,why,txt){const id=M.slots[i];if(why==="lesión")try{injuredDown(id)}catch(e){}M.slots[i]=null;if(why==="roja"){M.reds=(M.reds||0)+1}else M.outHoles=(M.outHoles||0)+1;M.out.set(id,why);addLog(M.min,txt,"bad");if(M.sel===i)M.sel=null;if(M.online&&why!=="roja")olEmit(txt,"goal")}
 function tick(){
   if(M.ended||M.hold)return;
   const inAdd=M.addLeft>0;
   if(inAdd){M.addLeft--;M.addN++}else{M.min++;M.addN=0}
+  if(M.online)olGuestApply();
   const m=M.min;let hole=false;
   if(M.boost>0)M.boost--;
   if(!inAdd){const arrived=M.sq.filter(p=>M.arr[p.id]===m);
@@ -2601,7 +2971,8 @@ function tick(){
   if(!inAdd){coachAuto(m);prayTick(m);if(castStyle()==="paleto"&&Math.random()<.06)paletoSay(true)}
   if(m>2&&foulTick(m)){updScore();return}
   if(m>3&&Math.random()<.04*(.4+.6*relNow())&&weird())return;
-  if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
+  if(M.online){if((M.online.role==="h"||M.online.solo)&&!M.pause)olHostChance()}
+  else if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
   updScore();
   if(clockEnd(m))return;
   if(hole&&M.slots.includes(null)){if(canFill()){if(M.skipping)autoFill();else{M.hold=true;addLog(m,`Hay un hueco en el campo. Meter a alguien cuenta como cambio (llevas ${M.subs}/5). El partido espera a que decidas.`,"ev")}}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
@@ -2610,10 +2981,10 @@ function tick(){
 function clockEnd(m){
   if(M.ended)return true;
   if(m===45&&!M.ht&&M.addLeft===0){
-    if(!M.a1){M.a1=rnd(1,3)+Math.min(3,Math.ceil(M.lost/2));M.lost=0;M.addLeft=M.a1;addLog(45,`El árbitro levanta ${M.a1} dedo${M.a1>1?"s":""}: ${M.a1} minuto${M.a1>1?"s":""} de descuento.`,"ev");updScore();return false}
+    if(!M.a1){M.a1=olA(1)||(rnd(1,3)+Math.min(3,Math.ceil(M.lost/2)));M.lost=0;M.addLeft=M.a1;addLog(45,`El árbitro levanta ${M.a1} dedo${M.a1>1?"s":""}: ${M.a1} minuto${M.a1>1?"s":""} de descuento.`,"ev");updScore();return false}
     M.ht=true;M.addN=0;addLog(45,"Descanso. Bocadillos de mortadela del maletero."+(onList().some(x=>x.p.trait==="fumador")?" Alguien se enciende un Ducados.":""),"ev");M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+8,0,100)});updScore();M.htUs=M.us;M.htThem=M.them;SFX.whistle(2);vo("halftime",null,true);if(unl("tac")&&!M.skipping){M.paused=true;clearTimeout(M.timer);htTalk()}return false}
   if(m===90&&M.addLeft===0){
-    if(!M.a2){M.a2=rnd(2,4)+Math.min(5,Math.ceil(M.lost/2));M.addLeft=M.a2;addLog(90,`${M.a2} minutos de descuento. ${M.a2>5?"El árbitro ha apuntado lo del perro, lo del tabaco y todo.":"Nadie sabe de dónde los saca."}`,"ev");updScore();return false}
+    if(!M.a2){M.a2=olA(2)||(rnd(2,4)+Math.min(5,Math.ceil(M.lost/2)));M.addLeft=M.a2;addLog(90,`${M.a2} minutos de descuento. ${M.a2>5?"El árbitro ha apuntado lo del perro, lo del tabaco y todo.":"Nadie sabe de dónde los saca."}`,"ev");updScore();return false}
     endMatch(true);return true}
   return false;
 }
@@ -2628,12 +2999,13 @@ function arrivalModal(){
    ${holes?`<p>Tienes <b>${holes} hueco${holes>1?"s":""}</b> en el campo. Meterlos ${(M.outHoles||0)>0?"cuenta como cambio":"no gasta cambios: rellenan a los que no llegaron"}.</p>`:`<p class="hint">El once está completo. Se quedan en el banquillo para cuando haga falta.</p>`}
    <div class="pc-act">${holes&&canFill()?`<button class="btn primary" data-act="arrfill">Meterlos en los huecos</button><button class="btn" data-act="arrpick">Elegir yo dónde</button>`:""}<button class="btn" data-act="arrok">${holes?"Dejarlos en el banquillo":"Vale, seguimos"}</button></div>`);
 }
-function arrResume(){closeModal();if(!M||M.ended)return;M.paused=false;const b=$("#m-pause");if(b){b.textContent="Pausa";b.classList.remove("paused")}renderSquad();if(!M.hold){clearTimeout(M.timer);M.timer=setTimeout(run,300)}}
+function arrResume(){closeModal();if(!M||M.ended)return;M.paused=false;if(M.online)setTimeout(()=>olLivePub(true),10);const b=$("#m-pause");if(b){b.textContent="Pausa";b.classList.remove("paused")}renderSquad();if(!M.hold){clearTimeout(M.timer);M.timer=setTimeout(run,300)}}
 function run(){
   if(!M||M.ended||M.hold||M.paused)return;
   if((M.replay||M.replayReq)&&!M.skipping){M.timer=setTimeout(run,250);return}
   const now=performance.now();const wait=Math.max(M.cineUntil||0,M.busyUntil||0);if(wait>now){M.timer=setTimeout(run,wait-now+50);return}
-  tick();if(!M.ended&&!M.hold&&!M.paused)M.timer=setTimeout(run,[1100,700,220][M.speed]);
+  if(M.online&&!olGate())return;
+  tick();if(M.online)olAfterTick();if(!M.ended&&!M.hold&&!M.paused)M.timer=setTimeout(run,M.online&&M.online.role==="g"&&!M.online.solo?60:[1100,700,220][M.speed]);
 }
 function renderSquad(){
   const el=$("#m-squad");if(!M){el.innerHTML="";return}
@@ -2657,7 +3029,7 @@ function doPick(el){
   const id=+el.dataset.id;const inP=sqP(id);
   if(M.sel==null){const e=M.slots.findIndex(x=>!x);if(e<0){toast("Toca primero el puesto que quieres cambiar.");return}M.sel=e}
   const i=M.sel,prev=M.slots[i];
-  if(prev){if(M.subs>=5){toast("Ya has hecho 5 cambios.");return}M.subs++;addLog(M.min,`Cambio: sale ${short(sqP(prev))}${sqP(prev).mE<30?" arrastrando los pies":""}, entra ${short(inP)} de ${POSN[roleOf(i)]}.`,"ev")}
+  if(prev){if(M.subs>=5){toast("Ya has hecho 5 cambios.");return}M.subs++;addLog(M.min,`Cambio: sale ${short(sqP(prev))}${sqP(prev).mE<30?" arrastrando los pies":""}, entra ${short(inP)} de ${POSN[roleOf(i)]}.`,"ev");olEmit(`Cambio: sale ${short(sqP(prev))}, entra ${short(inP)}.`)}
   else{if(onIds().length>=maxOn()){toast(`Tienes ${M.reds} expulsado${M.reds>1?"s":""}: jugáis con ${maxOn()}. Solo puedes mover a uno que ya esté en el campo a ese puesto.`);M.sel=null;renderSquad();return}const cnt=fillCounts();if(cnt===null){toast("Ya has hecho 5 cambios. Jugáis con uno menos.");return}addLog(M.min,`Entra ${short(inP)} de ${POSN[roleOf(i)]} a tapar el hueco${cnt?` (cambio ${M.subs}/5)`:""}.`,"ev")}
   M.slots[i]=id;M.sel=null;
   if(M.hold&&(!M.slots.includes(null)||!canFill())){M.hold=false;renderSquad();if(!M.paused)M.timer=setTimeout(run,300);return}
@@ -2670,10 +3042,10 @@ function setFormation(f,inMatch){
     S.lineup=slots;save();render();return}
   const pool=onIds().map(sqP);M.form=f;const roles=FORMS[f];const slots=Array(11).fill(null);
   orderPOR(roles).forEach(i=>{const b=bestFor(roles[i],pool.filter(p=>!slots.includes(p.id)));if(b)slots[i]=b.id});
-  M.slots=slots;M.sel=null;addLog(M.min,`Cambio de formación: ${f}.${f==="1-0-10"?" Todos arriba y que sea lo que Dios quiera.":""}`,"ev");setDots();renderSquad();
+  M.slots=slots;M.sel=null;olEmit(`Cambian a un ${f}.`);addLog(M.min,`Cambio de formación: ${f}.${f==="1-0-10"?" Todos arriba y que sea lo que Dios quiera.":""}`,"ev");setDots();renderSquad();
 }
 function setDots(){if(M&&M.vis)visSync()}
-function startMatch(){
+function startMatch(olo){
   const P=S.prep;const m=ourFixture();const opp=m.a===0?m.b:m.a;const v=P.venue;
   const sq=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).map(p=>({...p,mE:clamp(p.energy+P.arrive[p.id].en-(p.hang>0?15:0),10,100),drunk:Math.random()<(p.dep||0)/180}));
   const arr={};sq.forEach(p=>arr[p.id]=P.arrive[p.id].min);
@@ -2705,9 +3077,13 @@ function startMatch(){
   sq.filter(p=>arr[p.id]>0).forEach(p=>addLog(0,`${short(p)} todavía no ha llegado. Se le espera hacia el minuto ${arr[p.id]}.`,"bad"));
   const n=onIds().length;if(n<11)addLog(0,`Empezáis con ${n}. Habéis preguntado en el bar y nadie quería.`,"bad");
   visInit();
-  {const T0=S.comp.teams[M.opp];const tr=T0.tierOf!=null?T0.tierOf:S.comp.tier;const pm=[.6,.4,.18][tr]||0;let miss=0;if(Math.random()<pm){miss=wpick([1,2,3,4],x=>[5,3,1.5,.6][x-1]);}
+  {const md=$("#m-done");if(!olo&&S.comp.type!=="online"){md.dataset.act="post1";md.textContent="Rueda de prensa"}}
+  if(!olo)M.olBot=S.comp.type==="online";
+  if(!olo){const T0=S.comp.teams[M.opp];const tr=T0.tierOf!=null?T0.tierOf:S.comp.tier;const pm=[.6,.4,.18][tr]||0;let miss=0;if(Math.random()<pm){miss=wpick([1,2,3,4],x=>[5,3,1.5,.6][x-1]);}
    if(miss){M.oppN=11-miss;M.oppStr*=Math.pow(M.oppN/11,1.4);const out=M.vis.them.filter(p=>p.role!=="POR").sort(()=>Math.random()-.5).slice(0,miss);M.vis.them=M.vis.them.filter(p=>!out.includes(p));
      addLog(0,`${T0.n} solo trae a ${M.oppN}. ${pick(["Dos se han quedado dormidos.","Uno tiene comunión y el otro está de resaca.","Les falta gente: el de la furgoneta no ha arrancado.","Han preguntado en el bar y nadie quería.","Su delantero está en un juicio de divorcio."])} Aprovechadlo.`,"goal")}}
+  else{const ro=S.comp.teams[M.opp].roster||[];M.oppN=Math.min(11,ro.length||11);if(M.oppN<11){M.vis.them=M.vis.them.slice(0,M.oppN);addLog(0,`${S.comp.teams[M.opp].n} solo ha conseguido traer a ${M.oppN}.`,"goal")}}
+  if(olo){olLiveInit(olo);addLog(0,`Partido EN DIRECTO contra ${S.comp.teams[M.opp].n}, que lo maneja otra persona desde su móvil.`,"goal")}
   M.cine={type:"entrada",t0:performance.now(),dur:2800,data:{ours:v.ours,venue:v.n}};M.cineUntil=performance.now()+2800;
   updScore();renderSquad();M.timer=setTimeout(run,300);
 }
@@ -2716,6 +3092,7 @@ function endMatch(normal){
   SFX.whistle(3,true);setTimeout(()=>SFX.stop(),1500);vo("end",null,true);
   if(normal)addLog(M.min,`Final del partido. El árbitro se va corriendo antes de que alguien le pregunte nada.`,"ev");
   updScore();
+  if(S.comp&&S.comp.type==="online")return olEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   const c=S.comp,m=M.m,ko=isKO(c);
   const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
   const r=record(c,m.a,m.b,ga,gb,ko);m.win=r.win;m.ga=ga;m.gb=gb;m.pens=r.pens;{const ot=c.teams[M.opp];ot.gl=ot.gl||{};M.rivScorers.forEach(n=>{ot.gl[n]=(ot.gl[n]||0)+1})}
@@ -2883,6 +3260,18 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  olon:()=>{const on=!olEnabled();olSetCfg({on});if(on){olAskPerm();olStart();toast("Modos online activados: tienes la pestaña «Online» abajo.")}else{olStart();toast("Modos online desactivados.")}render()},
+  oldb:()=>{const v=($("#ol-db")&&$("#ol-db").value||"").trim();if(!/^https:\/\//.test(v)){toast("Pon la dirección completa, empezando por https://");return}olSetCfg({db:v});olStart();render()},
+  oladdf:()=>{olAddFriend($("#ol-fc")&&$("#ol-fc").value)},
+  olsharecode:()=>{const t=`Añádeme en la liga online de Los Papas Cochero. Mi código: ${olMe()}`;try{if(navigator.share){navigator.share({text:t});return}}catch(e){}try{navigator.clipboard.writeText(t);toast("Copiado. Pégalo en WhatsApp.")}catch(e){toast(t)}},
+  olcreate:()=>olCreate(),
+  olyes:v=>olAnswer(v,true),olno:v=>olAnswer(v,false),
+  olsel:v=>{OL.sel=v;render()},
+  olbegin:v=>olBegin(v),olleave:v=>olLeave(v),
+  olplay:v=>{if(S.olSwap){S.tab="prep";render();return}S.tab="online";olPlay(v)},
+  olcancel:()=>olCancel(),olbot:()=>olBot(),
+  olready:()=>{const P=S.prep;if(!P||!P.ol)return;P.ol.ready=1;const ol=S.comp.ol;fbq(`l/${ol.lid}/live/${ol.k}/${ol.home?"h":"g"}r`,"PUT",1);save();render();olPrepTick()},
+  olpost:()=>olPost(),olafter:()=>olAfter(),
   skin:()=>{let k="pc";try{k=localStorage.getItem("papascochero_skin")||"pc"}catch(e){}k=k==="fm"?"pc":"fm";try{localStorage.setItem("papascochero_skin",k)}catch(e){}if(!document.body.classList.contains("fm")!==(k==="fm")){}document.body.classList.toggle("fm",k==="fm");applySkin();render();toast(k==="fm"?"Aspecto Football Manager.":"Aspecto PC Fútbol de saldo.")},
   doupdate:()=>{closeModal();save();if(location.href.indexOf(window.PC_REMOTE)===0)location.reload();else location.reload()},
   updcheck:()=>checkUpdates(true),
@@ -3028,8 +3417,8 @@ const A={
   comm:()=>{S.comm=S.comm===false;save();render();if(S.comm!==false){voxInit();vo("intro",null,true)}else{try{window.AndroidTTS?AndroidTTS.flush(" "):speechSynthesis.cancel()}catch(e){}}},
   voxtoggle:()=>{S.voxOff=!S.voxOff;save();render()},
   speed:()=>{if(!M)return;M.speed=(M.speed+1)%3;$("#m-speed").textContent=["Lento","Normal","Rápido"][M.speed]},
-  pause:()=>{if(!M||M.ended)return;M.paused=!M.paused;const b=$("#m-pause");b.textContent=M.paused?"Seguir":"Pausa";b.classList.toggle("paused",M.paused);clearTimeout(M.timer);if(M.paused){const t=`Parece que ${clubName()} han pedido tiempo.`;addLog(M.min,t+" Haz los cambios con calma.","ev");vo("pause",null,true)}else M.timer=setTimeout(run,300)},
-  skip:()=>{if(!M||M.ended)return;clearTimeout(M.timer);M.paused=false;M.skipping=true;M.busyUntil=0;if(M.vis){M.vis.q=[];M.vis.ball.move=null}if(M.pendLogs){M.pendLogs.forEach(x=>addLog(x[0],x[1],x[2]));M.pendLogs=null}M.dispUs=M.us;M.dispThem=M.them;M.cine=null;M.cineUntil=0;if(M.hold){M.hold=false;autoFill()}let g=0;while(!M.ended&&g++<300)tick()},
+  pause:()=>{if(!M||M.ended)return;M.paused=!M.paused;if(M.online)setTimeout(()=>olLivePub(true),10);const b=$("#m-pause");b.textContent=M.paused?"Seguir":"Pausa";b.classList.toggle("paused",M.paused);clearTimeout(M.timer);if(M.paused){const t=`Parece que ${clubName()} han pedido tiempo.`;addLog(M.min,t+" Haz los cambios con calma.","ev");vo("pause",null,true)}else M.timer=setTimeout(run,300)},
+  skip:()=>{if(!M||M.ended)return;if(M.online&&!M.online.solo){toast("En un partido en directo no se puede saltar al final.");return}clearTimeout(M.timer);M.paused=false;M.skipping=true;M.busyUntil=0;if(M.vis){M.vis.q=[];M.vis.ball.move=null}if(M.pendLogs){M.pendLogs.forEach(x=>addLog(x[0],x[1],x[2]));M.pendLogs=null}M.dispUs=M.us;M.dispThem=M.them;M.cine=null;M.cineUntil=0;if(M.hold){M.hold=false;autoFill()}let g=0;while(!M.ended&&g++<300)tick()},
   resume:()=>{if(!M||!M.hold)return;M.hold=false;renderSquad();if(!M.paused)M.timer=setTimeout(run,300)},
   mpick:(v,el)=>doPick(el),
   post1:()=>postInterview(),post2:()=>postPizza(),post3:()=>showReport(),
@@ -3420,7 +3809,9 @@ function loop(t){
 
 /* ================= arranque ================= */
 drawCrest($("#crest"));applySkin();
-load();if(!S)newCreator();announceUpdate();voxLoad();setTimeout(()=>checkUpdates(false),2500);setInterval(()=>{if(!M)checkUpdates(false);else if(UPD.pending&&!M){}},15*60*1000);
+load();if(S&&S.olSwap)olRestore();if(!S)newCreator();announceUpdate();voxLoad();setTimeout(()=>checkUpdates(false),2500);setInterval(()=>{if(!M)checkUpdates(false);else if(UPD.pending&&!M){}},15*60*1000);
 render();requestAnimationFrame(loop);
+setTimeout(()=>{try{olStart()}catch(e){}},1500);
+window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine});
 })();
 </script>
