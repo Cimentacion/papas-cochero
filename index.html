@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="11.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="11.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2616,7 +2616,7 @@ function olStart(){
    el móvil solo permite unas pocas conexiones a la vez con el mismo servidor y si se llenan, lo demás no carga */
 async function olPollLeagues(force){
   if(OL.polling)return;OL.polling=true;
-  try{const want=Object.keys((OL.me&&OL.me.lg)||{});Object.keys(OL.lg).forEach(l=>{if(!want.includes(l))delete OL.lg[l]});
+  try{const gone=olCfg().gone||{};const want=Object.keys((OL.me&&OL.me.lg)||{}).filter(l=>!gone[l]);Object.keys(OL.lg).forEach(l=>{if(!want.includes(l))delete OL.lg[l]});
     let ch=false;const now=Date.now();OL.lgT=OL.lgT||{};
     for(const lid of want){const L=OL.lg[lid];const quiet=L&&(L.st==="done"||L.st==="off");const every=quiet?120000:(S&&S.olSwap&&S.comp&&S.comp.ol&&S.comp.ol.lid===lid)?2000:(S&&S.tab==="online"?4000:12000);
       if(!force&&OL.lgT[lid]&&now-OL.lgT[lid]<every)continue;OL.lgT[lid]=now;
@@ -2744,7 +2744,8 @@ async function olBegin(lid){
   const fx=olRR(T.length,L.two).map(r=>r.map(([a,b])=>a+"_"+b).join(","));
   const pot=L.fr?0:Math.round(60+snaps.reduce((a,p)=>a+(p.spon||0)*6+20,0)+bots*12);
   await fbq(`l/${lid}`,"PATCH",{teams:T,fx,r:0,rt:TS,st:"run",pot});olPollLeagues(true);toast("¡Arranca la liga!")}
-async function olLeave(lid){const L=OL.lg[lid];if(L&&L.org===olMe()&&L.st==="lobby"){await fbq(`l/${lid}`,"PATCH",{st:"off"})}await fbq(`u/${olMe()}/lg/${lid}`,"DELETE");OL.sel=null;toast("Has salido de la liga.")}
+async function olLeave(lid){const L=OL.lg[lid];const gone=olCfg().gone||{};gone[lid]=1;olSetCfg({gone});delete OL.lg[lid];if(OL.me&&OL.me.lg)delete OL.me.lg[lid];OL.sel=null;render();toast("Quitada de tu lista.");
+  if(L&&L.org===olMe()&&L.st==="lobby"){await fbq(`l/${lid}`,"PATCH",{st:"off"})}await fbq(`u/${olMe()}/lg/${lid}`,"DELETE")}
 async function olClaim(lid,L){
   if(!L.claim||!L.claim[olMe()]){const tb=olTable(L);const pos=tb.findIndex(t=>t.u===olMe());if(pos<0||pos>1){if(pos>=0&&!(L.claim||{})[olMe()])await fbq(`l/${lid}/claim/${olMe()}`,"PUT",-1);return}
     const share=Math.round((L.pot||0)*(pos===0?.65:.35));await fbq(`l/${lid}/claim/${olMe()}`,"PUT",share);
