@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="7.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="7.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2401,7 +2401,8 @@ function weird(){
   if(w.end){M.early=w.t;endMatch(false);return true}
   return false;
 }
-function removeAt(i,why,txt){const id=M.slots[i];M.slots[i]=null;M.outHoles=(M.outHoles||0)+1;M.out.set(id,why);addLog(M.min,txt,"bad");if(M.sel===i)M.sel=null}
+const maxOn=()=>11-(M.reds||0);
+function removeAt(i,why,txt){const id=M.slots[i];M.slots[i]=null;if(why==="roja"){M.reds=(M.reds||0)+1}else M.outHoles=(M.outHoles||0)+1;M.out.set(id,why);addLog(M.min,txt,"bad");if(M.sel===i)M.sel=null}
 function tick(){
   if(M.ended||M.hold)return;
   const inAdd=M.addLeft>0;
@@ -2448,9 +2449,9 @@ function clockEnd(m){
   return false;
 }
 function bestFor(role,pool){return pool.slice().sort((a,b)=>ovrAs(b,role)*knownFit(b,role)*(.5+b.mE/200)-ovrAs(a,role)*knownFit(a,role)*(.5+a.mE/200))[0]}
-function canFill(){const holes=M.slots.filter(x=>!x).length;return benchList().length>0&&holes>0&&(M.subs<5||holes>(M.outHoles||0))}
+function canFill(){const holes=M.slots.filter(x=>!x).length;return benchList().length>0&&holes>0&&onIds().length<maxOn()&&(M.subs<5||holes>(M.outHoles||0))}
 function fillCounts(){if((M.outHoles||0)>0){if(M.subs>=5)return null;M.subs++;M.outHoles--;return true}return false}
-function autoFill(){M.slots.forEach((id,i)=>{if(id)return;const b=bestFor(roleOf(i),benchList());if(!b)return;const cnt=fillCounts();if(cnt===null)return;M.slots[i]=b.id;addLog(M.min,`Entra ${short(b)} de ${POSN[roleOf(i)]}${cnt?` (cambio ${M.subs}/5)`:""}.`)})}
+function autoFill(){M.slots.forEach((id,i)=>{if(id||onIds().length>=maxOn())return;const b=bestFor(roleOf(i),benchList());if(!b)return;const cnt=fillCounts();if(cnt===null)return;M.slots[i]=b.id;addLog(M.min,`Entra ${short(b)} de ${POSN[roleOf(i)]}${cnt?` (cambio ${M.subs}/5)`:""}.`)})}
 const fewArrived=()=>{const P=S.prep;return !!(P&&P.arrive)&&S.players.filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).length<11};
 function arrivalModal(){
   if(!M||M.ended)return;const ps=(M.arrivedNow||[]).map(id=>sqP(id)).filter(Boolean);const holes=M.slots.filter(x=>!x).length;
@@ -2488,7 +2489,7 @@ function doPick(el){
   if(M.sel==null){const e=M.slots.findIndex(x=>!x);if(e<0){toast("Toca primero el puesto que quieres cambiar.");return}M.sel=e}
   const i=M.sel,prev=M.slots[i];
   if(prev){if(M.subs>=5){toast("Ya has hecho 5 cambios.");return}M.subs++;addLog(M.min,`Cambio: sale ${short(sqP(prev))}${sqP(prev).mE<30?" arrastrando los pies":""}, entra ${short(inP)} de ${POSN[roleOf(i)]}.`,"ev")}
-  else{const cnt=fillCounts();if(cnt===null){toast("Ya has hecho 5 cambios. Jugáis con uno menos.");return}addLog(M.min,`Entra ${short(inP)} de ${POSN[roleOf(i)]} a tapar el hueco${cnt?` (cambio ${M.subs}/5)`:""}.`,"ev")}
+  else{if(onIds().length>=maxOn()){toast(`Tienes ${M.reds} expulsado${M.reds>1?"s":""}: jugáis con ${maxOn()}. Solo puedes mover a uno que ya esté en el campo a ese puesto.`);M.sel=null;renderSquad();return}const cnt=fillCounts();if(cnt===null){toast("Ya has hecho 5 cambios. Jugáis con uno menos.");return}addLog(M.min,`Entra ${short(inP)} de ${POSN[roleOf(i)]} a tapar el hueco${cnt?` (cambio ${M.subs}/5)`:""}.`,"ev")}
   M.slots[i]=id;M.sel=null;
   if(M.hold&&(!M.slots.includes(null)||!canFill())){M.hold=false;renderSquad();if(!M.paused)M.timer=setTimeout(run,300);return}
   renderSquad();
