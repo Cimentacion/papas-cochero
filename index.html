@@ -7,7 +7,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="7.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="8.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -713,7 +713,7 @@ function sortIdx(c,list){return list.slice().sort((x,y)=>{const a=c.teams[x],b=c
 function ourFixture(){const c=S.comp;if(!c||c.done)return null;const r=c.rounds[c.r];if(!r)return null;return r.find(m=>m.a===0||m.b===0)||null}
 function venueOf(m){
   const c=S.comp;
-  if(m.a===0)return{n:curField().n,d:.8,ours:true,town:HOME,home:true};
+  if(m.a===0)return{n:S.embargo?curField().n:(S.club&&S.club.stadium)||curField().n,d:.8,ours:true,town:HOME,home:true};
   const opp=c.teams[m.b===0?m.a:m.b];
   if(c.tier===0&&c.type!=="cup"){const v=VENUES[opp.venue||1];return{n:v.n,d:v.d,ours:false,town:HOME,home:false}}
   return{n:`Campo municipal de ${opp.town}`,d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
@@ -1259,7 +1259,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["cambios","Pedir cambios"]]};
+const TABSUB={club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["voces","Voces"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}</button>`).join("")}</div>`}
 function viewClub(){
@@ -1731,6 +1731,7 @@ function clubBox(){
   return `<section class="win"><div class="bar">Tu club <small>nombre, escudo y camiseta</small></div><div class="body">
    <div class="mp-top"><div class="mp-team">${crestCv(us,70)}</div><div class="mp-vs" style="font-size:16px">${esc(clubName())}</div><div class="mp-team">${crestCv(us,60,1)}</div></div>
    <p class="pc-h">Nombre</p><div class="row"><input id="club-name" class="inp" maxlength="28" value="${esc(clubName())}"><button class="btn" data-act="clubname">Guardar</button></div>
+   <p class="pc-h">Nombre del estadio</p><div class="row"><input id="club-stad" class="inp" maxlength="50" placeholder="${esc(curField().n)}" value="${esc((S.club&&S.club.stadium)||"")}"><button class="btn" data-act="stadname">Guardar</button></div><p class="hint">Así lo dirán los comentaristas y el marcador. Déjalo vacío para usar el nombre del campo.</p>
    <p class="pc-h">Escudo</p>
    <div class="forms"><button class="btn mini ${!cr?"sel":""}" data-act="crest-def">La patata de siempre</button><button class="btn mini ${cr?"sel":""}" data-act="crest-new">Diseñar uno</button></div>
    ${cr?`${opt("cr","shape",["Escudo","Redondo","Picudo","Almenado"],cr.shape)}${opt("cr","pat",["Liso","Rayas","Banda","Franja","Cuartos","Galón"],cr.pat)}
@@ -2114,6 +2115,16 @@ function saveCode(){save();return "PAPAS1:"+btoa(unescape(encodeURIComponent(JSO
 function loadCode(txt){try{txt=String(txt||"").trim();let j;if(txt.startsWith("PAPAS1:"))j=JSON.parse(decodeURIComponent(escape(atob(txt.slice(7).replace(/\s+/g,"")))));else j=JSON.parse(txt);if(!j||j.v!==5||!Array.isArray(j.players))throw 0;
   if(!confirmLoad()){return}localStorage.setItem(KEY,JSON.stringify(j));toast("Partida cargada.");setTimeout(()=>location.reload(),600)}catch(e){toast("Ese código no es una partida válida.")}}
 function confirmLoad(){return true}
+function voicesBox(){
+  const L=voiceList();const opt=sel=>`<option value="">Automática</option>${L.map(v=>`<option value="${esc(v.name)}" ${v.name===sel?"selected":""}>${esc(v.name)}${v.lang&&v.lang!=="es"?" ("+esc(v.lang)+")":""}</option>`).join("")}`;
+  return `<section class="win"><div class="bar">Voces de los comentaristas <small>Manolo y Paco</small></div><div class="body">
+   ${L.length<=1?`<p><b>Tu ${window.AndroidTTS?"móvil":"navegador"} ${L.length?"solo tiene una voz en español (normalmente de mujer)":"no tiene voces en español"}.</b> Para tener voces de hombre:</p>
+   <ol class="tips"><li>${window.AndroidTTS?"":"Usa la APK: los navegadores del móvil solo ofrecen una voz. "}Ve a Ajustes del móvil › busca «Texto a voz» (Salida de texto a voz).</li><li>Elige «Servicios de voz de Google» como motor y toca el engranaje ⚙.</li><li>«Instalar datos de voz» › Español (España): descarga el paquete y verás varias voces (I, II, III, IV). Algunas son de hombre.</li><li>Vuelve aquí: aparecerán en la lista para elegir una para Manolo y otra para Paco.</li></ol>`:`<p class="hint">Elige una voz para cada uno y pruébala. Las de Google suelen llamarse algo como «es-es-x-eed-local»: no dicen si son de hombre o mujer, así que ve probando.</p>`}
+   <p class="pc-h">Manolo (narra)</p><div class="row"><select id="vA" class="inp">${opt(S.voiceA)}</select><button class="btn mini" data-act="vtest" data-v="0">Probar</button></div>
+   <p class="pc-h">Paco (comenta)</p><div class="row"><select id="vB" class="inp">${opt(S.voiceB)}</select><button class="btn mini" data-act="vtest" data-v="1">Probar</button></div>
+   <div class="pc-act"><button class="btn primary" data-act="vsave">Guardar voces</button><button class="btn" data-act="vreload">Volver a buscar voces</button></div>
+  </div></section>`;
+}
 function saveBox(){
   const code=saveCode();
   return `<section class="win"><div class="bar">Pasar la partida <small>del HTML a la APK o al revés</small></div><div class="body">
@@ -2157,7 +2168,7 @@ function houseBox(){
 }
 function viewMister(){
   const c=S.coach;
-  const sm=sub("mister");if(sm==="cambios")return feedbackBox();if(sm==="partida")return saveBox();if(sm==="trabajos")return jobsBox();if(sm==="mafia")return mafiaBox();if(sm==="chaparral")return chapaBox();
+  const sm=sub("mister");if(sm==="cambios")return feedbackBox();if(sm==="partida")return saveBox();if(sm==="voces")return voicesBox();if(sm==="trabajos")return jobsBox();if(sm==="mafia")return mafiaBox();if(sm==="chaparral")return chapaBox();
   return `<section class="win"><div class="bar">Ficha del entrenador</div><div class="body">
    <div class="ficha"><canvas class="face lg" data-face="coach" width="192" height="192"></canvas>
     <dl><dt>Nombre</dt><dd>${esc(c.name)}</dd><dt>Mote</dt><dd>${esc(c.nick)}</dd><dt>Edad</dt><dd>${c.age} años</dd><dt>Peinado</dt><dd>${HAIRN[c.look.hair]}</dd><dt>Balance</dt><dd>${c.w}G ${c.d}E ${c.l}P</dd><dt>Goles</dt><dd>${c.gf} a favor, ${c.ga} en contra</dd></dl></div>
@@ -2724,6 +2735,9 @@ const A={
   skin:()=>{let k="pc";try{k=localStorage.getItem("papascochero_skin")||"pc"}catch(e){}k=k==="fm"?"pc":"fm";try{localStorage.setItem("papascochero_skin",k)}catch(e){}if(!document.body.classList.contains("fm")!==(k==="fm")){}document.body.classList.toggle("fm",k==="fm");applySkin();render();toast(k==="fm"?"Aspecto Football Manager.":"Aspecto PC Fútbol de saldo.")},
   doupdate:()=>{closeModal();save();if(location.href.indexOf(window.PC_REMOTE)===0)location.reload();else location.reload()},
   updcheck:()=>checkUpdates(true),
+  vtest:v=>{const k=+v;S.voiceA=$("#vA").value||null;S.voiceB=$("#vB").value||null;const was=S.comm;S.comm=true;lastSpk=0;speak(k?"Qué barbaridad, Manolo. Esto es fútbol de verdad.":"Buenas tardes desde el estadio. Aquí Manolo, con el partido.",true,k);S.comm=was},
+  vsave:()=>{S.voiceA=$("#vA").value||null;S.voiceB=$("#vB").value||null;save();toast("Voces guardadas.")},
+  vreload:()=>{try{window.speechSynthesis&&speechSynthesis.getVoices()}catch(e){}setTimeout(render,400)},
   savecopy:async()=>{const t=saveCode();try{await navigator.clipboard.writeText(t);toast("Código copiado. Pégalo en la otra versión.")}catch(e){const a=$("#save-out");a.focus();a.select();try{document.execCommand("copy");toast("Código copiado.")}catch(e2){toast("Mantén pulsado el texto y copia.")}}},
   savefile:()=>{const t=saveCode();const b=new Blob([t],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`papas-cochero-T${S.season}.txt`;document.body.appendChild(a);a.click();a.remove();toast("Si no se descarga, usa «Copiar código».")},
   saveshare:async()=>{const t=saveCode();try{if(navigator.share){await navigator.share({title:"Partida de Los Papas Cochero",text:t});return}}catch(e){}try{await navigator.clipboard.writeText(t);toast("No se puede compartir aquí: código copiado.")}catch(e){toast("Usa «Copiar código».")}},
@@ -2784,6 +2798,7 @@ const A={
     else if(v==="latas"){const dep=M.sq.reduce((a,x)=>a+(x.dep||0),0)/Math.max(1,M.sq.length);if(dep>40){M.mod*=1.1;t="Pánico en el vestuario. Juegan por las latas."}else t="Les da igual: no beben tanto."}
     else t="Te comes el bocadillo de mortadela. Nadie dice nada.";
     addLog(45,`Charla del descanso: ${t}`,"ev");closeModal();M.paused=false;M.timer=setTimeout(run,300)},
+  stadname:()=>{S.club=S.club||{};S.club.stadium=($("#club-stad").value||"").trim().slice(0,50)||null;save();render();toast(S.club.stadium?`Estadio: ${S.club.stadium}`:"Nombre del campo por defecto.")},
   clubname:()=>{const v=($("#club-name").value||"").trim().slice(0,28);if(!v){toast("Ponle algún nombre.");return}S.club=S.club||{};S.club.name=v;
     if(S.comp)S.comp.teams[0].n=v;if(S.league)S.league.teams[0].n=v;if(S.cup)S.cup.teams[0].n=v;addNews(`El club pasa a llamarse ${v}. En el pueblo lo siguen llamando como antes.`);save();render();toast("Nombre cambiado.")},
   "crest-def":()=>{S.club=S.club||{};S.club.crest=null;save();render()},
@@ -2922,13 +2937,14 @@ function nearestTo(list,x,y,ex){let b=null,bd=1e9;list.forEach(p=>{if(p===ex)ret
 function setLabel(t,ms){const V=M.vis;V.label=t;V.labelUntil=performance.now()+(ms||1800);commentLabel(t)}
 let lastSpk=0;
 const CASTER=[{n:"Manolo",pitch:.72,rate:1.08},{n:"Paco",pitch:.58,rate:1.0}];
-function pickVoice(k){const ss=window.speechSynthesis;if(!ss)return null;const vs=ss.getVoices().filter(x=>/^es/i.test(x.lang));if(!vs.length)return null;
+function voiceList(){try{if(window.AndroidTTS&&AndroidTTS.voices)return AndroidTTS.voices().split("|").filter(Boolean).map(n=>({name:n,lang:"es"}));if(window.speechSynthesis)return speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang)).map(v=>({name:v.name,lang:v.lang}))}catch(e){}return[]}
+function pickVoice(k){const want=S&&(k?S.voiceB:S.voiceA);if(want&&window.speechSynthesis){const v=speechSynthesis.getVoices().find(x=>x.name===want);if(v)return v}const ss=window.speechSynthesis;if(!ss)return null;const vs=ss.getVoices().filter(x=>/^es/i.test(x.lang));if(!vs.length)return null;
   const male=vs.filter(v=>/male|hombre|masc|jorge|pablo|diego|carlos|juan|enrique|antonio|alvaro|álvaro|raul|raúl|x-eed|x-eef|x-eeb|esd|esf/i.test(v.name)&&!/female|mujer|helena|laura|lucia|lucía|monica|mónica|paulina|elvira|sabina|conchita|lupe/i.test(v.name));
   const es=vs.filter(v=>/^es[-_]ES/i.test(v.lang));const pool=male.length?male:(es.length?es:vs);return pool[k%pool.length]}
 function speak(t,important,who){
   if(!S||S.comm===false||(M&&M.skipping))return;const now=Date.now();if(!important&&now-lastSpk<3500)return;lastSpk=now;
   const k=who==null?0:who,cs=CASTER[k];
-  try{if(window.AndroidTTS){try{AndroidTTS.pitch(cs.pitch)}catch(e){}important&&k===0?AndroidTTS.flush(t):AndroidTTS.speak(t);return}
+  try{if(window.AndroidTTS){try{const vn=k?S.voiceB:S.voiceA;if(vn&&AndroidTTS.voice)AndroidTTS.voice(vn);AndroidTTS.pitch(vn?1:cs.pitch)}catch(e){}important&&k===0?AndroidTTS.flush(t):AndroidTTS.speak(t);return}
     const ss=window.speechSynthesis;if(!ss)return;
     const go=()=>{const u=new SpeechSynthesisUtterance(t);u.lang="es-ES";const v=pickVoice(k);if(v)u.voice=v;u.rate=cs.rate;u.pitch=cs.pitch;u.volume=1;try{ss.resume()}catch(e){}ss.speak(u)};
     if(important&&k===0&&(ss.speaking||ss.pending)){ss.cancel();setTimeout(go,150)}else go()}catch(e){}

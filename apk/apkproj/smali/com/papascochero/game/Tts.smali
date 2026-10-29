@@ -69,3 +69,80 @@
     invoke-virtual {v0, p1}, Landroid/speech/tts/TextToSpeech;->setPitch(F)I
     return-void
 .end method
+
+.method public voices()Ljava/lang/String;
+    .registers 6
+    .annotation runtime Landroid/webkit/JavascriptInterface;
+    .end annotation
+    :try_start
+    new-instance v0, Ljava/lang/StringBuilder;
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+    iget-object v1, p0, Lcom/papascochero/game/Tts;->tts:Landroid/speech/tts/TextToSpeech;
+    invoke-virtual {v1}, Landroid/speech/tts/TextToSpeech;->getVoices()Ljava/util/Set;
+    move-result-object v1
+    if-eqz v1, :done
+    invoke-interface {v1}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
+    move-result-object v1
+    :loop
+    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+    move-result v2
+    if-eqz v2, :done
+    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+    move-result-object v2
+    check-cast v2, Landroid/speech/tts/Voice;
+    invoke-virtual {v2}, Landroid/speech/tts/Voice;->getLocale()Ljava/util/Locale;
+    move-result-object v3
+    invoke-virtual {v3}, Ljava/util/Locale;->getLanguage()Ljava/lang/String;
+    move-result-object v3
+    const-string v4, "es"
+    invoke-virtual {v4, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :loop
+    invoke-virtual {v2}, Landroid/speech/tts/Voice;->getName()Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v3, "|"
+    invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    goto :loop
+    :done
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v0
+    return-object v0
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    const-string v0, ""
+    return-object v0
+.end method
+
+.method public voice(Ljava/lang/String;)V
+    .registers 6
+    .annotation runtime Landroid/webkit/JavascriptInterface;
+    .end annotation
+    :try_start
+    iget-object v0, p0, Lcom/papascochero/game/Tts;->tts:Landroid/speech/tts/TextToSpeech;
+    invoke-virtual {v0}, Landroid/speech/tts/TextToSpeech;->getVoices()Ljava/util/Set;
+    move-result-object v1
+    if-eqz v1, :end
+    invoke-interface {v1}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
+    move-result-object v1
+    :loop
+    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+    move-result v2
+    if-eqz v2, :end
+    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+    move-result-object v2
+    check-cast v2, Landroid/speech/tts/Voice;
+    invoke-virtual {v2}, Landroid/speech/tts/Voice;->getName()Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :loop
+    invoke-virtual {v0, v2}, Landroid/speech/tts/TextToSpeech;->setVoice(Landroid/speech/tts/Voice;)I
+    :end
+    return-void
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    return-void
+.end method
