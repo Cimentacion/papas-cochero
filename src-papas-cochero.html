@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="9.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="9.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2457,7 +2457,7 @@ function fbListen(key,path,cb){
     const k=ks[ks.length-1];
     if(patch){if(!o[k]||typeof o[k]!=="object")o[k]={};Object.entries(d||{}).forEach(([a,b])=>{if(b===null)delete o[k][a];else o[k][a]=b})}
     else if(d===null)delete o[k];else o[k]=d};
-  const h=patch=>e=>{try{const m=JSON.parse(e.data);setAt(m.path,m.data,patch);st.seen=Date.now();cb(st.data)}catch(x){}};
+  const h=patch=>e=>{try{const m=JSON.parse(e.data);if(patch&&m.data&&typeof m.data==="object"){const base=(m.path||"/").replace(/\/+$/,"");Object.entries(m.data).forEach(([k,v])=>setAt(base+"/"+k,v,false))}else setAt(m.path,m.data,patch);st.seen=Date.now();cb(st.data)}catch(x){}};
   es.addEventListener("put",h(false));es.addEventListener("patch",h(true));es.addEventListener("keep-alive",()=>{st.seen=Date.now()});
   es.onerror=()=>{};st.es=es;OL.es[key]=st;return st}
 function fbUnlisten(key){const s=OL.es[key];if(s){try{s.es.close()}catch(e){}delete OL.es[key]}}
@@ -2519,7 +2519,7 @@ const olHumanT=(L,i)=>{const t=olTeams(L)[i];return t&&t.u?t:null};
 async function olAdvance(lid,L){
   if(!L||L.st!=="run")return;const FX=arr(L.fx),r=L.r||0;if(r>=FX.length)return;
   if(olNow()<(L.rt||0))return;
-  const ms=olRound(L,r);let all=true,lastT=L.rt||0;const w={};
+  const ms=olRound(L,r);let all=true,lastT=typeof L.rt==="number"?L.rt:0;const w={};
   ms.forEach(([a,b],i)=>{const k=r+"_"+i;const x=L.res&&L.res[k];if(x){lastT=Math.max(lastT,typeof x.t==="number"?x.t:0);return}all=false;
     if(a<0||b<0){w[k]={bye:1,t:TS};return}
     const ha=olHumanT(L,a),hb=olHumanT(L,b);
@@ -2538,6 +2538,7 @@ function olMyMatch(lid,L){
 function olPending(){for(const lid of Object.keys(OL.lg)){const m=olMyMatch(lid,OL.lg[lid]);if(m)return m}return null}
 async function olTick(){
   if(!olOn())return;olPublish();
+  if(Date.now()-(OL.fullT||0)>30000){OL.fullT=Date.now();for(const lid of Object.keys(OL.lg)){const d=await fbq(`l/${lid}`);if(d){OL.lg[lid]=d;const st=OL.es["l_"+lid];if(st)st.data=JSON.parse(JSON.stringify(d))}}}
   for(const lid of Object.keys(OL.lg)){const L=OL.lg[lid];try{await olAdvance(lid,L)}catch(e){}
     const m=olMyMatch(lid,L);if(m&&!S.olSwap)olNotify(`«${L.n}»: ¡te toca!`,`Jornada ${m.r+1} contra ${m.opp.n}. ${m.human?"Es un jugador de verdad: prepara el viaje.":"Juega cuando quieras antes de que se cierre."}`,`m_${lid}_${m.k}`);
     if(L.st==="done")olClaim(lid,L)}
