@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="8.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="8.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -168,6 +168,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-siz
 .bet{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .bet .btn{font-family:var(--f-body);font-weight:700;font-size:13px;letter-spacing:0;display:flex;flex-direction:column;align-items:center;padding:6px 2px}
 .bet .btn small{font-family:var(--f-mono);font-size:18px;font-weight:400}
+.betok{background:#e3f6dc;border:2px solid #2f8a2f;padding:6px 8px;margin:6px 0;display:flex;flex-direction:column;gap:4px;font-size:14px}.betok>div{display:flex;justify-content:space-between;align-items:center;gap:6px}body.fm .betok{background:#12301a;border-color:#3fbf5a;color:#e9eaf7}.ledger i{font-style:normal;color:#777;font-size:12px;margin-right:4px}
 .bet2{display:grid;grid-template-columns:1fr auto;gap:6px}
 .amts{display:flex;gap:4px}
 .amts .btn{flex:1;font-size:11px;padding:6px 0}
@@ -782,7 +783,7 @@ function travelCost(){
 }
 function resolveTravel(){
   const P=S.prep,log=[],arrive={},d=P.venue.d;
-  const cost=travelCost();S.money-=cost;
+  const cost=travelCost();ledSync();S.money-=cost;led("Viaje al partido (gasolina y billetes)",-cost);
   const walkLate=Math.max(0,Math.round(d*14)-40),walkEn=-Math.round(d*3);
   const carMin=Math.round(d*1.1+5);
   vehicles().forEach(v=>{
@@ -1149,6 +1150,9 @@ function startGame(){
 }
 
 /* ================= vistas ================= */
+function led(n,v,keep){S.ledger=S.ledger||[];if(S.ledM==null)S.ledM=S.money-v;S.ledM+=v;if(!v&&!keep)return;S.ledger.unshift({w:S.week,n,v});S.ledger=S.ledger.slice(0,80)}
+function ledSync(){if(S.ledM==null){S.ledM=S.money;return}const r=S.money-S.ledM;if(r)led(r>0?"Otros ingresos (ventas, eventos…)":"Otros gastos (fichajes, latas, eventos…)",r)}
+function ledgerHTML(){const L=(S.ledger||[]).slice(0,30);if(!L.length)return `<p class="hint">Aún no hay movimientos.</p>`;return `<div class="eco ledger">${L.map(x=>`<div><span><i>S${x.w}</i> ${esc(x.n)}</span><span class="${x.v>0?"pos":x.v<0?"negv":""}">${x.v?eur(x.v):"—"}</span></div>`).join("")}</div>`}
 function addNews(t){S.news.unshift({w:S.week,t});S.news=S.news.slice(0,8)}
 const mafiaCuota=()=>Math.max(25,Math.ceil((S.debt||0)*.08));
 const LOANS=[100,250,500],LOAN_MAX=500;
@@ -1281,7 +1285,8 @@ function viewClub(){
   ${S.phase==="pre"?pretempBox():""}<section class="win"><div class="bar">Tu situación</div><div class="body">
    ${S.board&&S.board.obj?`<p>Objetivo de la directiva: <b>${OBJ_T[S.board.obj.type]}</b> · confianza ${S.board.trust}/100</p>`:""}<p class="hint">Afición: ${(S.fans||3).toLocaleString("es-ES")} · ${fansTxt()}</p>
    <div class="meter"><span>Moral</span><div class="cmpbar"><i style="width:${c.moral}%"></i></div><em>${c.moral}</em></div>
-   <p class="hint">Cuentas de cada semana:</p>${ecoHTML(weeklyLines())}
+   <p class="hint">Cuentas fijas de cada semana:</p>${ecoHTML(weeklyLines())}
+   <p class="hint" style="margin-top:8px">Movimientos (pagos, cobros, apuestas…), del más reciente al más antiguo:</p>${(ledSync(),ledgerHTML())}
   </div></section>
   <section class="win"><div class="bar">Teletexto del pueblo <small>pág. 888</small></div><div class="tele"><div class="h">FUENTES DE ANDALUCÍA · DEPORTES</div>${S.news.map(x=>`<div><span>S${x.w}</span> ${esc(x.t)}</div>`).join("")}</div></section>`;
 }
@@ -2393,9 +2398,10 @@ function viewPrep(){
     <section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
      <p class="hint">Se apuesta al resultado de los 90 minutos. A favor o en contra, aquí no se juzga a nadie.${fewArrived()?" Pero con menos de 11 en el campo, Paco no te deja apostar contra tu equipo: sería demasiado fácil.":""}</p>
      <div class="amts">${[5,10,20,50].map(a=>`<button class="btn ${P.amt===a?"sel":""}" data-act="amt" data-v="${a}">${a} €</button>`).join("")}</div>
-     <div class="bet"><button class="btn" data-act="bet" data-v="W">Ganan los Papas<small>x${P.odds.W}</small></button><button class="btn" data-act="bet" data-v="D">Empate<small>x${P.odds.D}</small></button><button class="btn" data-act="bet" data-v="L" ${fewArrived()?"disabled":""}>Gana el rival<small>${fewArrived()?"bloqueado":"x"+P.odds.L}</small></button></div>
+     <div class="bet"><button class="btn ${P.bets.some(b=>b.pick==="W")?"sel":""}" data-act="bet" data-v="W">Ganan los Papas<small>x${P.odds.W}</small></button><button class="btn ${P.bets.some(b=>b.pick==="D")?"sel":""}" data-act="bet" data-v="D">Empate<small>x${P.odds.D}</small></button><button class="btn ${P.bets.some(b=>b.pick==="L")?"sel":""}" data-act="bet" data-v="L" ${fewArrived()?"disabled":""}>Gana el rival<small>${fewArrived()?"bloqueado":"x"+P.odds.L}</small></button></div>
      <div class="bet2"><select id="sc-pick" aria-label="Goleador">${scorerOpts}</select><button class="btn" data-act="betsc">Que marca</button></div>
-     ${P.bets.length?`<div class="tele">${P.bets.map(b=>`<div>${b.amt} € a ${esc(b.label)} · x${b.odds}</div>`).join("")}</div>`:""}
+     <p class="hint">Tienes <b>${eur(S.money)}</b>. Cada toque en un botón es una apuesta de <b>${P.amt} €</b>, que se paga en el momento.</p>
+     ${P.bets.length?`<div class="betok"><b>✔ TUS APUESTAS (${P.bets.length}) · ${P.bets.reduce((a,b)=>a+b.amt,0)} € apostados, ya descontados</b>${P.bets.map((b,i)=>`<div><span>${b.amt} € a ${esc(b.label)} · x${b.odds} → cobras ${Math.round(b.amt*b.odds)} €</span><button class="btn mini" data-act="unbet" data-v="${i}">Quitar</button></div>`).join("")}</div>`:`<p class="hint" style="text-align:center">Todavía no has apostado nada.</p>`}
      <button class="btn play" data-act="kick">Saltar al campo</button></div></section>`;
   }
   return head;
@@ -2464,7 +2470,7 @@ function runDrill(id){
 function weekTick(){
   if((S.field||0)===FIELDS.length-1)ach("arena");
   if(S.kids===undefined)S.kids=S.coach.story.civil==="div"?2:0;
-  const L=weeklyLines();const tot=L.reduce((a,x)=>a+x[1],0);S.money+=tot;
+  ledSync();const L=weeklyLines();const tot=L.reduce((a,x)=>a+x[1],0);S.money+=tot;L.forEach(([n,v])=>led(n,v));
   S.idle=S.comp?0:(S.idle||0)+1;S.week++;
   S.hist=S.hist||{money:[],media:[]};S.hist.money.push(S.money);S.hist.media.push(teamMedia());S.hist.money=S.hist.money.slice(-60);S.hist.media=S.hist.media.slice(-60);
   S.players.forEach(p=>{if(p.ovr0==null)p.ovr0=ovr(p);p.prog=(p.prog||[]).concat(ovr(p)).slice(-30)});mafiaWeek();wifeWeek();if(stf("psico"))S.coach.moral=clamp(S.coach.moral+stf("psico"),0,100);maybeEvent();S.sessions=Array(sessCount()).fill(null);S.sessLog=[];S.sites=genSites();
@@ -2742,10 +2748,10 @@ function endMatch(normal){
   const bets=S.prep.bets.map(b=>{let won=false;
     if(b.type==="res")won=b.pick===res;else if(b.side==="u")won=!!M.goals[b.id];else won=M.rivScorers.includes(b.name);
     return{...b,won,pay:won?Math.round(b.amt*b.odds):0}});
-  const betWin=bets.reduce((a,b)=>a+b.pay,0);S.money+=betWin;
-  const pizzas=Math.max(1,Math.ceil((M.sq.length+1)/3));const free=S.perks.comida>0;const pizzaCost=free?0:pizzas*6;S.money-=pizzaCost;
-  const bote=res==="W"?15+c.tier*15:res==="D"?5+c.tier*5:0;S.money+=bote;
-  const taq=M.ours?Math.round((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2+Math.round(Math.min(S.fans||3,fieldCap())*TICKET[S.comp.tier]*(M.derbi?1.5:1)):0;S.money+=taq;
+  const betWin=bets.reduce((a,b)=>a+b.pay,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
+  const pizzas=Math.max(1,Math.ceil((M.sq.length+1)/3));const free=S.perks.comida>0;const pizzaCost=free?0:pizzas*6;S.money-=pizzaCost;led("Pizzería Belsay",-pizzaCost);
+  const bote=res==="W"?15+c.tier*15:res==="D"?5+c.tier*5:0;S.money+=bote;led("Bote del torneo por el resultado",bote);
+  const taq=M.ours?Math.round((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2+Math.round(Math.min(S.fans||3,fieldCap())*TICKET[S.comp.tier]*(M.derbi?1.5:1)):0;S.money+=taq;led("Taquilla",taq);
   const mvpId=Object.keys(M.goals).sort((a,b)=>M.goals[b]-M.goals[a])[0];
   const pool=onIds().length?onIds():M.sq.map(p=>p.id);
   const mvp=(mvpId&&findAny(+mvpId))||(pool.length&&sqP(pick(pool)))||S.players[0]||null;
@@ -2788,7 +2794,7 @@ function showReport(){
   CINE=null;const R=M.report;const lbl={W:"VICTORIA",D:"EMPATE",L:"DERROTA"}[R.res];
   const li=a=>a.map(s=>`<li>${esc(s)}</li>`).join("");
   const eco=weeklyLines();if(R.tcost)eco.push(["Viaje (gasolina y billetes)",-R.tcost]);if(R.taq)eco.push(["Taquilla",R.taq]);if(R.bote)eco.push(["Bote del torneo por el resultado",R.bote]);if(R.pizzaCost)eco.push(["Pizzería Belsay",-R.pizzaCost]);
-  const staked=R.bets.reduce((a,b)=>a+b.amt,0);if(R.bets.length)eco.push(["Apuestas (premios − apostado)",R.betWin-staked]);
+  R.bets.forEach(b=>eco.push([b.won?`Apuesta ACERTADA: ${b.label} (${b.amt} € → ${b.pay} €)`:`Apuesta PERDIDA: ${b.label}`,b.pay-b.amt]));
   modal("Resumen del partido",`
    <div class="res ${R.res==="W"?"w":""}"><em>${lbl}${R.pens?(R.win===0?" · PASÁIS POR PENALTIS":" · FUERA POR PENALTIS"):""}</em>${R.home?`${clubName()} ${R.us} – ${R.them} ${esc(R.opN)}`:`${esc(R.opN)} ${R.them} – ${R.us} ${clubName()}`}</div>
    ${R.early?`<p class="hint" style="text-align:center">El partido se acabó antes de tiempo.</p>`:""}
@@ -2797,7 +2803,7 @@ function showReport(){
    ${R.reveal.length?`<div class="sec"><h4>DESCUBRIMIENTOS</h4><ul>${li(R.reveal)}</ul></div>`:""}
    ${R.inj.length?`<div class="sec"><h4>LESIONES</h4><ul>${li(R.inj)}</ul></div>`:""}
    ${R.outs.length?`<div class="sec"><h4>SE FUERON A MITAD</h4><ul>${li(R.outs)}</ul></div>`:""}
-   ${R.bets.length?`<div class="sec"><h4>APUESTAS</h4><ul>${li(R.bets.map(b=>`${b.amt} € a ${b.label}: ${b.won?`cobras ${b.pay} €`:"perdida"}`))}</ul></div>`:""}
+   ${R.bets.length?`<div class="sec"><h4>APUESTAS</h4><ul>${li(R.bets.map(b=>`${b.won?"✔":"✘"} ${b.amt} € a ${b.label}: ${b.won?`ACERTADA, cobras ${b.pay} € (+${b.pay-b.amt} €)`:`PERDIDA (−${b.amt} €)`}`))}</ul></div>`:""}
    ${heatHTML()}<div class="sec"><h4>CUENTAS DE LA SEMANA</h4>${ecoHTML(eco)}</div>
    <button class="btn play" data-act="after">Empezar la semana</button>`);setTimeout(drawHeat,50);
 }
@@ -2981,12 +2987,13 @@ const A={
     modal("El trayecto",`<div class="sec"><h4>CRÓNICA DEL CAMINO</h4><ul>${log.map(l=>`<li>${esc(l)}</li>`).join("")||"<li>Sin novedad.</li>"}</ul></div><p class="hint">Gasolina y billetes: ${cost} €.</p><button class="btn play" data-act="close">Llegamos</button>`)},
   amt:v=>{S.prep.amt=+v;save();render()},
   bet:v=>{const P=S.prep;if(v==="L"&&fewArrived()){toast("Con menos de 11 no te dejan apostar contra tu equipo. Sería demasiado fácil.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}const lbl={W:"que ganan los Papas",D:"empate",L:"que gana el rival"}[v];
-    S.money-=P.amt;P.bets.push({type:"res",pick:v,amt:P.amt,odds:P.odds[v],label:lbl});save();render();toast("Apuesta hecha. Paco la apunta en una servilleta.")},
+    ledSync();S.money-=P.amt;P.bets.push({type:"res",pick:v,amt:P.amt,odds:P.odds[v],label:lbl});led(`Apuesta: ${lbl}`,-P.amt);save();render();toast(`✔ Apostados ${P.amt} € a ${lbl}. Si aciertas cobras ${Math.round(P.amt*P.odds[v])} €.`)},
+  unbet:i=>{const P=S.prep,b=P.bets[+i];if(!b)return;ledSync();P.bets.splice(+i,1);S.money+=b.amt;led(`Apuesta anulada: ${b.label}`,b.amt);save();render();toast(`Apuesta anulada. Te devuelven ${b.amt} €.`)},
   betsc:()=>{const P=S.prep;const val=$("#sc-pick")&&$("#sc-pick").value;if(!val)return;if(val[0]==="r"&&fewArrived()){toast("Con menos de 11 no puedes apostar por los goleadores rivales.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}
     const m=ourFixture();const opp=S.comp.teams[m.a===0?m.b:m.a];let b;
     if(val[0]==="u"){const p=pById(+val.slice(1));b={type:"sc",side:"u",id:p.id,odds:scOdds(p),label:`que marca ${short(p)}`}}
     else{const r=opp.roster[+val.slice(1)];b={type:"sc",side:"r",name:r.n,odds:rivOdds(r),label:`que marca ${r.n}`}}
-    S.money-=P.amt;b.amt=P.amt;P.bets.push(b);save();render();toast("Apuesta hecha.")},
+    ledSync();S.money-=P.amt;b.amt=P.amt;P.bets.push(b);led(`Apuesta: ${b.label}`,-P.amt);save();render();toast(`✔ Apostados ${P.amt} € a ${b.label}. Si aciertas cobras ${Math.round(P.amt*b.odds)} €.`)},
   kick:()=>startMatch(),
   form:v=>setFormation(v,false),
   auto:()=>{autoLineup();save();render();toast("Once hecho a ojo de buen cubero.")},
