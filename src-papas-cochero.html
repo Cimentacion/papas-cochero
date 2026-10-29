@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="9.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="10.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -177,6 +177,7 @@ table.tbl{width:100%;border-collapse:collapse;font-family:var(--f-mono);font-siz
 .olcd{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;background:#111;color:#ffd23f;font-family:var(--f-display);padding:8px 12px;margin:6px 0;border:2px solid #ffd23f}.olcd b{font-size:26px}.olcd.hurry{background:#c8233a;color:#fff}
 .mwait{background:#111;color:#ffd23f;text-align:center;padding:6px;font-family:var(--f-display);font-size:13px}
 body.fm .olfx.me{background:#262b72}body.fm .oltb tr.me{background:#ffd23f}body.fm .olgo{background:#12301a;border-color:#3fbf5a}
+.sqt{font-family:var(--f-body,sans-serif)!important;font-size:14px!important;width:100%}.sqt td,.sqt th{font-family:inherit!important;font-size:14px!important;padding:4px 5px}.sqt td.t{white-space:normal;width:60%}
 .wlink{color:inherit;text-decoration:underline dotted;cursor:pointer}
 .bet2{display:grid;grid-template-columns:1fr auto;gap:6px}
 .amts{display:flex;gap:4px}
@@ -753,7 +754,12 @@ function wPlayer(R,t,pos,boost){const pro=t>=4;const age=pro?18+Math.floor(R()*1
 function wSquad(n,t){const R=seeded(hashStr(n)+t*7);return W_SHAPE.map(pos=>wPlayer(R,t,pos,-3))}
 function wXI(ps,form){const roles=FORMS[form]||FORMS["4-4-2"];const pool=ps.slice().sort((a,b)=>b.q-a.q);const xi=[];
   roles.forEach(r=>{let i=pool.findIndex(p=>p.pos===r);if(i<0)i=pool.findIndex(p=>(p.pos==="POR")===(r==="POR"));if(i<0)i=0;if(pool[i]){xi.push(Object.assign({},pool[i],{role:r,q:pool[i].pos===r?pool[i].q:pool[i].q*.85}));pool.splice(i,1)}});return xi}
-function wStr(c){const xi=wXI(c.ps,c.form);if(!xi.length)return 5;return strOfQ(xi.reduce((a,p)=>a+p.q,0)/11)}
+const COACH_MOTE=["el Profe","Míster Bigote","el Sabio","Pepe Pizarra","el Táctico","el Brujo","Chandalito","el Gritón","el Calvo","el Abuelo","Tiza","el Filósofo"];
+function wCoach(R,t,seed){R=R||seeded(seed||Math.floor(Math.random()*1e9));const age=34+Math.floor(R()*30);const exp=Math.max(0,Math.floor((age-32)*R()));
+  return{n:`${MALE[Math.floor(R()*MALE.length)]} ${SUR[Math.floor(R()*SUR.length)]}`,m:R()<.4?COACH_MOTE[Math.floor(R()*COACH_MOTE.length)]:"",age,exp,rep:Math.round(30+R()*40+t*2),st:["ofensivo","defensivo","del patadón","de toque","de los de antes","pesado con la táctica"][Math.floor(R()*6)],since:S.season,car:[],w:0,d:0,l:0}}
+function wCoachOf(c){if(!c.coach)c.coach=wCoach(seeded(hashStr(c.n)+99),c.t);return c.coach}
+const coachName=k=>k?`${k.n}${k.m?` «${k.m}»`:""}`:"—";
+function wStr(c){const xi=wXI(c.ps,c.form);if(!xi.length)return 5;const k=wCoachOf(c);return +(strOfQ(xi.reduce((a,p)=>a+p.q,0)/11)*(.95+Math.min(100,k.rep)/1000)).toFixed(1)}
 function wExtraName(t,used){const towns=Object.keys(GEO).filter(x=>x!==HOME);const pre=["CD","UD","Atlético","CF","Racing","Real","Deportivo"];
   for(let k=0;k<400;k++){const R=seeded(t*1000+k);const n=t===0?pick(LOCAL_TEAMS.concat(COMARCA_TEAMS)):`${pre[Math.floor(R()*pre.length)]} ${towns[Math.floor(R()*towns.length)]}`;if(!used.has(n))return[n,towns[k%towns.length]]}return[`Club ${t}-${used.size}`,towns[0]]}
 function wInit(){
@@ -773,13 +779,31 @@ function wTeam(n,i){const c=S.world&&S.world.clubs[n];if(!c)return null;const st
   return{n:c.n,town:c.town,str,col:c.col,roster:xi.map(p=>({n:p.n,pos:p.role})).concat(rest.map(p=>({n:p.n,pos:p.pos}))),form:c.form,venue:c.venue||1+((i||0)%3),tag:c.tag||undefined,tierOf:c.t}}
 /* fin de temporada del mundo: clasificaciones, ascensos, envejecer, fichajes */
 function wSeason(c,ourPos){
-  const W=wInit();const lines=[];const order={};
+  const W=wInit();const lines=[];const lines0=lines;const order={};const nt0=()=>{const i=W.tiers.findIndex(l=>l.includes("__us"));return i}; 
   for(let t=0;t<TIERS.length;t++){
     if(c&&t===c.tier&&c.type==="league"){order[t]=sortIdx(c,[...Array(c.teams.length).keys()]).map(i=>c.teams[i].us?"__us":c.teams[i].n).filter(n=>n==="__us"||W.clubs[n]);
       W.tiers[t].forEach(n=>{if(!order[t].includes(n))order[t].push(n)})}
     else order[t]=W.tiers[t].map(n=>({n,s:n==="__us"?0:wStr(W.clubs[n])*(.8+Math.random()*.4)})).sort((a,b)=>b.s-a.s).map(x=>x.n)}
   Object.values(W.clubs).forEach(cl=>cl.tag="");
   const champ={};for(let t=0;t<TIERS.length;t++)champ[t]=order[t][0];
+  // entrenadores: rendimiento, destituciones, fichajes de banquillo y retiradas
+  W.free=W.free||[];const sacked=[];
+  for(let t=0;t<TIERS.length;t++){const L=order[t],N=L.length;const exp=L.slice().filter(n=>n!=="__us").sort((a,b)=>wStr(W.clubs[b])-wStr(W.clubs[a]));
+    L.forEach((n,i)=>{const cl=W.clubs[n];if(!cl)return;const k=wCoachOf(cl);const want=exp.indexOf(n);const perf=(want-i)/N;
+      k.rep=clamp(Math.round(k.rep+perf*30+(i<2&&t<TIERS.length-1?8:0)-(i>=N-2&&t>0?8:0)),5,100);k.exp++;k.age++;
+      if(i===0)k.car.push(`Campeón de ${TIERS[t].n} (T${S.season})`);
+      const bad=(i>=N-3&&Math.random()<.5)||(perf<-.3&&Math.random()<.6);
+      if(k.age>=70||(k.age>=64&&Math.random()<.25)){if(t===nt0())lines0.push(`${coachName(k)} se jubila tras ${k.exp} años en los banquillos. Último club: ${cl.n}.`);cl.coach=null;sacked.push(cl)}
+      else if(bad){k.car.push(`Destituido en el ${cl.n} (T${S.season})`);W.free.push(k);cl.coach=null;sacked.push(cl);if(t===nt0())lines0.push(`El ${cl.n} destituye a ${coachName(k)}.`)}})}
+  // los clubes que han echado al suyo buscan: libres, o se lo quitan a uno de una división menor
+  sacked.sort((a,b)=>b.t-a.t).forEach(cl=>{let k=null;
+    const free=W.free.filter(x=>x.rep>=20+cl.t*5).sort((a,b)=>b.rep-a.rep);
+    if(Math.random()<.45){const below=Object.values(W.clubs).filter(o=>o.coach&&o.t<cl.t&&o.t>=cl.t-2&&o.coach.rep>=55).sort((a,b)=>b.coach.rep-a.coach.rep)[0];
+      if(below){k=below.coach;k.car.push(`Del ${below.n} al ${cl.n} (T${S.season})`);below.coach=null;sacked.push(below);if(cl.t===nt0()||below.t===nt0())lines0.push(`${coachName(k)} deja el ${below.n} y ficha por el ${cl.n}.`)}}
+    if(!k&&free.length&&Math.random()<.7){k=free[0];W.free=W.free.filter(x=>x!==k);k.car.push(`Ficha por el ${cl.n} (T${S.season})`);if(cl.t===nt0())lines0.push(`El ${cl.n} contrata a ${coachName(k)}, que estaba en el paro.`)}
+    if(!k){k=wCoach(null,cl.t);k.car.push(`Debuta en el ${cl.n} (T${S.season})`);if(cl.t===nt0())lines0.push(`El ${cl.n} apuesta por un desconocido: ${coachName(k)}.`)}
+    k.since=S.season+1;k.w=k.d=k.l=0;cl.coach=k;k.car=k.car.slice(-8)});
+  W.free.forEach(k=>k.age++);W.free=W.free.filter(k=>k.age<70).slice(-40);
   for(let t=0;t<TIERS.length-1;t++){const up=order[t].slice(0,2),dn=order[t+1].slice(-2);
     up.forEach(n=>{if(n!=="__us"){W.clubs[n].t=t+1;W.clubs[n].tag="↑"}});dn.forEach(n=>{if(n!=="__us"){W.clubs[n].t=t;W.clubs[n].tag="↓"}});
     W.tiers[t]=W.tiers[t].filter(n=>!up.includes(n)).concat(dn);W.tiers[t+1]=W.tiers[t+1].filter(n=>!dn.includes(n)).concat(up)}
@@ -806,9 +830,10 @@ function wSeason(c,ourPos){
     if(cl.ps.length>20)cl.ps=cl.ps.sort((a,b)=>b.q-a.q).slice(0,20)});
   const mv=[];if(nt>=0){W.tiers[nt].forEach(n=>{const cl=W.clubs[n];if(cl&&cl.tag)mv.push(`${cl.n} ${cl.tag==="↑"?"sube":"baja"} a ${TIERS[nt].n}.`)})}
   return mv.concat(lines)}
-function clubBox(n){const cl=S.world&&S.world.clubs[n];if(!cl)return;const xi=wXI(cl.ps,cl.form);
+function rivalClubBox(n){const cl=S.world&&S.world.clubs[n];if(!cl)return;const xi=wXI(cl.ps,cl.form);
   const rows=cl.ps.slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||b.q-a.q).map(p=>`<tr><td>${p.pos}</td><td class="t">${esc(p.n)}${xi.some(x=>x.n===p.n)?" ●":""}</td><td>${p.age}</td><td><b>${p.q}</b></td></tr>`).join("");
-  modal(cl.n,`<p>${esc(cl.town)} · ${esc(TIERS[cl.t].n)} · fuerza <b>${wStr(cl)}</b> · juega ${cl.form}${cl.tag?` · ${cl.tag==="↑"?"recién ascendido":"recién descendido"}`:""}</p><p class="hint">Caja del club: ${cl.money.toLocaleString("es-ES")} €. Con eso fichan en verano. ● = titular.</p><div class="tblw"><table class="tbl"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th></tr></thead><tbody>${rows}</tbody></table></div><button class="btn play" data-act="close">Cerrar</button>`)}
+  const k=wCoachOf(cl);
+  modal(cl.n,`<div class="offer"><div><b>Entrenador: ${esc(coachName(k))}</b><small>${k.age} años · ${k.exp} temporada${k.exp===1?"":"s"} de experiencia · en el club desde la T${k.since} · estilo ${esc(k.st)} · prestigio ${k.rep}/100</small>${k.car.length?`<small>Trayectoria: ${k.car.slice(-4).map(esc).join(" · ")}</small>`:""}</div></div><p>${esc(cl.town)} · ${esc(TIERS[cl.t].n)} · fuerza <b>${wStr(cl)}</b> · juega ${cl.form}${cl.tag?` · ${cl.tag==="↑"?"recién ascendido":"recién descendido"}`:""}</p><p class="hint">Caja del club: ${cl.money.toLocaleString("es-ES")} €. Con eso fichan en verano. ● = titular.</p><div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th></tr></thead><tbody>${rows}</tbody></table></div><button class="btn play" data-act="close">Cerrar</button>`)}
 
 /* ================= viajes ================= */
 const stop=n=>{const g=GEO[n]||GEOFAR[n];return{n,lat:g[0],lon:g[1]}};
@@ -1718,6 +1743,7 @@ function matchPreview(c,oppIdx,o){
    ${row2(esc(teamTop(us,0)),"Pichichi",esc(teamTop(opp,oppIdx)),"")}${S.rival&&opp.n===S.rival?`<div class="mp-r"><span></span><small style="color:#c8233a;font-weight:700">⚔ DERBI</small><span></span></div>`:""}${opp.tag?`<div class="mp-r"><span></span><small>${opp.tag==="↓"?"Recién descendido":"Recién ascendido"}</small><span></span></div>`:""}${friendly?"":rivalReport(opp)}
    ${(()=>{if(friendly)return "";const rf=refFor(c,oppIdx),wt=weatherFor(c,oppIdx);return `<div class="mp-r"><span>${esc(rf.n)}</span><small>Árbitro</small><span>${rf.t==="comprado"?"Muy simpático":REF_T[rf.t]}</span></div><div class="mp-r"><span></span><small>Previsión</small><span>${WEATHER[wt]}</span></div>`})()}
    ${row2(S.formation,"Formación",friendly||c.tier<=1?"¿?":(opp.form||"4-4-2"),"")}
+   ${S.world&&S.world.clubs[opp.n]?row2(esc(S.coach.name),"Entrenador",esc(coachName(wCoachOf(S.world.clubs[opp.n]))),""):""}
    ${S.world&&S.world.clubs[opp.n]?`<div class="pc-act"><button class="btn mini" data-act="wclub" data-v="${esc(opp.n)}">Ver la plantilla de ${esc(opp.n)}</button></div>`:""}
   </div></section>`;
 }
@@ -2547,7 +2573,8 @@ function olSnap(){
   const pool=S.players.filter(p=>!p.injured).sort((a,b)=>ovr(b)-ovr(a));
   return{n:clubName(),coach:S.coach?S.coach.name:"",col:ourKit().c1,kit:ourKit(),crest:(S.club&&S.club.crest)||null,stad:(S.club&&S.club.stadium)||null,
     str:+Math.max(6,(pw.a+pw.d)/2).toFixed(1),form:S.formation,tier:curTier(),spon:olSpon(),
-    ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.known?p.pos:p.pos})),t:TS}}
+    ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.pos,age:p.age,q:ovr(p),g:p.allGoals||p.goals||0,tit:S.lineup.includes(p.id)?1:0})),
+    ch:S.coach?{n:S.coach.name,m:S.coach.nick||"",age:S.coach.age,w:S.coach.w,d:S.coach.d,l:S.coach.l}:null,div:TIERS[curTier()].n,season:S.season,tro:(S.trophies||[]).slice(-6),fans:S.fans||3,t:TS}}
 async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<180000)return;OL.pubT=Date.now();await fbq(`u/${olMe()}/p`,"PUT",olSnap())}
 function olStart(){
   if(!olOn()){Object.keys(OL.es).forEach(fbUnlisten);return}
@@ -2618,7 +2645,9 @@ async function olTick(){
   if(Date.now()-(OL.fullT||0)>30000){OL.fullT=Date.now();for(const lid of Object.keys(OL.lg)){const d=await fbq(`l/${lid}`);if(d){OL.lg[lid]=d;const st=OL.es["l_"+lid];if(st)st.data=JSON.parse(JSON.stringify(d))}}}
   for(const lid of Object.keys(OL.lg)){const L=OL.lg[lid];try{await olAdvance(lid,L)}catch(e){}
     const m=olMyMatch(lid,L);if(m&&!S.olSwap)olNotify(`«${L.n}»: ¡te toca!`,`Jornada ${m.r+1} contra ${m.opp.n}. ${m.human?"Es un jugador de verdad: prepara el viaje.":"Juega cuando quieras antes de que se cierre."}`,`m_${lid}_${m.k}`);
-    if(L.st==="done")olClaim(lid,L)}
+    if(L.st==="done"&&!L.fr)olClaim(lid,L);
+    if(L.fr&&L.st==="lobby"&&L.org===olMe()&&Object.values(L.mem||{}).every(m=>m.ok===1))await olBegin(lid);
+    if(L.fr&&L.st==="lobby"&&Object.values(L.mem||{}).some(m=>m.ok===-1)&&L.org===olMe())await fbq(`l/${lid}`,"PATCH",{st:"off"})}
   for(const[lid,v]of Object.entries((OL.me&&OL.me.in)||{}))olNotify("Invitación a una liga online",`${v.from} te invita a «${v.n}».`,`inv_${lid}`);
   if(S&&S.olSwap&&S.prep)olPrepTick();
   olBanner();
@@ -2641,6 +2670,19 @@ async function olCreate(){
   await fbq(`u/${olMe()}/lg/${lid}`,"PUT",1);
   for(const u of fr){await fbq(`u/${u}/in/${lid}`,"PUT",{from:me.n,n});await fbq(`u/${u}/lg/${lid}`,"PUT",1)}
   S.sub=S.sub||{};S.sub.online="ligas";OL.sel=lid;save();render();toast(`Liga «${n}» creada. Invitaciones enviadas.`)}
+async function olViewTeam(u){
+  const p=u===olMe()?olSnap():await fbq(`u/${u}/p`);if(!p){toast("No se ha podido cargar su equipo"+(OL.err?` (${OL.err})`:"")+".");return}
+  const ro=arr(p.ro).slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||(b.q||0)-(a.q||0));const ch=p.ch||{n:p.coach||"—"};
+  modal(p.n,`<div class="mp-top"><div class="mp-team">${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},64)}<b>${esc(p.n)}</b><small>${esc(p.div||"")}</small>${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},46,1)}</div></div>
+   <div class="offer"><div><b>Míster: ${esc(ch.n)}${ch.m&&ch.m!=="Míster"?` «${esc(ch.m)}»`:""}</b><small>${ch.age?ch.age+" años · ":""}${ch.w!=null?`balance ${ch.w}G ${ch.d}E ${ch.l}P`:""}${p.season?` · temporada ${p.season}`:""}</small>${arr(p.tro).length?`<small>Vitrina: ${arr(p.tro).map(esc).join(" · ")}</small>`:""}</div></div>
+   <p class="hint">Fuerza del once: <b>${p.str}</b> · ${esc(p.form||"")} · afición ${(p.fans||3).toLocaleString("es-ES")}</p>
+   <div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th><th>Goles</th></tr></thead><tbody>${ro.map(x=>`<tr><td>${x.pos}</td><td class="t">${esc(x.n)}${x.tit?" ●":""}</td><td>${x.age||"?"}</td><td><b>${x.q!=null?x.q:"?"}</b></td><td>${x.g||0}</td></tr>`).join("")}</tbody></table></div>
+   <p class="hint">● = en su once. Datos de la última vez que abrió el juego.</p><button class="btn play" data-act="close">Cerrar</button>`);paintCrests($("#modal"))}
+async function olFriendly(u){
+  const F=(OL.me&&OL.me.f)||{};const me=olSnap();const lid=Date.now().toString(36)+olCode().slice(0,3).toLowerCase();const n=`Amistoso: ${me.n} – ${F[u]||u}`;
+  await fbq(`l/${lid}`,"PUT",{n,org:olMe(),orgN:me.n,wait:1800,bots:0,two:0,fr:1,st:"lobby",c:TS,mem:{[olMe()]:{n:me.n,ok:1},[u]:{n:F[u]||u,ok:0}}});
+  await fbq(`u/${olMe()}/lg/${lid}`,"PUT",1);await fbq(`u/${u}/in/${lid}`,"PUT",{from:me.n,n,fr:1});await fbq(`u/${u}/lg/${lid}`,"PUT",1);
+  OL.sel=lid;S.sub=S.sub||{};S.sub.online="ligas";save();render();toast(`Reto enviado a ${F[u]||u}. Cuando acepte, empieza el amistoso.`)}
 async function olAnswer(lid,yes){await fbq(`l/${lid}/mem/${olMe()}/ok`,"PUT",yes?1:-1);await fbq(`u/${olMe()}/in/${lid}`,"DELETE");if(!yes)await fbq(`u/${olMe()}/lg/${lid}`,"DELETE");else OL.sel=lid;toast(yes?"Te has apuntado a la liga.":"Invitación rechazada.")}
 const olBotNames=n=>{let pool=[];try{pool=tierTeams(curTier()).map(x=>x[0])}catch(e){}pool=pool.filter(x=>x!==clubName());if(pool.length<n)pool=pool.concat(LOCAL_TEAMS,COMARCA_TEAMS).filter((x,i,a)=>a.indexOf(x)===i&&x!==clubName());const r=seeded(hashStr(String(Date.now())));return shufR(pool,r).slice(0,n)};
 function shufR(a,R){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -2653,7 +2695,7 @@ async function olBegin(lid){
   const bn=olBotNames(bots);const teams=snaps.concat(bn.map((n,i)=>({n,u:"",bot:1,str:+(avg*(.75+R()*.45)).toFixed(1),col:RIVC[i%RIVC.length],form:pick(NORMAL_FORMS),ro:rosterFor(n),tier:snaps[0]?snaps[0].tier:0})));
   const order=shufR([...teams.keys()],R);const T=order.map(i=>teams[i]);
   const fx=olRR(T.length,L.two).map(r=>r.map(([a,b])=>a+"_"+b).join(","));
-  const pot=Math.round(60+snaps.reduce((a,p)=>a+(p.spon||0)*6+20,0)+bots*12);
+  const pot=L.fr?0:Math.round(60+snaps.reduce((a,p)=>a+(p.spon||0)*6+20,0)+bots*12);
   await fbq(`l/${lid}`,"PATCH",{teams:T,fx,r:0,rt:TS,st:"run",pot});toast("¡Arranca la liga!")}
 async function olLeave(lid){const L=OL.lg[lid];if(L&&L.org===olMe()&&L.st==="lobby"){await fbq(`l/${lid}`,"PATCH",{st:"off"})}await fbq(`u/${olMe()}/lg/${lid}`,"DELETE");OL.sel=null;toast("Has salido de la liga.")}
 async function olClaim(lid,L){
@@ -2687,9 +2729,9 @@ function viewOnline(){
   if(!olDB())return `<section class="win"><div class="bar">Servidor de la liga online</div><div class="body"><p>Falta la dirección de la base de datos (Firebase) que guarda las ligas.</p>
     <input class="inp" id="ol-db" placeholder="https://….firebasedatabase.app/" style="width:100%"><div class="pc-act"><button class="btn primary" data-act="oldb">Guardar</button></div></div></section>`;
   if(k==="amigos"){const F=(OL.me&&OL.me.f)||{};
-    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
+    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
      <section class="win"><div class="bar">Añadir amigo</div><div class="body"><div class="row"><input class="inp" id="ol-fc" placeholder="Código (6 letras)" maxlength="6" style="text-transform:uppercase"><button class="btn primary" data-act="oladdf">Añadir</button></div></div></section>
-     <section class="win"><div class="bar">Amigos <small>${Object.keys(F).length}</small></div><div class="body">${Object.keys(F).length?`<div class="list">${Object.entries(F).map(([u,n])=>`<div class="offer"><div><b>${esc(n)}</b><small>${u}</small></div></div>`).join("")}</div>`:`<p class="hint">Todavía no tienes amigos añadidos.</p>`}${err}</div></section>`}
+     <section class="win"><div class="bar">Amigos <small>${Object.keys(F).length}</small></div><div class="body">${Object.keys(F).length?`<div class="list">${Object.entries(F).map(([u,n])=>`<div class="offer"><div><b>${esc(n)}</b><small>${u}</small></div><div class="row"><button class="btn mini" data-act="olteam" data-v="${u}">Ver equipo</button><button class="btn mini primary" data-act="olfr" data-v="${u}">Retar</button></div></div>`).join("")}</div>`:`<p class="hint">Todavía no tienes amigos añadidos.</p>`}${err}</div></section>`}
   if(k==="crear"){const F=(OL.me&&OL.me.f)||{};const fl=Object.entries(F);
     return `<section class="win"><div class="bar">Organizar liga online</div><div class="body">
      <p class="pc-h">Nombre de la liga</p><input class="inp" id="ol-n" style="width:100%" value="${esc("Liga "+clubName())}">
@@ -2706,8 +2748,17 @@ function viewOnline(){
   if(!ids.length)return h+`<section class="win"><div class="bar">Tus ligas online</div><div class="body"><p class="hint">No estás en ninguna liga. Organiza una en «Organizar liga» o espera una invitación.</p><p class="hint">Tu código: <b>${olMe()}</b></p>${err}</div></section>`;
   h+=ids.length>1?`<div class="subtabs">${ids.map((l,i)=>{const L=OL.lg[l];const dup=ids.some(o=>o!==l&&OL.lg[o].n===L.n);return `<button class="${l===sel?"sel":""}" data-act="olsel" data-v="${l}">${esc(L.n)}${dup?` (${i+1})`:""}${olMyMatch(l,L)?" ⚽":""}</button>`}).join("")}</div>`:"";
   return h+olLeagueView(sel,OL.lg[sel])+err}
+function olFriendlyView(lid,L){
+  const mm=olMyMatch(lid,L),T=olTeams(L),x=(L.res||{})["0_0"];const other=Object.entries(L.mem||{}).find(([u])=>u!==olMe());
+  let body;
+  if(L.st==="lobby")body=`<p>Esperando a que ${esc(other?other[1].n:"tu amigo")} acepte el reto…</p>`;
+  else if(x)body=`<p class="olcode" style="font-size:26px;letter-spacing:0">${esc(T[0].n)} ${x.a} – ${x.b} ${esc(T[1].n)}${x.au?" *":""}</p><p class="hint">${x.au?"No se llegó a jugar: se simuló.":"Amistoso jugado."} No da puntos ni dinero, solo el orgullo.</p>`;
+  else if(mm)body=`<div class="olgo"><p><b>¡A jugar!</b> Contra <b>${esc(mm.opp.n)}</b> ${mm.home?"en casa":"fuera"}. 30 s para el viaje, 30 s para el once y partido en directo.</p><button class="btn play" data-act="olplay" data-v="${lid}">Ir al partido</button></div>`;
+  else body=`<p class="hint">Preparando el partido…</p>`;
+  return `<section class="win"><div class="bar">${esc(L.n)} <small>amistoso online</small></div><div class="body">${body}<div class="pc-act"><button class="btn" data-act="olleave" data-v="${lid}">${L.st==="lobby"&&L.org===olMe()?"Cancelar el reto":"Quitar de la lista"}</button></div></div></section>`}
 function olLeagueView(lid,L){
   const org=L.org===olMe();const W=(OLW.find(x=>x[0]===L.wait)||[0,L.wait+" s"])[1];
+  if(L.fr)return olFriendlyView(lid,L);
   const head=`<section class="win"><div class="bar">${esc(L.n)} <small>${L.st==="lobby"?"esperando a que acepten":L.st==="run"?`jornada ${(L.r||0)+1} de ${arr(L.fx).length}`:"terminada"}</small></div><div class="body">
    <p class="hint">Organiza ${esc(L.orgN||"")} · espera entre jornadas: ${W} · ${L.two?"ida y vuelta":"solo ida"}${L.pot?` · bote: <b>${L.pot} €</b>`:""}</p>`;
   if(L.st==="lobby"){const mem=Object.entries(L.mem||{});const ok=mem.filter(([,m])=>m.ok===1).length;
@@ -2726,7 +2777,7 @@ function olLeagueView(lid,L){
   else{const pos=tb.findIndex(t=>t.u===olMe());status=`<p><b>Liga terminada.</b> Campeón: <b>${esc(tb[0].n)}</b>${tb[1]?`, segundo: ${esc(tb[1].n)}`:""}. ${pos>=0?`Acabas ${pos+1}º.`:""}${(L.claim||{})[olMe()]>0?` Cobraste ${L.claim[olMe()]} €.`:""}</p>`}
   return head+status+`</div></section>
    <section class="win"><div class="bar">Jornada ${r+1} <small>* = simulado</small></div><div class="body">${fxh}</div></section>
-   <section class="win"><div class="bar">Clasificación</div><div class="body"><table class="tbl oltb"><tr><th>#</th><th>Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr>${tb.map((t,i)=>`<tr class="${t.u===olMe()?"me":""} ${i<2?"pz":""}"><td>${i+1}</td><td>${esc(t.n)}${t.u?" 👤":""}</td><td>${t.pj}</td><td>${t.gf-t.gc}</td><td><b>${t.pts}</b></td></tr>`).join("")}</table>
+   <section class="win"><div class="bar">Clasificación</div><div class="body"><table class="tbl oltb"><tr><th>#</th><th>Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr>${tb.map((t,i)=>`<tr class="${t.u===olMe()?"me":""} ${i<2?"pz":""}"><td>${i+1}</td><td>${t.u?`<a class="wlink" data-act="olteam" data-v="${t.u}">${esc(t.n)}</a> 👤`:esc(t.n)}</td><td>${t.pj}</td><td>${t.gf-t.gc}</td><td><b>${t.pts}</b></td></tr>`).join("")}</table>
    <p class="hint">👤 = jugador de verdad. Los dos primeros se reparten el bote (${L.pot||0} €).</p><div class="pc-act"><button class="btn" data-act="olleave" data-v="${lid}">Salir de la liga</button></div></div></section>`}
 /* ---------- jugar un partido online ---------- */
 function olPlay(lid){
@@ -2834,7 +2885,7 @@ function olEndMatch(res){
   const c=S.comp,ol=c.ol,m=M.m;const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
   const bets=S.prep.bets.map(b=>{let won=false;if(b.type==="res")won=b.pick===res;else if(b.side==="u")won=!!M.goals[b.id];else won=M.rivScorers.includes(b.name);return{...b,won,pay:won?Math.round(b.amt*b.odds):0}});
   const betWin=bets.reduce((a,b)=>a+b.pay,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
-  const prize=res==="W"?40+c.tier*20:res==="D"?15+c.tier*8:0;if(prize){S.money+=prize;led(`Prima liga online (${res==="W"?"victoria":"empate"})`,prize)}
+  const prize=(OL.lg[ol.lid]||{}).fr?0:res==="W"?40+c.tier*20:res==="D"?15+c.tier*8:0;if(prize){S.money+=prize;led(`Prima liga online (${res==="W"?"victoria":"empate"})`,prize)}
   const opN=c.teams[1].n;const usN=M.scorers.slice(),thN=M.rivScorers.slice();
   const O=M.online;const writer=!O||O.solo||O.role==="h";
   if(writer)fbq(`l/${ol.lid}/res/${ol.k}`,"PUT",{a:ga,b:gb,sa:m.a===0?usN:thN,sb:m.a===0?thN:usN,t:TS});
@@ -3343,12 +3394,12 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
-  wclub:v=>clubBox(v),
+  wclub:v=>rivalClubBox(v),
   olon:()=>{const on=!olEnabled();olSetCfg({on});if(on){olAskPerm();olStart();toast("Modos online activados: tienes la pestaña «Online» abajo.")}else{olStart();toast("Modos online desactivados.")}render()},
   oldb:()=>{const v=($("#ol-db")&&$("#ol-db").value||"").trim();if(!/^https:\/\//.test(v)){toast("Pon la dirección completa, empezando por https://");return}olSetCfg({db:v});olStart();render()},
   oladdf:()=>{olAddFriend($("#ol-fc")&&$("#ol-fc").value)},
   olsharecode:()=>{const t=`Añádeme en la liga online de Los Papas Cochero. Mi código: ${olMe()}`;try{if(navigator.share){navigator.share({text:t});return}}catch(e){}try{navigator.clipboard.writeText(t);toast("Copiado. Pégalo en WhatsApp.")}catch(e){toast(t)}},
-  olcreate:()=>olCreate(),
+  olcreate:()=>olCreate(),olfr:v=>olFriendly(v),olteam:v=>olViewTeam(v),
   olyes:v=>olAnswer(v,true),olno:v=>olAnswer(v,false),
   olsel:v=>{OL.sel=v;render()},
   olbegin:v=>olBegin(v),olleave:v=>olLeave(v),
