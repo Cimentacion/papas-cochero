@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="11.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="11.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2769,7 +2769,7 @@ function viewOnline(){
   if(!olDB())return `<section class="win"><div class="bar">Servidor de la liga online</div><div class="body"><p>Falta la dirección de la base de datos (Firebase) que guarda las ligas.</p>
     <input class="inp" id="ol-db" placeholder="https://….firebasedatabase.app/" style="width:100%"><div class="pc-act"><button class="btn primary" data-act="oldb">Guardar</button></div></div></section>`;
   if(k==="amigos"){const F=(OL.me&&OL.me.f)||{};
-    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><p class="hint">${OL.pubErr?`<span style="color:#c8233a">No se ha podido subir tu equipo: ${esc(OL.pubErr)}</span>`:OL.pubOk?`✔ Tu equipo se subió al servidor hace ${olFmtLeft(Date.now()-OL.pubOk)}.`:"Subiendo tu equipo al servidor…"}</p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
+    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><p class="hint">${OL.pubErr?`<span style="color:#c8233a">No se ha podido subir tu equipo: ${esc(OL.pubErr)}</span>`:OL.pubOk?`✔ Tu equipo se subió al servidor hace ${olFmtLeft(Date.now()-OL.pubOk)}.`:"Subiendo tu equipo al servidor…"} <button class="btn mini" data-act="olpub">Subir ahora</button></p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
      <section class="win"><div class="bar">Añadir amigo</div><div class="body"><div class="row"><input class="inp" id="ol-fc" placeholder="Código (6 letras)" maxlength="6" style="text-transform:uppercase"><button class="btn primary" data-act="oladdf">Añadir</button></div></div></section>
      <section class="win"><div class="bar">Amigos <small>${Object.keys(F).length}</small></div><div class="body">${Object.keys(F).length?`<div class="list">${Object.entries(F).map(([u,n])=>`<div class="offer"><div><b>${esc(n)}</b><small>${u}</small></div><div class="row"><button class="btn mini" data-act="olteam" data-v="${u}">Ver equipo</button><button class="btn mini primary" data-act="olfr" data-v="${u}">Retar</button></div></div>`).join("")}</div>`:`<p class="hint">Todavía no tienes amigos añadidos.</p>`}${err}</div></section>`}
   if(k==="crear"){const F=(OL.me&&OL.me.f)||{};const fl=Object.entries(F);
@@ -3450,6 +3450,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  olpub:async()=>{toast("Subiendo tu equipo…");await olPublish(true);render();toast(OL.pubErr?"No se ha podido subir: "+OL.pubErr:"Equipo subido.")},
   diff:()=>{S.diff=((S.diff!=null?S.diff:1)+1)%3;save();render();toast(`Dificultad: ${["Fácil","Normal","Difícil"][S.diff]}.`)},
   renew:v=>{const r=(S.renew||[]).find(x=>x.id===+v);const p=pById(+v);if(!r||!p)return;p.wage=r.ask;p.ct=rnd(2,3);S.renew=S.renew.filter(x=>x!==r);addNews(`${fullName(p)} renueva: ${r.ask} €/semana.`);save();render();toast(`${short(p)} renovado.`)},
   norenew:v=>{const p=pById(+v);if(!p)return;S.renew=(S.renew||[]).filter(x=>x.id!==+v);S.players=S.players.filter(x=>x!==p);S.lineup=S.lineup.map(x=>x===p.id?null:x);legendCheck(p);
