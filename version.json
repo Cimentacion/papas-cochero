@@ -1,1 +1,1 @@
-{"v":"8.6","notes":["En la plantilla, debajo de la foto sale la posición en grande (POR, DEF, MED, DEL o ???)","Arriba de la plantilla: cuántos jugadores tienes y cuántos de cada posición"]}
+{"v":"8.7","notes":["Arreglado: las voces grabadas salían como no disponibles. Ahora se descargan al hablar y, si un método falla, prueba otro","En Míster › Configuración pone si las voces grabadas están funcionando"]}
