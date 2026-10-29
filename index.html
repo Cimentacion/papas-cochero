@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="10.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="10.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2671,13 +2671,17 @@ async function olCreate(){
   for(const u of fr){await fbq(`u/${u}/in/${lid}`,"PUT",{from:me.n,n});await fbq(`u/${u}/lg/${lid}`,"PUT",1)}
   S.sub=S.sub||{};S.sub.online="ligas";OL.sel=lid;save();render();toast(`Liga «${n}» creada. Invitaciones enviadas.`)}
 async function olViewTeam(u){
-  const p=u===olMe()?olSnap():await fbq(`u/${u}/p`);if(!p){toast("No se ha podido cargar su equipo"+(OL.err?` (${OL.err})`:"")+".");return}
-  const ro=arr(p.ro).slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||(b.q||0)-(a.q||0));const ch=p.ch||{n:p.coach||"—"};
+  modal("Cargando equipo…",`<p>Pidiendo los datos al servidor…</p><button class="btn" data-act="close">Cerrar</button>`);
+  let p=null;try{p=u===olMe()?olSnap():await Promise.race([fb(`u/${u}/p`),new Promise((_,rj)=>setTimeout(()=>rj(new Error("tarda demasiado")),12000))]);if(p){OL.users[u]=p}}catch(e){OL.err=String(e.message||e);p=OL.users[u]||null;if(p)toast("Sin conexión: te enseño lo último que se cargó.")}
+  if(!p){modal("No se ha podido cargar",`<p>No llego al servidor para ver ese equipo${OL.err?` (${esc(OL.err)})`:""}. Prueba otra vez en un momento.</p><button class="btn play" data-act="close">Vale</button>`);return}
+  try{olShowTeam(p)}catch(e){modal("Error",`<p>No se ha podido mostrar su equipo: ${esc(String(e.message||e))}</p><p class="hint">Mándale una captura de esto a Claude.</p><button class="btn play" data-act="close">Vale</button>`)}}
+function olShowTeam(p){
+  const ro=arr(p.ro).filter(x=>x&&x.n).slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||(b.q||0)-(a.q||0));const ch=p.ch||{n:p.coach||"—"};
   modal(p.n,`<div class="mp-top"><div class="mp-team">${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},64)}<b>${esc(p.n)}</b><small>${esc(p.div||"")}</small>${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},46,1)}</div></div>
    <div class="offer"><div><b>Míster: ${esc(ch.n)}${ch.m&&ch.m!=="Míster"?` «${esc(ch.m)}»`:""}</b><small>${ch.age?ch.age+" años · ":""}${ch.w!=null?`balance ${ch.w}G ${ch.d}E ${ch.l}P`:""}${p.season?` · temporada ${p.season}`:""}</small>${arr(p.tro).length?`<small>Vitrina: ${arr(p.tro).map(esc).join(" · ")}</small>`:""}</div></div>
-   <p class="hint">Fuerza del once: <b>${p.str}</b> · ${esc(p.form||"")} · afición ${(p.fans||3).toLocaleString("es-ES")}</p>
+   <p class="hint">Fuerza del once: <b>${p.str}</b> · ${esc(p.form||"")} · afición ${Number(p.fans||3).toLocaleString("es-ES")}</p>
    <div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th><th>Goles</th></tr></thead><tbody>${ro.map(x=>`<tr><td>${x.pos}</td><td class="t">${esc(x.n)}${x.tit?" ●":""}</td><td>${x.age||"?"}</td><td><b>${x.q!=null?x.q:"?"}</b></td><td>${x.g||0}</td></tr>`).join("")}</tbody></table></div>
-   <p class="hint">● = en su once. Datos de la última vez que abrió el juego.</p><button class="btn play" data-act="close">Cerrar</button>`);paintCrests($("#modal"))}
+   <p class="hint">● = en su once. Datos de la última vez que abrió el juego.</p><button class="btn play" data-act="close">Cerrar</button>`);try{paintCrests($("#modal"))}catch(e){}}
 async function olFriendly(u){
   const F=(OL.me&&OL.me.f)||{};const me=olSnap();const lid=Date.now().toString(36)+olCode().slice(0,3).toLowerCase();const n=`Amistoso: ${me.n} – ${F[u]||u}`;
   await fbq(`l/${lid}`,"PUT",{n,org:olMe(),orgN:me.n,wait:1800,bots:0,two:0,fr:1,st:"lobby",c:TS,mem:{[olMe()]:{n:me.n,ok:1},[u]:{n:F[u]||u,ok:0}}});
