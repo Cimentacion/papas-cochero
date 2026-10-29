@@ -11,7 +11,7 @@ OUT=os.path.join(ROOT,"audio");os.makedirs(OUT,exist_ok=True)
 vol=json.load(open(os.path.join(ROOT,"tools","vol.json"),encoding="utf-8"))
 src=open(os.path.join(ROOT,"src-papas-cochero.html"),encoding="utf-8").read()
 names=set()
-for arr in ("MALE","FEM","MOTE"):
+for arr in ("MALE","FEM","MOTE","FIRSTC"):
     m=re.search(r"const %s=(\[[^\]]*\])"%arr,src);names.update(json.loads(m.group(1)))
 names.add("el entrenador")
 def slug(t):
