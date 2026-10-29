@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="9.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="9.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2700,8 +2700,9 @@ async function olKick(){
   const L=S.lineup.map((id,i)=>id&&arrived.some(p=>p.id===id)?{p:{...pById(id),mE:pById(id).energy},role:FORMS[S.formation][i]}:null).filter(Boolean);
   const pw=L.length?power(L,S.formation,{home:ol.home}):{a:5,d:5};
   await fbq(`lv/${key}/${side}q`,"PUT",{n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
-  modal("Saltando al campo",`<p>Esperando a que ${esc(ol.oppN)} salga del vestuario…</p><p class="hint">Si tarda más de 20 segundos, empezáis igual.</p>`);
-  const t0=Date.now();let q=null;while(Date.now()-t0<20000){q=await fbq(`lv/${key}/${oside}q`);if(q)break;await new Promise(r=>setTimeout(r,1200))}
+  OL.kickBot=false;const t0=Date.now(),LIM=90000;let q=null;
+  const show=()=>modal("Saltando al campo",`<p>Esperando a que <b>${esc(ol.oppN)}</b> salga del vestuario para jugar el partido en directo…</p><p class="hint">Quedan <b id="olkw">${Math.ceil((LIM-(Date.now()-t0))/1000)}</b> s. Si no aparece, jugarás contra su equipo manejado por la máquina.</p><div class="pc-act"><button class="btn" data-act="olkickbot">No esperar más</button></div>`);
+  show();while(Date.now()-t0<LIM&&!OL.kickBot){q=await fbq(`lv/${key}/${oside}q`);if(q)break;const e=$("#olkw");if(e)e.textContent=Math.ceil((LIM-(Date.now()-t0))/1000);else if(!OL.kickBot)show();await new Promise(r=>setTimeout(r,1000))}
   closeModal();const T=S.comp.teams[1];
   if(q){T.roster=arr(q.ro).length?arr(q.ro):T.roster;T.form=q.form||T.form;T.str=q.str||T.str;if(q.col&&q.col!==ourKit().c1)T.col=q.col}
   const online=q?{role:side,key,peerOk:true}:null;if(!q)toast(`${ol.oppN} no aparece. Su equipo lo maneja la máquina.`);
@@ -3279,7 +3280,7 @@ const A={
   olplay:v=>{if(S.olSwap){S.tab="prep";render();return}S.tab="online";olPlay(v)},
   olcancel:()=>olCancel(),olbot:()=>olBot(),
   olready:()=>{const P=S.prep;if(!P||!P.ol)return;P.ol.ready=1;const ol=S.comp.ol;fbq(`l/${ol.lid}/live/${ol.k}/${ol.home?"h":"g"}r`,"PUT",1);save();render();olPrepTick()},
-  olpost:()=>olPost(),olafter:()=>olAfter(),
+  olkickbot:()=>{OL.kickBot=true},olpost:()=>olPost(),olafter:()=>olAfter(),
   skin:()=>{let k="pc";try{k=localStorage.getItem("papascochero_skin")||"pc"}catch(e){}k=k==="fm"?"pc":"fm";try{localStorage.setItem("papascochero_skin",k)}catch(e){}if(!document.body.classList.contains("fm")!==(k==="fm")){}document.body.classList.toggle("fm",k==="fm");applySkin();render();toast(k==="fm"?"Aspecto Football Manager.":"Aspecto PC Fútbol de saldo.")},
   doupdate:()=>{closeModal();save();if(location.href.indexOf(window.PC_REMOTE)===0)location.reload();else location.reload()},
   updcheck:()=>checkUpdates(true),
@@ -3429,7 +3430,7 @@ const A={
   voxtoggle:()=>{S.voxOff=!S.voxOff;save();render()},
   speed:()=>{if(!M)return;M.speed=(M.speed+1)%3;$("#m-speed").textContent=["Lento","Normal","Rápido"][M.speed]},
   pause:()=>{if(!M||M.ended)return;M.paused=!M.paused;if(M.online)setTimeout(()=>olLivePub(true),10);const b=$("#m-pause");b.textContent=M.paused?"Seguir":"Pausa";b.classList.toggle("paused",M.paused);clearTimeout(M.timer);if(M.paused){const t=`Parece que ${clubName()} han pedido tiempo.`;addLog(M.min,t+" Haz los cambios con calma.","ev");vo("pause",null,true)}else M.timer=setTimeout(run,300)},
-  skip:()=>{if(!M||M.ended)return;if(M.online&&!M.online.solo){toast("En un partido en directo no se puede saltar al final.");return}clearTimeout(M.timer);M.paused=false;M.skipping=true;M.busyUntil=0;if(M.vis){M.vis.q=[];M.vis.ball.move=null}if(M.pendLogs){M.pendLogs.forEach(x=>addLog(x[0],x[1],x[2]));M.pendLogs=null}M.dispUs=M.us;M.dispThem=M.them;M.cine=null;M.cineUntil=0;if(M.hold){M.hold=false;autoFill()}let g=0;while(!M.ended&&g++<300)tick()},
+  skip:()=>{if(!M||M.ended)return;if(M.online||(S.comp&&S.comp.ol&&S.comp.ol.human)){toast("Contra otro jugador no se puede saltar al final.");return}clearTimeout(M.timer);M.paused=false;M.skipping=true;M.busyUntil=0;if(M.vis){M.vis.q=[];M.vis.ball.move=null}if(M.pendLogs){M.pendLogs.forEach(x=>addLog(x[0],x[1],x[2]));M.pendLogs=null}M.dispUs=M.us;M.dispThem=M.them;M.cine=null;M.cineUntil=0;if(M.hold){M.hold=false;autoFill()}let g=0;while(!M.ended&&g++<300)tick()},
   resume:()=>{if(!M||!M.hold)return;M.hold=false;renderSquad();if(!M.paused)M.timer=setTimeout(run,300)},
   mpick:(v,el)=>doPick(el),
   post1:()=>postInterview(),post2:()=>postPizza(),post3:()=>showReport(),
