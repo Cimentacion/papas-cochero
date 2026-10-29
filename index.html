@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="10.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="10.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2576,7 +2576,7 @@ function olSnap(){
     ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.pos,age:p.age,q:ovr(p),g:p.allGoals||p.goals||0,tit:S.lineup.includes(p.id)?1:0})),
     pl:pool.slice(0,22).map(p=>{const o=Object.assign({},p);delete o.veh;o.prog=(p.prog||[]).slice(-12);o.exc=(p.exc||[]).slice(0,2);o.tit=S.lineup.includes(p.id)?1:0;return o}),
     ch:S.coach?{n:S.coach.name,m:S.coach.nick||"",age:S.coach.age,w:S.coach.w,d:S.coach.d,l:S.coach.l,gf:S.coach.gf,ga:S.coach.ga,look:S.coach.look||null,photo:S.coach.photo||null,moral:S.coach.moral}:null,div:TIERS[curTier()].n,season:S.season,tro:(S.trophies||[]).slice(-6),fans:S.fans||3,t:TS}}
-async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<300000)return;OL.pubT=Date.now();await fbq(`u/${olMe()}/p`,"PUT",olSnap())}
+async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<300000)return;OL.pubT=Date.now();try{const d=JSON.parse(JSON.stringify(olSnap()));await fb(`u/${olMe()}/p`,"PUT",d);OL.pubOk=Date.now();OL.pubErr=""}catch(e){OL.pubErr=String(e.message||e)}}
 function olStart(){
   if(!olOn()){Object.keys(OL.es).forEach(fbUnlisten);return}
   olClock();olPublish(true);
@@ -2674,7 +2674,7 @@ async function olCreate(){
 async function olViewTeam(u){
   modal("Cargando equipo…",`<p>Pidiendo los datos al servidor…</p><button class="btn" data-act="close">Cerrar</button>`);
   let p=null;try{p=u===olMe()?olSnap():await Promise.race([fb(`u/${u}/p`),new Promise((_,rj)=>setTimeout(()=>rj(new Error("tarda demasiado")),12000))]);if(p){OL.users[u]=p}}catch(e){OL.err=String(e.message||e);p=OL.users[u]||null;if(p)toast("Sin conexión: te enseño lo último que se cargó.")}
-  if(!p){modal("No se ha podido cargar",`<p>No llego al servidor para ver ese equipo${OL.err?` (${esc(OL.err)})`:""}. Prueba otra vez en un momento.</p><button class="btn play" data-act="close">Vale</button>`);return}
+  if(!p){modal("No se ha podido cargar",OL.err?`<p>No llego al servidor (${esc(OL.err)}). Prueba otra vez en un momento.</p><button class="btn play" data-act="close">Vale</button>`:`<p>Tu amigo todavía no ha subido su equipo al servidor.</p><p class="hint">Tiene que abrir el juego (versión 10.4 o más nueva) con «Habilitar modos online» activado. Se sube solo al abrirlo.</p><button class="btn play" data-act="close">Vale</button>`);return}
   try{olShowTeam(p)}catch(e){modal("Error",`<p>No se ha podido mostrar su equipo: ${esc(String(e.message||e))}</p><p class="hint">Mándale una captura de esto a Claude.</p><button class="btn play" data-act="close">Vale</button>`)}}
 function olShowTeam(p){
   OL.fp=arr(p.pl);const pl=OL.fp;
@@ -2740,7 +2740,7 @@ function viewOnline(){
   if(!olDB())return `<section class="win"><div class="bar">Servidor de la liga online</div><div class="body"><p>Falta la dirección de la base de datos (Firebase) que guarda las ligas.</p>
     <input class="inp" id="ol-db" placeholder="https://….firebasedatabase.app/" style="width:100%"><div class="pc-act"><button class="btn primary" data-act="oldb">Guardar</button></div></div></section>`;
   if(k==="amigos"){const F=(OL.me&&OL.me.f)||{};
-    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
+    return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><p class="hint">${OL.pubErr?`<span style="color:#c8233a">No se ha podido subir tu equipo: ${esc(OL.pubErr)}</span>`:OL.pubOk?`✔ Tu equipo se subió al servidor hace ${olFmtLeft(Date.now()-OL.pubOk)}.`:"Subiendo tu equipo al servidor…"}</p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
      <section class="win"><div class="bar">Añadir amigo</div><div class="body"><div class="row"><input class="inp" id="ol-fc" placeholder="Código (6 letras)" maxlength="6" style="text-transform:uppercase"><button class="btn primary" data-act="oladdf">Añadir</button></div></div></section>
      <section class="win"><div class="bar">Amigos <small>${Object.keys(F).length}</small></div><div class="body">${Object.keys(F).length?`<div class="list">${Object.entries(F).map(([u,n])=>`<div class="offer"><div><b>${esc(n)}</b><small>${u}</small></div><div class="row"><button class="btn mini" data-act="olteam" data-v="${u}">Ver equipo</button><button class="btn mini primary" data-act="olfr" data-v="${u}">Retar</button></div></div>`).join("")}</div>`:`<p class="hint">Todavía no tienes amigos añadidos.</p>`}${err}</div></section>`}
   if(k==="crear"){const F=(OL.me&&OL.me.f)||{};const fl=Object.entries(F);
