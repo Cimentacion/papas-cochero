@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="10.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="10.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2574,8 +2574,9 @@ function olSnap(){
   return{n:clubName(),coach:S.coach?S.coach.name:"",col:ourKit().c1,kit:ourKit(),crest:(S.club&&S.club.crest)||null,stad:(S.club&&S.club.stadium)||null,
     str:+Math.max(6,(pw.a+pw.d)/2).toFixed(1),form:S.formation,tier:curTier(),spon:olSpon(),
     ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.pos,age:p.age,q:ovr(p),g:p.allGoals||p.goals||0,tit:S.lineup.includes(p.id)?1:0})),
-    ch:S.coach?{n:S.coach.name,m:S.coach.nick||"",age:S.coach.age,w:S.coach.w,d:S.coach.d,l:S.coach.l}:null,div:TIERS[curTier()].n,season:S.season,tro:(S.trophies||[]).slice(-6),fans:S.fans||3,t:TS}}
-async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<180000)return;OL.pubT=Date.now();await fbq(`u/${olMe()}/p`,"PUT",olSnap())}
+    pl:pool.slice(0,22).map(p=>{const o=Object.assign({},p);delete o.veh;o.prog=(p.prog||[]).slice(-12);o.exc=(p.exc||[]).slice(0,2);o.tit=S.lineup.includes(p.id)?1:0;return o}),
+    ch:S.coach?{n:S.coach.name,m:S.coach.nick||"",age:S.coach.age,w:S.coach.w,d:S.coach.d,l:S.coach.l,gf:S.coach.gf,ga:S.coach.ga,look:S.coach.look||null,photo:S.coach.photo||null,moral:S.coach.moral}:null,div:TIERS[curTier()].n,season:S.season,tro:(S.trophies||[]).slice(-6),fans:S.fans||3,t:TS}}
+async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<300000)return;OL.pubT=Date.now();await fbq(`u/${olMe()}/p`,"PUT",olSnap())}
 function olStart(){
   if(!olOn()){Object.keys(OL.es).forEach(fbUnlisten);return}
   olClock();olPublish(true);
@@ -2676,12 +2677,18 @@ async function olViewTeam(u){
   if(!p){modal("No se ha podido cargar",`<p>No llego al servidor para ver ese equipo${OL.err?` (${esc(OL.err)})`:""}. Prueba otra vez en un momento.</p><button class="btn play" data-act="close">Vale</button>`);return}
   try{olShowTeam(p)}catch(e){modal("Error",`<p>No se ha podido mostrar su equipo: ${esc(String(e.message||e))}</p><p class="hint">Mándale una captura de esto a Claude.</p><button class="btn play" data-act="close">Vale</button>`)}}
 function olShowTeam(p){
-  const ro=arr(p.ro).filter(x=>x&&x.n).slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||(b.q||0)-(a.q||0));const ch=p.ch||{n:p.coach||"—"};
+  OL.fp=arr(p.pl);const pl=OL.fp;
+  const ro=(pl.length?pl.map((q,i)=>({n:fullName(q),pos:q.known?q.pos:"???",age:q.age,q:ovr(q),g:q.allGoals||q.goals||0,tit:q.tit,i})):arr(p.ro)).filter(x=>x&&x.n).slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||(b.q||0)-(a.q||0));const ch=p.ch||{n:p.coach||"—"};
   modal(p.n,`<div class="mp-top"><div class="mp-team">${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},64)}<b>${esc(p.n)}</b><small>${esc(p.div||"")}</small>${crestCv({n:p.n,col:p.col,crest:p.crest,kit:p.kit},46,1)}</div></div>
-   <div class="offer"><div><b>Míster: ${esc(ch.n)}${ch.m&&ch.m!=="Míster"?` «${esc(ch.m)}»`:""}</b><small>${ch.age?ch.age+" años · ":""}${ch.w!=null?`balance ${ch.w}G ${ch.d}E ${ch.l}P`:""}${p.season?` · temporada ${p.season}`:""}</small>${arr(p.tro).length?`<small>Vitrina: ${arr(p.tro).map(esc).join(" · ")}</small>`:""}</div></div>
+   <div class="offer"><canvas id="ol-cface" width="120" height="120" style="width:60px;height:60px;border:2px solid #000;flex:none"></canvas><div style="flex:1"><b>Míster: ${esc(ch.n)}${ch.m&&ch.m!=="Míster"?` «${esc(ch.m)}»`:""}</b><small>${ch.age?ch.age+" años · ":""}${ch.w!=null?`balance ${ch.w}G ${ch.d}E ${ch.l}P`:""}${p.season?` · temporada ${p.season}`:""}</small>${arr(p.tro).length?`<small>Vitrina: ${arr(p.tro).map(esc).join(" · ")}</small>`:""}</div></div>
    <p class="hint">Fuerza del once: <b>${p.str}</b> · ${esc(p.form||"")} · afición ${Number(p.fans||3).toLocaleString("es-ES")}</p>
-   <div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th><th>Goles</th></tr></thead><tbody>${ro.map(x=>`<tr><td>${x.pos}</td><td class="t">${esc(x.n)}${x.tit?" ●":""}</td><td>${x.age||"?"}</td><td><b>${x.q!=null?x.q:"?"}</b></td><td>${x.g||0}</td></tr>`).join("")}</tbody></table></div>
-   <p class="hint">● = en su once. Datos de la última vez que abrió el juego.</p><button class="btn play" data-act="close">Cerrar</button>`);try{paintCrests($("#modal"))}catch(e){}}
+   <div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th><th>Goles</th></tr></thead><tbody>${ro.map(x=>`<tr><td>${x.pos}</td><td class="t">${x.i!=null?`<a class="wlink" data-act="olcard" data-v="${x.i}">${esc(x.n)}</a>`:esc(x.n)}${x.tit?" ●":""}</td><td>${x.age||"?"}</td><td><b>${x.q!=null?x.q:"?"}</b></td><td>${x.g||0}</td></tr>`).join("")}</tbody></table></div>
+   <p class="hint">● = en su once. ${OL.fp.length?"Toca un jugador para ver su ficha. ":""}Se actualiza cada vez que abre el juego y cada 5 minutos mientras juega.</p><button class="btn play" data-act="close">Cerrar</button>`);try{paintCrests($("#modal"))}catch(e){}
+  try{const cv=$("#ol-cface");if(cv){if(ch.look)drawFace(cv,Object.assign({},ch.look,{photo:ch.photo,mood:(ch.moral||50)>65?"happy":(ch.moral||50)<30?"sad":"neutral",age:ch.age||47,eye:"#4a3020",bg:"#9fb8c9",stubble:true}));else cv.remove()}}catch(e){}
+  OL.lastTeam=p}
+function olCard(i){const p=(OL.fp||[])[+i];if(!p)return;modal(fullName(p),cardHTML(p));const b=$("#mod-b");
+  b.querySelectorAll(".pc-act [data-act]").forEach(el=>el.remove());const act=b.querySelector(".pc-act");if(act)act.innerHTML=`<button class="btn" data-act="olback">Volver al equipo</button><button class="btn" data-act="close">Cerrar</button>`;
+  b.querySelectorAll("canvas[data-face]").forEach(cv=>{cv.removeAttribute("data-face");drawFace(cv,lookOf(p))});const r=b.querySelector("#radar");if(r)drawRadar(r,p)}
 async function olFriendly(u){
   const F=(OL.me&&OL.me.f)||{};const me=olSnap();const lid=Date.now().toString(36)+olCode().slice(0,3).toLowerCase();const n=`Amistoso: ${me.n} – ${F[u]||u}`;
   await fbq(`l/${lid}`,"PUT",{n,org:olMe(),orgN:me.n,wait:1800,bots:0,two:0,fr:1,st:"lobby",c:TS,mem:{[olMe()]:{n:me.n,ok:1},[u]:{n:F[u]||u,ok:0}}});
@@ -3404,7 +3411,7 @@ const A={
   oldb:()=>{const v=($("#ol-db")&&$("#ol-db").value||"").trim();if(!/^https:\/\//.test(v)){toast("Pon la dirección completa, empezando por https://");return}olSetCfg({db:v});olStart();render()},
   oladdf:()=>{olAddFriend($("#ol-fc")&&$("#ol-fc").value)},
   olsharecode:()=>{const t=`Añádeme en la liga online de Los Papas Cochero. Mi código: ${olMe()}`;try{if(navigator.share){navigator.share({text:t});return}}catch(e){}try{navigator.clipboard.writeText(t);toast("Copiado. Pégalo en WhatsApp.")}catch(e){toast(t)}},
-  olcreate:()=>olCreate(),olfr:v=>olFriendly(v),olteam:v=>olViewTeam(v),
+  olcreate:()=>olCreate(),olfr:v=>olFriendly(v),olteam:v=>olViewTeam(v),olcard:v=>olCard(v),olback:()=>{if(OL.lastTeam)olShowTeam(OL.lastTeam)},
   olyes:v=>olAnswer(v,true),olno:v=>olAnswer(v,false),
   olsel:v=>{OL.sel=v;render()},
   olbegin:v=>olBegin(v),olleave:v=>olLeave(v),
