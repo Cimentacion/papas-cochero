@@ -1,44 +1,308 @@
-{"normal":{
-"intro":["Buenas tardes y bienvenidos al fútbol de pueblo. Que ruede el balón.","Muy buenas tardes, amigos. Hoy hay fútbol. Del bueno, o del malo, ya veremos.","Buenas tardes. Aquí Manolo y Paco, con el partido de la semana."],
-"shot":["¡Dispara","¡Atención, chuta","¡Prueba suerte","¡Se la juega"],
-"save":["¡Paradón de","¡Qué parada de"],
-"miss":["¡Fuera! Por poquito.","Al tejado de la nave. Otro balón perdido.","¡Uyyy! ¡Rozando el palo!"],
-"post":["¡Al palo! ¡Qué mala suerte!","¡Larguero! ¡Ha temblado hasta la portería!"],
-"goalUs":["¡Gooooool! ¡Gol de los Papas! ¡Esto es increíble, señores!","¡Golazo! ¡La grada se viene abajo!","¡Gol, gol, gol! ¡No me lo puedo creer!"],
-"goalThem":["Gol del rival. Mazazo.","Gol en contra. El portero no ha visto ni el balón.","Y marcan ellos. Qué desastre de defensa, por favor."],
-"corner":["Córner.","Saque de esquina. Atentos al área."],
-"offside":["¡Fuera de juego! El linier levanta la bandera.","Bandera arriba. Fuera de juego."],
-"throwin":["Saque de banda."],
-"yellow":["Tarjeta amarilla para","Amarilla para"],
-"red":["¡Tarjeta roja para","¡Expulsado"],
-"coachCard":["¡Al míster le sacan tarjeta! ¡Qué escándalo!"],
-"pause":["Parece que el equipo ha pedido tiempo.","Parón en el partido. El míster quiere hablar."],
-"arrivals":["Atención, que llegan los que faltaban. Vienen del viaje hechos polvo."],
-"halftime":["Descanso. Bocadillos de mortadela para todos."],
-"end":["Final del partido. El árbitro se va corriendo.","Se acabó lo que se daba. Final del partido."],
-"penUs":["¡Penalti! ¡Penalti a favor!"],
-"penThem":["Penalti en contra. Qué desastre."],
-"freekick":["Falta peligrosa al borde del área."],
-"pray":["Atención, que hay un jugador rezando en mitad del campo.","Uno se ha puesto a rezar. Esto no lo había visto nunca."],
-"b_prayer":["Señor, que no nos metan otro.","Virgencita, que me quede como estoy.","Dios mío, si marcamos, dejo las latas."],
-"b_goalUs":["¡Qué barbaridad, Manolo! ¡Qué barbaridad!","Eso no lo mete ni Joaquín en sus buenos tiempos.","Hay que ver, Manolo. Esto es fútbol de verdad."],
-"b_goalThem":["Ya te lo decía yo, Manolo. Esa defensa es un coladero.","Así no se puede, hombre. Así no se puede.","El portero estaba mirando el móvil, seguro."],
-"b_shot":["Ahí había que pasarla, Manolo.","Ese balón todavía está subiendo.","Uy, uy, uy."],
-"b_card":["Bien sacada. Le ha pegado una patada que se ha oído en Écija.","Eso es tarjeta aquí y en Marte.","El árbitro hoy viene con ganas, Manolo."],
-"b_any":["Menudo partido, Manolo.","Esto es lo que le gusta a la gente.","Yo ya no entiendo nada, Manolo."]},
-"tele":{
-"intro":["Bienvenidos a una nueva jornada de Primera División. Todo listo para que ruede el balón."],
-"goalUs":["¡Goool! ¡Goool! ¡Gol de los Papas Cochero en Primera División! ¡Increíble, señoras y señores!"]},
-"paleto":{
-"intro":["Bueno, ¿esto ya ha empezado o qué? Yo he venido por las latas.","¿Esto es fútbol? Bueno, venga, vale."],
-"shot":["¡Tira, tira, animal!","¿Pero dónde va ese?"],
-"save":["Lo ha parado el gordo. Increíble."],
-"miss":["Fuera. Normal, si no saben."],
-"goalUs":["¡Eh, eh, que ha sido gol! ¿De quién? Me da igual.","¡Gooool! Bueno, eso creo. No he visto nada, estaba abriendo una lata."],
-"goalThem":["¿Han marcado? ¿Quién? Bah, da igual, otra lata."],
-"yellow":["Tarjeta para ese. Bien hecho, que es malísimo."],
-"red":["¡Fuera, fuera, a la calle!"],
-"pause":["¿Qué pasa, que se han parado? Pues me abro otra lata."],
-"halftime":["Descanso. Rubio, ¿quedan latas?"],
-"end":["¿Ya se ha acabado? Pues me voy al bar."],
-"b_any":["No sé quién es ese, pero me parece horrible.","El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.","Me abro unas latas.","Pásame otra lata, Rubio.","Mi cuñado jugaba mejor, y eso que está cojo.","¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.","El árbitro es primo del alcalde, eso lo sé yo.","¿Ese no es el de la carnicería?","Qué calor, mi arma. Qué calor.","Eso en mis tiempos se arreglaba a guantazos.","Mira el de amarillo, que va corriendo como un pato.","¿Quién ha traído las pipas?","Ese tiene más barriga que yo, y mira que es difícil.","Yo es que no veo bien de lejos, pero ese es malísimo."]}}
+{
+"normal": {
+"intro": [
+"Buenas tardes y bienvenidos al fútbol de pueblo. Que ruede el balón.",
+"Muy buenas tardes, amigos. Hoy hay fútbol. Del bueno, o del malo, ya veremos.",
+"Buenas tardes. Aquí Manolo y Paco, con el partido de la semana.",
+"Muy buenas, aficionados. Tarde de fútbol con olor a sardinas del bar de al lado.",
+"Saludos a todos los que nos escuchan, que creo que son tres. Empieza el partido.",
+"Arranca el encuentro. El campo, como siempre, lleno de piedras y de ilusión.",
+"Buenas tardes. Hoy el árbitro ha venido en bici y con prisa. Comenzamos."
+],
+"shot": [
+"¡Dispara",
+"¡Atención, chuta",
+"¡Prueba suerte",
+"¡Se la juega",
+"¡Remata",
+"¡Chutazo de",
+"¡Lo intenta",
+"¡Zapatazo de",
+"¡Disparo de"
+],
+"save": [
+"¡Paradón de",
+"¡Qué parada de",
+"¡Manopla de",
+"¡Lo saca",
+"¡Milagro de"
+],
+"miss": [
+"¡Fuera! Por poquito.",
+"Al tejado de la nave. Otro balón perdido.",
+"¡Uyyy! ¡Rozando el palo!",
+"¡Se marcha fuera! Ni con mapa.",
+"¡Al lateral de la red! Mucha gente lo ha cantado.",
+"Desviado. Ese balón acaba en la piscina del vecino.",
+"¡Fuera por centímetros! Qué agonía.",
+"Ese ha ido directo a la gasolinera.",
+"Alto, muy alto. Hay que avisar a la NASA.",
+"¡Uyyyy! La grada ya lo estaba cantando."
+],
+"post": [
+"¡Al palo! ¡Qué mala suerte!",
+"¡Larguero! ¡Ha temblado hasta la portería!",
+"¡Poste! ¡El balón ha sonado como una campana!",
+"¡Madera! Hoy no es nuestro día."
+],
+"goalUs": [
+"¡Gooooool! ¡Gol de los Papas! ¡Esto es increíble, señores!",
+"¡Golazo! ¡La grada se viene abajo!",
+"¡Gol, gol, gol! ¡No me lo puedo creer!",
+"¡Gol! ¡Gol de los nuestros! ¡Que se entere toda la comarca!",
+"¡Toma, toma, toma! ¡Golazo por la escuadra!",
+"¡Adentro! ¡El portero no sabe ni dónde está!",
+"¡Gooool! ¡Esto es Fuentes, señores!",
+"¡Golazo! ¡Esto lo tienen que poner en Canal Sur!",
+"¡Gol! ¡Se abrazan hasta con el árbitro!"
+],
+"goalThem": [
+"Gol del rival. Mazazo.",
+"Gol en contra. El portero no ha visto ni el balón.",
+"Y marcan ellos. Qué desastre de defensa, por favor.",
+"Gol de ellos. A ver quién se lo explica al míster.",
+"Nos la meten. Silencio en el descampado.",
+"Gol en contra. Hasta el perro se ha ido a casa.",
+"Y marcan. Esto se está poniendo feo.",
+"Gol visitante. La defensa estaba hablando de política."
+],
+"corner": [
+"Córner.",
+"Saque de esquina. Atentos al área.",
+"Córner. Suben hasta los centrales.",
+"Saque de esquina. Mucho peligro aquí.",
+"Córner a favor. Que suba el portero, que es el más alto."
+],
+"offside": [
+"¡Fuera de juego! El linier levanta la bandera.",
+"Bandera arriba. Fuera de juego.",
+"Fuera de juego clarísimo. Estaba más adelantado que el autobús de Écija.",
+"Bandera. El delantero estaba en otra provincia."
+],
+"throwin": [
+"Saque de banda.",
+"Saque de banda. Lo coge con las dos manos, como manda el reglamento.",
+"Fuera de banda. Se toma su tiempo para sacar."
+],
+"yellow": [
+"Tarjeta amarilla para",
+"Amarilla para",
+"Amarilla, y bien sacada, para",
+"Cartulina amarilla para",
+"El árbitro amonesta a"
+],
+"red": [
+"¡Tarjeta roja para",
+"¡Expulsado",
+"¡A la calle! Roja directa para",
+"¡Se va expulsado"
+],
+"coachCard": [
+"¡Al míster le sacan tarjeta! ¡Qué escándalo!"
+],
+"pause": [
+"Parece que el equipo ha pedido tiempo.",
+"Parón en el partido. El míster quiere hablar.",
+"El partido se detiene. Hay reunión en la banda.",
+"Tiempo muerto. El míster saca la pizarra de Mahou."
+],
+"arrivals": [
+"Atención, que llegan los que faltaban. Vienen del viaje hechos polvo."
+],
+"halftime": [
+"Descanso. Bocadillos de mortadela para todos.",
+"Descanso. Los jugadores se van a la sombra, si es que la encuentran.",
+"Final de la primera parte. Hay tortilla en la nevera del maletero."
+],
+"end": [
+"Final del partido. El árbitro se va corriendo.",
+"Se acabó lo que se daba. Final del partido.",
+"¡Final! Ahora todos al bar a comentarlo.",
+"Pitido final. Esto ha sido una montaña rusa, amigos."
+],
+"penUs": [
+"¡Penalti! ¡Penalti a favor!"
+],
+"penThem": [
+"Penalti en contra. Qué desastre."
+],
+"freekick": [
+"Falta peligrosa al borde del área."
+],
+"pray": [
+"Atención, que hay un jugador rezando en mitad del campo.",
+"Uno se ha puesto a rezar. Esto no lo había visto nunca."
+],
+"b_prayer": [
+"Señor, que no nos metan otro.",
+"Virgencita, que me quede como estoy.",
+"Dios mío, si marcamos, dejo las latas."
+],
+"b_goalUs": [
+"¡Qué barbaridad, Manolo! ¡Qué barbaridad!",
+"Eso no lo mete ni Joaquín en sus buenos tiempos.",
+"Hay que ver, Manolo. Esto es fútbol de verdad.",
+"Eso ha sido de jugada ensayada, Manolo. O de casualidad, no sé.",
+"Que lo pongan en las noticias, Manolo.",
+"Esto merece una ronda de cañas.",
+"¡Qué bonito es el fútbol cuando se gana, Manolo!",
+"Mi madre lo está viendo por la radio y estará llorando."
+],
+"b_goalThem": [
+"Ya te lo decía yo, Manolo. Esa defensa es un coladero.",
+"Así no se puede, hombre. Así no se puede.",
+"El portero estaba mirando el móvil, seguro.",
+"Ese gol tiene más culpables que un juicio.",
+"Yo ya lo veía venir, Manolo. Lo veía venir.",
+"Así no vamos a ningún sitio, Manolo.",
+"El central estaba atándose los cordones, seguro.",
+"Hay que despertar, que esto no es la siesta."
+],
+"b_shot": [
+"Ahí había que pasarla, Manolo.",
+"Ese balón todavía está subiendo.",
+"Uy, uy, uy.",
+"Esa la metía yo con la zurda, Manolo. Y soy diestro.",
+"Muy alta. Hay que bajar ese balón.",
+"Le ha pegado con el alma. Y con la espinilla.",
+"Casi, casi. Pero casi no vale.",
+"Ese balón lo tenía que haber pasado, Manolo."
+],
+"b_card": [
+"Bien sacada. Le ha pegado una patada que se ha oído en Écija.",
+"Eso es tarjeta aquí y en Marte.",
+"El árbitro hoy viene con ganas, Manolo.",
+"Tarjeta merecida. Esa entrada era de cárcel.",
+"El árbitro hoy no perdona ni una, Manolo.",
+"Esa tarjeta la ha visto hasta mi abuela.",
+"Lleva toda la tarde buscándola."
+],
+"b_any": [
+"Menudo partido, Manolo.",
+"Esto es lo que le gusta a la gente.",
+"Yo ya no entiendo nada, Manolo.",
+"Qué calor hace, Manolo.",
+"Esto en la tele no lo ponen, Manolo.",
+"¿Tú has visto la camiseta del número cinco? Lleva una mancha de tomate.",
+"El campo hoy está más duro que el pan de ayer.",
+"Mira, mira, que el perro ha vuelto al córner.",
+"A este partido le falta un poco de todo, Manolo.",
+"Yo con este equipo me iba a la Champions, Manolo.",
+"Huele a barbacoa. Alguien está asando en la grada.",
+"Hay más gente en la cola del pan que aquí.",
+"Este árbitro pita como si le pagaran por pitido.",
+"El delantero corre como si llevara la compra.",
+"Esto es fútbol de verdad, sin VAR y sin vergüenza."
+]
+},
+"tele": {
+"intro": [
+"Bienvenidos a una nueva jornada de Primera División. Todo listo para que ruede el balón.",
+"Muy buenas noches. Partido grande en el estadio. Las cámaras ya están listas. Empezamos.",
+"Bienvenidos. Ambiente de las grandes noches. El balón ya está en el centro del campo."
+],
+"goalUs": [
+"¡Goool! ¡Goool! ¡Gol de los Papas Cochero en Primera División! ¡Increíble, señoras y señores!",
+"¡Golazo! ¡Esto es historia del fútbol español!",
+"¡Gol! ¡Del descampado a Primera, y marcando!"
+],
+"goalThem": [
+"Gol del rival. Aquí se paga cualquier error.",
+"Gol. La calidad en Primera se nota, señores."
+],
+"miss": [
+"Se marcha fuera por poco. Ocasión clarísima.",
+"Desviado. Lo tuvo en la cabeza."
+]
+},
+"paleto": {
+"intro": [
+"Bueno, ¿esto ya ha empezado o qué? Yo he venido por las latas.",
+"¿Esto es fútbol? Bueno, venga, vale.",
+"¿Han empezado ya? Yo es que acabo de llegar del bar.",
+"Venga, a ver si ganamos, que he apostado dos latas.",
+"Aquí estamos, con la nevera llena y la ilusión vacía."
+],
+"shot": [
+"¡Tira, tira, animal!",
+"¿Pero dónde va ese?",
+"¡Dale, dale, dale!",
+"¡Esa va fuera, seguro!",
+"¡Pégale, hombre, pégale!"
+],
+"save": [
+"Lo ha parado el gordo. Increíble.",
+"El portero ese para hasta los aviones.",
+"Lo ha parado con la cara. Qué valiente."
+],
+"miss": [
+"Fuera. Normal, si no saben.",
+"Fuera. Como mi cuñado, que no da una.",
+"Eso no es un tiro, eso es un pase al bar."
+],
+"goalUs": [
+"¡Eh, eh, que ha sido gol! ¿De quién? Me da igual.",
+"¡Gooool! Bueno, eso creo. No he visto nada, estaba abriendo una lata.",
+"¡Gol! ¡Gol! ¡Rubio, que hemos metido gol!",
+"¡Que ha entrado, que ha entrado! ¡Abro otra lata!"
+],
+"goalThem": [
+"¿Han marcado? ¿Quién? Bah, da igual, otra lata.",
+"Nos han metido otro. Pásame la lata grande.",
+"Gol de esos. Esto es un robo, un robo."
+],
+"yellow": [
+"Tarjeta para ese. Bien hecho, que es malísimo."
+],
+"red": [
+"¡Fuera, fuera, a la calle!"
+],
+"pause": [
+"¿Qué pasa, que se han parado? Pues me abro otra lata.",
+"Se han parado. Pues aprovecho y voy al servicio.",
+"¿Ya se han cansado? Si no han hecho nada."
+],
+"halftime": [
+"Descanso. Rubio, ¿quedan latas?"
+],
+"end": [
+"¿Ya se ha acabado? Pues me voy al bar.",
+"Se acabó. Mañana hay que madrugar, Rubio.",
+"Final. Yo me quedo a recoger las latas."
+],
+"b_any": [
+"No sé quién es ese, pero me parece horrible.",
+"El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.",
+"Me abro unas latas.",
+"Pásame otra lata, Rubio.",
+"Mi cuñado jugaba mejor, y eso que está cojo.",
+"¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.",
+"El árbitro es primo del alcalde, eso lo sé yo.",
+"¿Ese no es el de la carnicería?",
+"Qué calor, mi arma. Qué calor.",
+"Eso en mis tiempos se arreglaba a guantazos.",
+"Mira el de amarillo, que va corriendo como un pato.",
+"¿Quién ha traído las pipas?",
+"Ese tiene más barriga que yo, y mira que es difícil.",
+"Yo es que no veo bien de lejos, pero ese es malísimo.",
+"Ese de ahí es el del taller, que me debe dinero.",
+"¿Tú sabes de qué juega el de rojo? Yo tampoco.",
+"Mi perro juega mejor, y eso que es cojo.",
+"Esto de las porterías de palé no es reglamentario.",
+"Me han dicho que el árbitro es de Marchena. Así va la cosa.",
+"Yo jugué aquí en el ochenta y cinco. Bueno, en la grada.",
+"Rubio, ¿te has traído el abridor?",
+"Esto me lo pagan los de la peña, que yo no pongo ni un euro.",
+"El calvo ese corre como un pato mareado.",
+"Pues el bocadillo de chorizo estaba buenísimo.",
+"Esto con un poco de flamenco de fondo mejoraría mucho.",
+"¿Ese es el hijo de la Paqui? Qué grande está.",
+"A mí me gustaba más el fútbol de antes. Bueno, este también es de antes.",
+"Yo me abro unas latas y ya lo veo todo más bonito.",
+"¿Por qué corren tanto? Si el balón va solo.",
+"El de la gorra es el entrenador, ¿no? Pues tiene cara de no saber nada.",
+"Me duele la rodilla solo de verlos.",
+"Esto lo arreglaba yo con dos de mi pueblo."
+]
+}
+}
