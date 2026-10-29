@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="11.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="11.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1285,13 +1285,13 @@ function addNews(t){S.news.unshift({w:S.week,t});S.news=S.news.slice(0,8)}
 const mafiaCuota=()=>Math.max(25,Math.ceil((S.debt||0)*.08));
 const LOANS=[100,250,500],LOAN_MAX=500;
 function mafiaWeek(){
-  if(!(S.debt>0))return;const q=mafiaCuota();
+  if(!(S.debt>0))return;{const cap=Math.round((S.loanP||LOAN_MAX)*1.4);if(S.debt>cap)S.debt=cap}const q=mafiaCuota();
   if(S.money>=0){S.debt=Math.max(0,S.debt-q);if(!S.debt){S.loanP=0;ach("mafia");addNews("Has terminado de pagar a la mafia. Te mandan una tarta con una nota: «Vuelve cuando quieras».")}return}
-  S.money+=q;S.debt=Math.ceil(S.debt*1.1);S.mafiaStrikes=(S.mafiaStrikes||0)+1;
+  S.money+=q;S.mafiaStrikes=(S.mafiaStrikes||0)+1;
   const ps=S.players.slice().sort((a,b)=>ovr(b)-ovr(a));
   if(ps.length){const p=ps[0];legendCheck(p);S.players=S.players.filter(x=>x.id!==p.id);S.lineup=S.lineup.map(x=>x===p.id?null:x);
     const t=pick([`No has pagado. ${fullName(p)} se sube a una furgoneta blanca sin matrícula. Nadie ha visto nada.`,`No has pagado. A ${fullName(p)} lo vieron por última vez en la gasolinera con dos señores con traje en agosto.`,`No has pagado. En el vestuario aparece la camiseta de ${fullName(p)} doblada y una nota: «Esta semana, sí».`]);
-    addNews(t);S.mafiaMsg=t+" La deuda sube un 10 %."}
+    addNews(t);S.mafiaMsg=t+" La deuda sigue siendo la misma, pero ya saben dónde vives."}
   else{
     let t="";if(!S.embargo){S.embargo=true;t="No has pagado y no te quedan jugadores que llevarse. La mafia embarga el campo. Os toca jugar en mitad de la calle."}else t="Otra semana sin pagar. Te rayan el coche y te dejan una cabeza de cerdo en el buzón.";
     if(S.kids){t+=` Y se llevan a tus ${S.kids} hijo${S.kids>1?"s":""}. «Los cuidaremos bien», dicen.`;S.kids=0}
@@ -2428,7 +2428,7 @@ function drawDowns(c,P,T){const V=M&&M.vis;if(!V||!V.downs)return;V.downs.forEac
 function mafiaBox(){
   const d=S.debt||0,ue=Math.ceil(Math.max(d,1000)/10);
   return `<section class="win"><div class="bar">«Los del polígono» <small>préstamos sin preguntas</small></div><div class="body">
-   <p class="hint">Te dejan dinero ahora y devuelves un 40 % más. Cada semana se cobra una cuota (${d?mafiaCuota()+" €":"el 8 % de lo que debas"}). Si no llegas, se llevan a tu mejor jugador y no vuelve. Si no te quedan jugadores, te embargan el campo${S.kids?" y se quedan con tus hijos":""}.</p>
+   <p class="hint">Te dejan dinero ahora y devuelves un 40 % más, ni un euro más. Cada semana se cobra una cuota (${d?mafiaCuota()+" €":"el 8 % de lo que debas"}). Si no llegas, se llevan a tu mejor jugador y no vuelve. Si no te quedan jugadores, te embargan el campo${S.kids?" y se quedan con tus hijos":""}.</p>
    ${d?`<p><b>Debes ${d} €.</b> Cuota semanal: ${mafiaCuota()} €.${S.mafiaStrikes?` Impagos: ${S.mafiaStrikes}.`:""}</p><div class="row"><button class="btn" data-act="payall">Pagarlo todo (${d} €)</button></div>`:""}
    ${S.embargo?`<p style="color:#c8233a"><b>Campo embargado.</b> Jugáis en mitad de la calle y los coches no paran.</p><div class="row"><button class="btn primary" data-act="unembargo">Recuperar el campo (${ue} €)</button></div>`:""}
    <p class="hint">Te fían como mucho ${LOAN_MAX} € en total. Te quedan ${LOAN_MAX-(S.loanP||0)} € por pedir.</p><div class="row">${LOANS.map(a=>`<button class="btn" data-act="loan" data-v="${a}" ${(S.loanP||0)+a>LOAN_MAX?"disabled":""}>Pedir ${a} €</button>`).join("")}</div>
