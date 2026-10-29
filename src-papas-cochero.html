@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="8.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="8.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1134,7 +1134,7 @@ function viewCreator(){
   </div></section>`;
 }
 function startGame(){
-  S={v:5,field:0,season:1,tierTeams:{},tmarket:[],house:0,scouts:[],reports:[],reach:0,coach:{...C,moral:55,w:0,d:0,l:0,gf:0,ga:0},money:300,week:1,phase:"pre",comp:null,players:[],lineup:Array(11).fill(null),formation:"4-4-2",
+  S={v:5,field:0,season:1,tierTeams:{},tmarket:[],house:0,scouts:["primo"],reports:[],reach:0,coach:{...C,moral:55,w:0,d:0,l:0,gf:0,ga:0},money:300,week:1,phase:"pre",comp:null,players:[],lineup:Array(11).fill(null),formation:"4-4-2",
     sessions:[null,null,null],sessLog:[],upg:[],sponsors:[],sponsorPay:{},perks:{comida:0},freeWork:0,news:[],tab:"pueblo",nextId:1,trophies:[],prep:null,memorial:[],openPlace:"paro",tierNext:0,eds:0};
   S.sites=genSites();
   addNews("Fundas Los Papas Cochero en la barra del bar. Testigos: dos clientes y el camarero.");
@@ -1317,7 +1317,7 @@ function viewPueblo(){
   const cap=HOUSES[S.house||0].scouts;const mine=(S.scouts||[]);
   const scoutRows=SCOUTS.map(sc=>{const hired=mine.includes(sc.id);const lock=(sc.t||0)>(S.reach||0);
     return `<div class="place"><div><b>${esc(sc.n)}</b><p>${esc(sc.d)} Cobra ${sc.w} €/semana${sc.c?` y ${sc.c} € por firmar`:""}.</p></div>${hired?`<button class="btn mini" data-act="unscout" data-v="${sc.id}">Despedir</button>`:lock?`<span class="hint">Sube de categoría</span>`:`<button class="btn mini primary" data-act="scout" data-v="${sc.id}" ${mine.length>=cap?"disabled":""}>Contratar</button>`}</div>`}).join("");
-  return `${S.reports&&S.reports.length?`<section class="win"><div class="bar">Informes de tus ojeadores <small>Posición confirmada</small></div><div class="body"><div class="list">${S.reports.map(p=>prow(p,"report")).join("")}</div></div></section>`:""}
+  return `${S.reports&&S.reports.length?`<section class="win"><div class="bar">Informes de tus ojeadores <small>Posición confirmada · faltan un 20-25 % menos</small></div><div class="body"><div class="list">${S.reports.map(p=>prow(p,"report")).join("")}</div></div></section>`:""}
   <section class="win"><div class="bar">${esc(pl.n)} <small>${cand.length} disponibles · plantilla ${S.players.length}/22</small></div><div class="body"><div class="list">${cand.length?cand.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div></section>
   <section class="win"><div class="bar">Sitios de ${HOME} y alrededores <small>${opened.length}/${PLACES.length} descubiertos</small></div><div class="body">
    <p class="hint">Cada semana hay caras nuevas. Los <span class="unk">???</span> no saben ni de qué juegan: se descubre entrenando o jugando. La media va de 1 a 99: aquí, de 10 a 20 ya es mucho.</p>${rows}
@@ -1412,7 +1412,7 @@ function viewComp(){
   <section class="win"><div class="bar">La escalera</div><div class="body"><div class="ko">${ladder}</div></div></section>`;
 }
 function relProb(p){
-  if(p.injured)return 0;const hk=HOUSES[S.house||0].abs*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1);
+  if(p.injured)return 0;const hk=HOUSES[S.house||0].abs*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1)*(p.rel||1);
   return ABS.reduce((a,[w])=>a*(1-Math.min(1,w(p)*hk)),1);
 }
 function sellValue(p){const t=S.comp?S.comp.tier:(S.tierNext||0);const o=ovr(p);const base=Math.max(0,(o-TIER_Q[t])*3)+t*15+(p.age<30?(potOf(p)-o)*1.5:0)+3;return Math.max(1,Math.round(base*(p.age>55?.3:p.age>45?.6:p.age>33?.85:1.1)))}
@@ -1450,7 +1450,7 @@ function cardHTML(p){
    <div class="pc-rel"><span>Confianza</span><div><i style="width:${p.conf||0}%;background:#2f7d32"></i></div><b>${p.conf||0}</b></div>
    <div class="pc-rel"><span>Dependencia</span><div><i style="width:${p.dep||0}%;background:#d98a1f"></i></div><b>${p.dep||0}</b></div>
    <div class="pc-rel"><span>Energía</span><div><i style="width:${p.energy}%;background:${ecol(p.energy)}"></i></div><b>${p.energy}</b></div>
-   <p class="pc-tr"><b>${esc(t.n)}.</b> ${esc(t.d)}</p>${specs(p).length?`<p class="pc-h">Especialidades</p><ul class="tips">${specs(p).map(x=>`<li><b>${x}:</b> ${SPEC_D[x]}</li>`).join("")}</ul>`:""}${p.tenure?`<p class="hint">${p.tenure} temporada${p.tenure>1?"s":""} en el club · ${p.allGames||0} partidos · ${p.allGoals||0} goles en total.</p>`:""}
+   ${p.rel?`<p class="hint">🔎 Lo encontró ${esc(p.scout||"tu ojeador")}: falta a los partidos un ${Math.round((1-p.rel)*100)} % menos que la gente del montón.</p>`:""}<p class="pc-tr"><b>${esc(t.n)}.</b> ${esc(t.d)}</p>${specs(p).length?`<p class="pc-h">Especialidades</p><ul class="tips">${specs(p).map(x=>`<li><b>${x}:</b> ${SPEC_D[x]}</li>`).join("")}</ul>`:""}${p.tenure?`<p class="hint">${p.tenure} temporada${p.tenure>1?"s":""} en el club · ${p.allGames||0} partidos · ${p.allGoals||0} goles en total.</p>`:""}
    ${probs.length?`<p class="pc-h">Problemas</p><ul class="tips">${probs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
    ${exc?`<p class="pc-h">Últimas excusas</p><ul class="tips">${exc}</ul>`:""}
    <p class="pc-h">Contrato</p><p>${p.wage} €/semana en bocadillos.${p.veh?` Tiene ${esc(p.veh.n)} (${p.veh.plazas} plazas).`:""}</p>
@@ -2419,14 +2419,18 @@ function weekTick(){
   S.players.forEach(p=>{if(p.knock>0)p.knock--;if(stf("psico")){p.dep=clamp((p.dep||0)-2*stf("psico"),0,100)}if(p.injured)p.injured--;p.energy=clamp(p.energy+45,20,100);
     if(!p.drank){if((p.dep||0)>=40){p.conf=clamp((p.conf||0)-8,0,100);p.mono=true}else p.mono=false;p.dep=clamp((p.dep||0)-3,0,100);p.conf=clamp((p.conf||0)-2,0,100)}else p.mono=false;
     p.drank=false;p.hang=0});
-  const tier=S.comp?S.comp.tier:(S.tierNext||0);const open=PLACES.filter(placeOpen);
+  scoutWeek();
+  S.reports=(S.reports||[]).slice(0,8);S.tmarket=genTransfers();
+  return tot;
+}
+function scoutWeek(){
+  S.reports=S.reports||[];const open=PLACES.filter(placeOpen);
   (S.scouts||[]).forEach(sid=>{const sc=SCOUTS.find(x=>x.id===sid);if(!sc)return;
     const pool=sc.ojo===0?open.filter(pl=>pl.t===0):open;
     const extra=sc.ojo>=3?PLACES.filter(pl=>pl.t===(S.reach||0)+1):[];
-    const pl=pick(pool.concat(extra));const p=genPlayer(pl.id,sc.ojo*2.5);p.known=true;p.scout=sc.n;p.cost=Math.round(p.cost*1.1)+sc.ojo*3;
+    const pl=pick(pool.concat(extra));const p=genPlayer(pl.id,sc.ojo*2.5);p.known=true;p.scout=sc.n;p.rel=+(.75+Math.random()*.05).toFixed(2);p.cost=Math.round(p.cost*1.1)+sc.ojo*3;
     S.reports.unshift(p)});
-  S.reports=(S.reports||[]).slice(0,8);S.tmarket=genTransfers();
-  return tot;
+  S.reports=S.reports.slice(0,8);
 }
 
 /* ================= partido ================= */
@@ -2834,7 +2838,7 @@ const A={
   "c-look":v=>{C.look[v]=!C.look[v];render()},"c-hair":v=>{C.look.hair=+v;render()},
   "c-civil":v=>{C.story.civil=v;render()},"c-story":v=>{C.story[v]=!C.story[v];render()},
   "c-nophoto":()=>{C.photo=null;render()},
-  "c-sign":()=>{if(!C.name.trim()){toast("Pon un nombre. Aunque sea un mote.");return}startGame()},
+  "c-sign":()=>{if(!C.name.trim()){toast("Pon un nombre. Aunque sea un mote.");return}startGame();try{scoutWeek();save();render()}catch(e){}},
   nophoto:()=>{S.coach.photo=null;save();render()},
   place:v=>{S.openPlace=v;save();render();window.scrollTo(0,0)},
   drill:v=>runDrill(v),
@@ -2910,7 +2914,7 @@ const A={
   prep:()=>startPrep(),
   conv:(v,el)=>{const id=+el.dataset.id;const P=S.prep;if(P.conv[id])delete P.conv[id];else{if(Object.keys(P.conv).length>=18){toast("Máximo 18 convocados: 11 titulares y 7 suplentes.");return}P.conv[id]=true}save();render()},
   "conv-ok":()=>{const P=S.prep;const ids=Object.keys(P.conv).map(Number);if(!ids.length){toast("No has avisado a nadie.");return}
-    P.absent={};ids.forEach(id=>{const p=pById(id);if(!p)return;p.nconv=(p.nconv||0)+1;const hk=HOUSES[S.house||0].abs*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1);for(const[w,t]of ABS){if(Math.random()<w(p)*hk){P.absent[id]=t(p);break}}});
+    P.absent={};ids.forEach(id=>{const p=pById(id);if(!p)return;p.nconv=(p.nconv||0)+1;const hk=HOUSES[S.house||0].abs*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1)*(p.rel||1);for(const[w,t]of ABS){if(Math.random()<w(p)*hk){P.absent[id]=t(p);break}}});
     Object.keys(P.absent).forEach(id=>{const p=pById(+id);if(p){p.nfalta=(p.nfalta||0)+1;p.exc=[P.absent[id]].concat(p.exc||[]).slice(0,3)}});P.step="bajas";save();render();window.scrollTo(0,0)},
   "to-trip":()=>{const P=S.prep;P.gas={};autoAssign();P.step="viaje";save();render();window.scrollTo(0,0)},
   gas:v=>{const P=S.prep;P.gas[v]=!P.gas[v];save();render()},
