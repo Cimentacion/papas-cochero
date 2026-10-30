@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="13.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="14.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -998,7 +998,7 @@ function huntDo(v){const[cn,ix,full]=v.split("|");const cl=S.world&&S.world.club
   if(S.players.length>=22){toast("Plantilla llena: 22.");return}if(S.money<fee){toast(`Necesitas ${fee} €.`);return}
   if(full!=="1"&&Math.random()>.25){wp.huntNo=S.season;toast(`El ${cl.n} se ríe de tu oferta. Te cuelgan el teléfono.`);addNews(`El ${cl.n} rechaza la oferta de ${clubName()} por ${wp.n}. «Ni por ese dinero ni por el doble».`);closeModal();save();render();return}
   const p=wToPlayer(wp,tier,cl.n);p.wage=Math.max(p.wage+1,Math.round(p.wage*1.2));p.ct=2;ledSync();S.money-=fee;led(`Fichaje de ${fullName(p)} (del ${cl.n})`,-fee);S.players.push(p);const e=S.lineup.findIndex(x=>!x);if(e>=0)S.lineup[e]=p.id;wSold(p,fee);
-  addNews(`¡${clubName()} le arranca a ${fullName(p)} al ${cl.n} por ${fee} €!`);closeModal();save();render();toast(`${short(p)} es tuyo.`)}
+  addNews(`¡${clubName()} le arranca a ${fullName(p)} al ${cl.n} por ${fee} €!`);addHeat(cl.n,1,`les quitasteis a ${fullName(p)}`);feedPost("sign",{p:short(p)});closeModal();save();render();toast(`${short(p)} es tuyo.`)}
 /* ofertas que llegan solas */
 function genTOffer(){if(!S.world||!S.comp||S.comp.type==="online"||Math.random()>.14)return;const tier=curTier();
   if(Math.random()<.5&&S.players.length>12){const mine=S.players.filter(p=>!p.injured&&!p.loan).sort((a,b)=>ovr(b)-ovr(a)).slice(0,5);const p=pick(mine);if(!p)return;
@@ -1401,7 +1401,7 @@ function coachDeath(){
   const first=pick(FIRSTC.concat(MALE.filter(n=>!/\s/.test(n))));const age=clamp(old.age-rnd(24,38),25,60);
   const look=Object.assign({},old.look,{hair:Math.random()<.5?old.look.hair:rnd(0,4),stache:Math.random()<.4,glasses:Math.random()<.3,belly:Math.random()<.5,ojeras:false});
   const me=S.dyn[S.dyn.length-1];me.died=S.season;me.age=old.age;me.rec=`${old.w}G ${old.d}E ${old.l}P`;me.tro=(S.trophies||[]).slice();
-  S.coach=Object.assign({},old,{name:`${first} ${pat} ${msur}`,nick:pick(["El Niño","El Heredero","Junior","El Hijo del Míster","Míster"]),age,photo:null,look,moral:60,w:0,d:0,l:0,gf:0,ga:0,
+  S.coach=Object.assign({},old,{ctr:pick(Object.keys(CTRAITS)),xp:Math.round((old.xp||0)*.3),name:`${first} ${pat} ${msur}`,nick:pick(["El Niño","El Heredero","Junior","El Hijo del Míster","Míster"]),age,photo:null,look,moral:60,w:0,d:0,l:0,gf:0,ga:0,
     story:Object.assign({},old.story,{civil:"single",madre:false,bar:false,per:false})});
   S.exFree=true;S.wife=null;S.exWives=[];S.kids=Math.max(0,(S.kids||0)-1);S.dyn.push({n:S.coach.name,born:S.season-age,from:S.season,mother,father:old.name,tro:[]});
   S.memorial.push(`Míster ${old.name} (${old.age})`);addNews(`Fallece el míster ${old.name} a los ${old.age} años. Su hijo ${S.coach.name} coge el banquillo. El legado sigue.`);
@@ -1519,7 +1519,8 @@ function weeklyLines(){
   {const w=(S.sstaff||[]).reduce((a,id)=>a+(SSTAFF.find(x=>x.id===id)||{w:0}).w*ek(null,.6),0);if(w)L.push(["Personal del estadio",-Math.round(w)])}
   if(unl("wage")){const w=S.players.reduce((a,p)=>a+p.wage,0)+staffWages(),cap=WAGE_CAP[curTier()];if(w>cap)L.push(["Multa por pasarte del límite salarial",-(w-cap)*2])}
   const sw=(S.scouts||[]).reduce((a,id)=>a+(SCOUTS.find(x=>x.id===id)||{w:0}).w,0);if(sw)L.push(["Bocadillos y gasolina de los ojeadores",-sw]);
-  if(!dry)S.sponsors.forEach(n=>{const o=S.sponsorPay[n];if(o)L.push([`Valla: ${n}`,Math.round(o*(has("led")?1.3:1))])});
+  if(!dry)S.sponsors.forEach(n=>{const o=S.sponsorPay[n];if(o)L.push([`Valla: ${n}`,Math.round(o*(has("led")?1.3:1)*(ctr("pijo")?1.2:1))])});
+  if(S.alcSub>0)L.push(["Subvención por alinear al alcalde",nice(60*ek(null,.6))]);
   if(!dry&&TVW[tierNow()])L.push(["Derechos de televisión",TVW[tierNow()]]);
   return L;
 }
@@ -1581,7 +1582,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
+const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["redes","Redes"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}${k==="plantilla"?` (${S.players.length})`:""}</button>`).join("")}</div>`}
 function renewBox(){const L=(S.renew||[]).map(r=>({r,p:pById(r.id)})).filter(x=>x.p);if(!L.length){S.renew=[];return ""}
@@ -1753,7 +1754,7 @@ function viewComp(){
   const ladder=TIERS.map((t,i)=>`<div class="${i===(c?c.tier:S.tierNext)?"us":""}">${i?`${TIERS.length-i}.`:"·"} ${esc(t.n)}${i?"":" (no federada)"} · ${t.teams} equipos · ${(t.teams-1)*2} jornadas${i===(c?c.tier:S.tierNext)?" ← estáis aquí":""}</div>`).reverse().join("");
   if(!c)return `<section class="win"><div class="bar">Pretemporada <small>Temporada ${S.season}</small></div><div class="body"><p>Siguiente: <b>${esc(TIERS[S.tierNext].n)}</b>.</p><div class="ko">${ladder}</div><p class="hint">Suben los dos primeros y bajan los dos últimos. Victoria 3, empate 1, derrota 0.</p></div></section>${S.trophies.length?`<section class="win"><div class="bar">Vitrina</div><div class="body"><p>${S.trophies.map(esc).join(" · ")}</p></div></section>`:""}`;
   const N=c.teams.length;
-  const tbl=`<div class="tblw"><table class="tbl"><thead><tr><th>#</th><th class="t">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>PTS</th></tr></thead><tbody>${sortIdx(c,[...Array(N).keys()]).map((i,k)=>{const r=c.teams[i];return `<tr class="${r.us?"us":""} ${k<2&&c.tier<TIERS.length-1?"up":""} ${k>=N-2&&c.tier>0?"down":""}"><td>${k+1}</td><td class="t">${crestCv(r,18).replace('class="crestcv"','class="crestcv tcrest"')}${!r.us&&S.world&&S.world.clubs[r.n]?`<a class="wlink" data-act="wclub" data-v="${esc(r.n)}">${esc(r.n)}</a>`:esc(r.n)}${r.tag?` <small>${r.tag}</small>`:""}${S.rival&&r.n===S.rival?" <small>⚔</small>":""}</td><td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td><td>${r.gf}</td><td>${r.gc}</td><td>${r.pts}</td></tr>`}).join("")}</tbody></table></div>`;
+  const tbl=`<div class="tblw"><table class="tbl"><thead><tr><th>#</th><th class="t">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>PTS</th></tr></thead><tbody>${sortIdx(c,[...Array(N).keys()]).map((i,k)=>{const r=c.teams[i];return `<tr class="${r.us?"us":""} ${k<2&&c.tier<TIERS.length-1?"up":""} ${k>=N-2&&c.tier>0?"down":""}"><td>${k+1}</td><td class="t">${crestCv(r,18).replace('class="crestcv"','class="crestcv tcrest"')}${!r.us&&S.world&&S.world.clubs[r.n]?`<a class="wlink" data-act="wclub" data-v="${esc(r.n)}">${esc(r.n)}</a>`:esc(r.n)}${r.tag?` <small>${r.tag}</small>`:""}${isRiv(r.n)?" <small>⚔</small>":""}</td><td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td><td>${r.gf}</td><td>${r.gc}</td><td>${r.pts}</td></tr>`}).join("")}</tbody></table></div>`;
   const next=c.rounds[c.r]?c.rounds[c.r].map(m=>`<div class="${m.a===0||m.b===0?"us":""}">${esc(c.teams[m.a].n)} – ${esc(c.teams[m.b].n)}</div>`).join(""):"";
   return `<section class="win"><div class="bar">${esc(c.name)} <small>Temporada ${S.season} · ${esc(c.stage[Math.min(c.r,c.stage.length-1)])}</small></div><div class="body">
    <p class="hint">${N} equipos a ida y vuelta: ${(N-1)*2} jornadas, una por semana. Victoria 3, empate 1, derrota 0. ${c.tier<TIERS.length-1?"Suben los dos primeros.":""} ${c.tier>0?"Bajan los dos últimos.":""}</p>${tbl}
@@ -1977,7 +1978,7 @@ function matchPreview(c,oppIdx,o){
    ${row2(usStr.toFixed(1),"Fuerza",opp.str.toFixed(1),cmp(usStr,opp.str))}
    ${nl?row2(esc(TIERS[c.tier].n),"División",esc(TIERS[opp.tierOf].n),""):row2(`${order.indexOf(0)+1}º`,"Posición",`${order.indexOf(oppIdx)+1}º`,cmp(order.indexOf(oppIdx),order.indexOf(0)))}
    ${nl?"":row2(us.pts,"Puntos",opp.pts,cmp(us.pts,opp.pts))+row2(`${us.gf}:${us.gc}`,"Goles",`${opp.gf}:${opp.gc}`,cmp(us.gf-us.gc,opp.gf-opp.gc))+row2(fc(teamForm(c,0)),"Forma",fc(teamForm(c,oppIdx)),"")}
-   ${row2(esc(teamTop(us,0)),"Pichichi",esc(teamTop(opp,oppIdx)),"")}${S.rival&&opp.n===S.rival?`<div class="mp-r"><span></span><small style="color:#c8233a;font-weight:700">⚔ DERBI</small><span></span></div>`:""}${opp.tag?`<div class="mp-r"><span></span><small>${opp.tag==="↓"?"Recién descendido":"Recién ascendido"}</small><span></span></div>`:""}${friendly?"":rivalReport(opp)}
+   ${row2(esc(teamTop(us,0)),"Pichichi",esc(teamTop(opp,oppIdx)),"")}${isRiv(opp.n)?`<div class="mp-r"><span></span><small style="color:#c8233a;font-weight:700">⚔ ${opp.n===S.rival?"DERBI":"RIVALIDAD: "+esc((S.heat[opp.n].why||[])[0]||"")}</small><span></span></div>`:""}${opp.tag?`<div class="mp-r"><span></span><small>${opp.tag==="↓"?"Recién descendido":"Recién ascendido"}</small><span></span></div>`:""}${friendly?"":rivalReport(opp)}
    ${(()=>{if(friendly)return "";const rf=refFor(c,oppIdx),wt=weatherFor(c,oppIdx);return `<div class="mp-r"><span>${esc(rf.n)}</span><small>Árbitro</small><span>${rf.t==="comprado"?"Muy simpático":REF_T[rf.t]}</span></div><div class="mp-r"><span></span><small>Previsión</small><span>${WEATHER[wt]}</span></div>`})()}
    ${row2(S.formation,"Formación",friendly||c.tier<=1?"¿?":oppForm(opp,c)+(oppForm(opp,c)!==(opp.form0||opp.form)?` (suele ${opp.form0||opp.form})`:""),"")}
    ${friendly?"":(()=>{const st=STY[(studied(opp,c.tier)||{}).style||styleOf(opp)];const info=unl("report")||stf("segundo");return `<div class="mp-r"><span>${(S.tacHist||[]).length?"Tú: "+esc(TACN[(S.tacHist||[]).slice(-1)[0]]||""):""}</span><small>Estilo</small><span>${esc(st.n)}${info&&st.good?` · mejor «${TACN[st.good]}»`:""}</span></div>`})()}
@@ -2255,7 +2256,7 @@ function talkHTML(p,step){
 }
 /* ---------- eventos ---------- */
 const EVENTS=[
- {id:"amanyo",c:()=>S.comp&&S.comp.type==="league"&&(S.reach||0)>=1,t:"Un señor con riñonera te ofrece dinero por perder el próximo partido.",o:[["Aceptar el sobre",()=>{const m=300+curTier()*300;S.money+=m;S.fixNext=true;if(Math.random()<.3){S.comp.teams[0].pts=Math.max(0,S.comp.teams[0].pts-6);S.coach.moral=clamp(S.coach.moral-20,0,100);return `Te pillan. Te quitan 6 puntos y sales en Canal Sur. Te quedas los ${m} €.`}return `Cobras ${m} €. Nadie sospecha nada. De momento.`}],["Echarlo del bar",()=>{S.coach.moral=clamp(S.coach.moral+5,0,100);return "Le echas. Te sientes íntegro durante un rato."}]]},
+ {id:"amanyo",c:()=>S.comp&&S.comp.type==="league"&&(S.reach||0)>=1,t:"Un señor con riñonera te ofrece dinero por perder el próximo partido.",o:[["Aceptar el sobre",()=>{const m=nice((300+curTier()*300)*ek(null,.8));S.money+=m;S.fixNext=true;if(Math.random()<.3){S.comp.teams[0].pts=Math.max(0,S.comp.teams[0].pts-6);S.coach.moral=clamp(S.coach.moral-20,0,100);return `Te pillan. Te quitan 6 puntos y sales en Canal Sur. Te quedas los ${m} €.`}return `Cobras ${m} €. Nadie sospecha nada. De momento.`}],["Echarlo del bar",()=>{S.coach.moral=clamp(S.coach.moral+5,0,100);return "Le echas. Te sientes íntegro durante un rato."}]]},
  {id:"pelea",c:()=>S.players.length>5,t:p=>`${short(p)} sale en el Diario de Sevilla por una pelea en la feria.`,o:[["Multarle",(p)=>{p.conf=clamp((p.conf||0)-20,0,100);S.money+=20;return `${short(p)} paga 20 € y te retira el saludo.`}],["Defenderle en público",(p)=>{if(S.board)S.board.trust=clamp(S.board.trust-10,0,100);p.conf=clamp((p.conf||0)+20,0,100);return `${short(p)} te adora. A la directiva no le hace gracia.`}]]},
  {id:"tele",c:()=>true,t:"La tele local quiere grabar un reportaje del equipo.",o:[["Aceptar",()=>{S.fans=Math.round((S.fans||3)*1.15+5);return "Salís en la tele a la hora de la siesta. Ganáis aficionados."}],["Decir que no",()=>"Se van a grabar a las majorettes."]]},
  {id:"hacienda",c:()=>S.money>300,t:"Hacienda quiere revisar las cuentas del club.",o:[["Pagar un asesor (100 €)",()=>{S.money-=100;return "El asesor lo arregla todo con una carpeta azul."}],["Arriesgarse",()=>{if(Math.random()<.5){const f=Math.round(S.money*.2);S.money-=f;return `Multa de ${f} €. La carpeta azul habría salido más barata.`}return "No encuentran nada. Las cuentas están en una servilleta."}]]},
@@ -2266,6 +2267,10 @@ const EVENTS=[
  {id:"benefico",c:()=>S.players.length>=11,t:"El pueblo de al lado propone un partido benéfico.",o:[["Jugarlo",()=>{const m=60+curTier()*40;S.money+=m;S.players.forEach(x=>x.energy=clamp(x.energy-20,20,100));S.fans=Math.round((S.fans||3)*1.05+2);return `+${m} € y algo de afición. Los jugadores, reventados.`}],["Pasar",()=>"Otra vez será."]]},
  {id:"bus",c:()=>(S.fans||3)>=15,t:"La peña quiere un autobús para ir a los partidos fuera.",o:[["Pagarlo (200 €)",()=>{S.money-=200;S.fans=Math.round((S.fans||3)*1.2);return "La peña crece. El autobús huele a chorizo."}],["No",()=>{S.fans=Math.round((S.fans||3)*.9);return "Algunos se enfadan y se hacen del Marchena."}]]},
  {id:"jeque",c:()=>(S.reach||0)>=7&&S.players.length>11,t:p=>`Un jeque pregunta por ${short(p)}. Ofrece muchísimo dinero.`,best:1,o:[["Venderlo",(p)=>{const m=sellValue(p)*6;S.money+=m;legendCheck(p);S.players=S.players.filter(x=>x!==p);S.lineup=S.lineup.map(x=>x===p.id?null:x);return `${short(p)} se va a Catar por ${m} €.`}],["No se vende",()=>{S.fans=Math.round((S.fans||3)*1.05);return "La afición te aplaude."}]]},
+ {id:"feria",c:()=>!!S.comp,t:"Es la feria del pueblo. Media plantilla quiere ir esta noche.",o:[["Dejarles ir",()=>{S.players.forEach(x=>{x.conf=clamp((x.conf||0)+10,0,100);if(Math.random()<.5)x.hang=2});S.feriaNext=true;return "Vuelven de madrugada con sombreros de cordobés. El próximo partido en casa, la grada llena: taquilla doble."}],["Concentración obligatoria",()=>{S.players.forEach(x=>x.conf=clamp((x.conf||0)-6,0,100));return "Se quedan en casa, rabiando. Sobrios."}]]},
+ {id:"alcaldejuega",c:()=>S.players.length<22,t:"El alcalde quiere jugar con el equipo «para la foto de las elecciones».",o:[["Ficharle",()=>{const p=genPlayer("bar",-10);p.first="Don Ramón";p.mote="El Alcalde";p.sur="(alcalde)";p.age=58;p.known=true;p.pos="DEL";p.wage=0;p.trait="normal";S.players.push(p);S.alcSub=8;return "El alcalde ficha. Durante 8 semanas, el Ayuntamiento os da una subvención extra. Juega fatal, eso sí."}],["Decirle que no",()=>{if(S.board)S.board.trust=clamp(S.board.trust-4,0,100);return "El alcalde se ofende. Ya veremos la próxima subvención."}]]},
+ {id:"rodaje",c:()=>!S.embargo,t:"Una productora quiere rodar una serie en vuestro campo durante dos semanas.",o:[["Alquilárselo",()=>{const m=nice(250*ek(null,.8));S.money+=m;S.mud=2;return `+${m.toLocaleString("es-ES")} €. Os dejan el campo lleno de cables: dos semanas entrenando peor.`}],["No",()=>"Se van a rodar al campo del Marchena. Ahí salen en la tele ellos."]]},
+ {id:"influencer",c:()=>(S.fans||3)>=20,t:"Un influencer de Sevilla quiere grabar un vídeo con el equipo.",o:[["Aceptar",()=>{S.redes=clamp((S.redes||0)+30,-100,100);S.fans=Math.round((S.fans||3)*1.08+3);feedPost("W",{});return "El vídeo tiene 200.000 visitas. Las redes os adoran."}],["Echarle",()=>{S.redes=clamp((S.redes||0)-10,-100,100);return "Sube un vídeo poniéndoos a parir. Las redes se enfadan un poco."}]]},
  {id:"riada",c:()=>(S.field||0)<=1&&!S.embargo,t:"Una tormenta inunda el campo.",o:[["Arreglarlo (120 €)",()=>{S.money-=120;return "Arreglado con cuatro carretillas de albero."}],["Jugar en el barro",()=>{S.mud=2;return "Las dos próximas semanas se entrena peor."}]]}];
 function maybeEvent(){
   if(!S||S.prep||M||Math.random()>.28)return;const list=EVENTS.filter(e=>e.c());if(!list.length)return;const e=pick(list);
@@ -2521,7 +2526,7 @@ function pressQuestions(R){
   if(R.res==="W")qs.push({q:"¿Este año ascienden?",a:[["«Este año subimos, lo firmo.»",()=>{S.fans=Math.round((S.fans||3)*1.06+1);if(S.board)S.board.trust=clamp(S.board.trust+(S.comp&&sortIdx(S.comp,[...Array(S.comp.teams.length).keys()]).indexOf(0)<2?5:-5),0,100);return "La afición se viene arriba. Ahora hay que cumplir."}],["«Partido a partido.»",()=>"Respuesta de manual. Nadie apunta nada."],["«Vamos a ganar la Champions.»",()=>{S.players.forEach(p=>p.conf=clamp((p.conf||0)+3,0,100));S.fans=Math.round((S.fans||3)*1.04+1);if(S.board)S.board.trust=clamp(S.board.trust-4,0,100);return "Los jugadores se lo creen. La directiva, no."}]]});
   if(best)qs.push({q:`Se dice que ${short(best)} quiere irse a un equipo más grande. ¿Qué tiene que decir?`,a:[["«Es intransferible.»",()=>{best.conf=clamp((best.conf||0)+12,0,100);return `${short(best)} se emociona. Más confianza.`}],["«Si pagan, que se vaya.»",()=>{best.conf=clamp((best.conf||0)-15,0,100);S.money+=0;return `${short(best)} se entera por la radio. No le ha sentado bien.`}],["«¿Quién?»",()=>{best.conf=clamp((best.conf||0)-5,0,100);S.fans=Math.round((S.fans||3)*1.02+1);return "Carcajadas en la sala. A él no le hace gracia."}]]});
   if(M&&M.sq.some(x=>x.drunk))qs.push({q:"Varios de sus jugadores olían a cerveza. ¿Algo que decir?",a:[["«Es zumo de manzana.»",()=>"Nadie se lo cree, pero tampoco lo pueden demostrar."],["«Sí, y aun así corren más que los suyos.»",()=>{S.fans=Math.round((S.fans||3)*1.05+1);if(S.board)S.board.trust=clamp(S.board.trust-6,0,100);return "Ovación en el bar. Bronca de la directiva."}],["«Sin comentarios.»",()=>"Siguiente pregunta."]]});
-  qs.push({q:`¿Qué opina de ${R.opN}?`,a:[["«Un rival muy digno.»",()=>"Elegante. Aburrido, pero elegante."],["«Son unos paquetes.»",()=>{S.fans=Math.round((S.fans||3)*1.03+1);S.coach.moral=clamp(S.coach.moral+3,0,100);S.grudge=R.opN;return `En ${R.opN} lo han puesto en el tablón del vestuario. La vuelta va a estar caliente.`}],["«Ni sé de dónde son.»",()=>"Se ríen hasta los de su pueblo."]]});
+  qs.push({q:`¿Qué opina de ${R.opN}?`,a:[["«Un rival muy digno.»",()=>"Elegante. Aburrido, pero elegante."],["«Son unos paquetes.»",()=>{S.fans=Math.round((S.fans||3)*1.03+1);S.coach.moral=clamp(S.coach.moral+3,0,100);S.grudge=R.opN;addHeat(R.opN,1,"les llamaste paquetes en la prensa");return `En ${R.opN} lo han puesto en el tablón del vestuario. La vuelta va a estar caliente.`}],["«Ni sé de dónde son.»",()=>"Se ríen hasta los de su pueblo."]]});
   return qs.sort(()=>Math.random()-.5).slice(0,2);
 }
 function pressStep(){
@@ -2720,7 +2725,7 @@ function houseBox(){
 function viewMister(){
   const c=S.coach;
   const sm=sub("mister");if(sm==="familia")return familyBox();if(sm==="cambios")return feedbackBox();if(sm==="partida")return saveBox();if(sm==="config")return configBox()+(S.voxOff?voicesBox():"");if(sm==="trabajos")return jobsBox();if(sm==="mafia")return mafiaBox();if(sm==="chaparral")return chapaBox();
-  return `<section class="win"><div class="bar">Ficha del entrenador</div><div class="body">
+  return `<section class="win"><div class="bar">Prestigio <small>${esc(CLV[coachLv()][1])}</small></div><div class="body"><div class="meter"><span>Nivel ${coachLv()+1}</span><div class="cmpbar"><i style="width:${CLV[coachLv()+1]?Math.round(((c.xp||0)-CLV[coachLv()][0])/(CLV[coachLv()+1][0]-CLV[coachLv()][0])*100):100}%"></i></div><em>${c.xp||0}</em></div><p class="hint">Cada nivel da un +1 % al equipo en todos los partidos. Se sube ganando (los derbis cuentan doble), con títulos y ascensos.${CLV[coachLv()+1]?` Siguiente: «${CLV[coachLv()+1][1]}» a ${CLV[coachLv()+1][0]} puntos.`:""}</p>${c.ctr?`<p><b>${esc(CTRAITS[c.ctr].n)}.</b> ${esc(CTRAITS[c.ctr].d)}</p>`:""}</div></section><section class="win"><div class="bar">Ficha del entrenador</div><div class="body">
    <div class="ficha"><canvas class="face lg" data-face="coach" width="192" height="192"></canvas>
     <dl><dt>Nombre</dt><dd>${esc(c.name)}</dd><dt>Mote</dt><dd>${esc(c.nick)}</dd><dt>Edad</dt><dd>${c.age} años</dd><dt>Peinado</dt><dd>${HAIRN[c.look.hair]}</dd><dt>Balance</dt><dd>${c.w}G ${c.d}E ${c.l}P</dd><dt>Goles</dt><dd>${c.gf} a favor, ${c.ga} en contra</dd></dl></div>
    <div class="bio">${esc(bio(c))}</div>
@@ -2820,7 +2825,7 @@ function viewPrep(){
     const scSel=P.scPick||S.lastScPick||"";const scorerOpts=arrived.map(p=>`<option value="u${p.id}">${esc(short(p))} (tuyo) · x${scOdds(p)}</option>`).join("")+(fewArrived()?"":opp.roster.map((r,i)=>r.pos==="POR"?"":`<option value="r${i}">${esc(r.n)} (${esc(opp.n)}) · x${rivOdds(r)}</option>`).join(""));
     return matchPreview(c,m.a===0?m.b:m.a)+`<section class="win"><div class="bar">${c.type==="nat"?"Convocatoria":"4 · Llegada"} <small>${arrived.length} ${c.type==="nat"?"disponibles":"en el campo"}</small></div><div class="body">
      <p>${c.type==="nat"?"Convocados":"Han llegado"}: ${arrived.map(p=>esc(short(p))+(P.arrive[p.id].min>0?` (al ${P.arrive[p.id].min}')`:"")).join(", ")||"nadie"}.</p><p class="hint">Ahora que sabes quién ha llegado, monta el once. Los que llegan tarde pueden empezar en el banquillo.</p></div></section>`+lineupSection()+`
-    ${S.bookie?bookieHTML(P,opp,pu,scorerOpts,scSel):`<section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
+    ${c.type==="league"||c.type==="cup"?prePressHTML(P,opp):""}${S.bookie?bookieHTML(P,opp,pu,scorerOpts,scSel):`<section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
      <p class="hint">Se apuesta al resultado de los 90 minutos. A favor o en contra, aquí no se juzga a nadie.${fewArrived()?" Pero con menos de 11 en el campo, Paco no te deja apostar contra tu equipo: sería demasiado fácil.":""}</p>
      <div class="amts">${[5,10,20,50].map(a=>a*Math.max(1,nice(ek(null,.6)))).map(a=>`<button class="btn ${P.amt===a?"sel":""}" data-act="amt" data-v="${a}">${a} €</button>`).join("")}</div>
      <div class="bet"><button class="btn ${P.bets.some(b=>b.pick==="W")?"sel":""}" data-act="bet" data-v="W">${S.natSwap?"Gana España":"Ganan los Papas"}<small>x${P.odds.W}</small></button><button class="btn ${P.bets.some(b=>b.pick==="D")?"sel":""}" data-act="bet" data-v="D">Empate<small>x${P.odds.D}</small></button><button class="btn ${P.bets.some(b=>b.pick==="L")?"sel":""}" data-act="bet" data-v="L" ${fewArrived()?"disabled":""}>Gana el rival<small>${fewArrived()?"bloqueado":"x"+P.odds.L}</small></button></div>
@@ -3431,6 +3436,34 @@ function presInbox(){const ms=(OL.me&&OL.me.msg)||{};const seen=olCfg().mseen||{
 function presBanner(m){let b=$("#olmsg");if(!b){b=document.createElement("div");b.id="olmsg";document.body.appendChild(b)}
   b.innerHTML=`<small>💬 ${esc(m.c||"")}${m.c?" · ":""}${esc(m.f||"Un amigo")}</small><div>${esc(m.t||"")}</div>${m.u?`<button class="btn mini" data-act="olmsgto" data-v="${esc(m.u)}">Responder</button>`:""}`;b.hidden=false;b.classList.remove("in");void b.offsetWidth;b.classList.add("in");
   clearTimeout(presBanner.t);presBanner.t=setTimeout(()=>{b.hidden=true},6000);try{SFX.whistle&&SFX.whistle(1)}catch(e){}}
+/* ================= RIVALIDADES, REDES, PRESTIGIO DEL MÍSTER ================= */
+function addHeat(n,v,why){if(!n||n===clubName())return;S.heat=S.heat||{};const h=S.heat[n]||(S.heat[n]={h:0,why:[]});const was=h.h>=3;h.h=Math.min(9,h.h+v);if(why){h.why.unshift(why);h.why=h.why.slice(0,3)}
+  if(!was&&h.h>=3){addNews(`Nace una rivalidad: ${clubName()} contra ${n}. ${why?why.charAt(0).toUpperCase()+why.slice(1)+".":""}`);feedPost("hate",{opp:n})}}
+const isRiv=n=>!!S&&((S.rival&&n===S.rival)||!!(S.heat&&S.heat[n]&&S.heat[n].h>=3));
+function heatSeason(){Object.keys(S.heat||{}).forEach(n=>{S.heat[n].h--;if(S.heat[n].h<=0)delete S.heat[n]})}
+/* prestigio del míster */
+const CLV=[[0,"Míster de pueblo"],[60,"Entrenador comarcal"],[200,"Técnico regional"],[500,"Entrenador de categoría nacional"],[1200,"Míster de Primera"],[2500,"Leyenda del banquillo"]];
+const coachLv=()=>{const x=(S.coach&&S.coach.xp)||0;let l=0;CLV.forEach((c,i)=>{if(x>=c[0])l=i});return l};
+function coachXP(v,why){const l0=coachLv();S.coach.xp=(S.coach.xp||0)+v;const l1=coachLv();if(l1>l0){addNews(`${S.coach.name} sube de nivel: ahora es «${CLV[l1][1]}». En el bar ya le llaman de usted.`);toast(`¡Nivel de míster: ${CLV[l1][1]}!`)}}
+const CTRAITS={pijo:{n:"El pijo",d:"Viene de un colegio privado. Los patrocinadores le adoran: pagan un 20 % más."},estudioso:{n:"El estudioso",d:"Se ha visto todos los vídeos tácticos de internet. El equipo rinde un 2 % más."},juerguista:{n:"El juerguista",d:"Se va de cañas con la plantilla. Más confianza, más afición… y más resaca."},bruto:{n:"El bruto",d:"Grita como su padre pero el doble. Los gritos en el partido valen más."}};
+const ctr=k=>!!S&&S.coach&&S.coach.ctr===k;
+/* redes sociales del club */
+const HANDLES=["@pepe_cochero","@lamari_fuentes","@ultra_del_bombo","@elmanolo73","@rocio_andaluza","@el_del_bar","@futbolpaleto","@soydelpueblo","@abuela_papas","@curro_ultra","@sevillista_infiltrado","@betico_de_la_calle","@la_peña_del_tractor","@anonimo_enfadao"];
+function feedPost(k,o){o=o||{};const c=S.coach.name.split(" ")[0],club=clubShort(),opp=o.opp||"el rival";const T={
+  W:[`¡¡${club.toUpperCase()} HASTA LA MUERTE!! ${o.sc||""} 🔥`,`${c} es un genio y nadie lo sabe todavía`,`Hoy pago yo las cañas. Bueno, hoy no, el domingo`,`${o.mvp?o.mvp+" es el mejor jugador del mundo, no acepto debate":"Qué equipazo tenemos, señores"}`,`Me he quedado afónico. Merece la pena`],
+  D:[`Empate. Ni fu ni fa. Como mi matrimonio`,`${c}, ¿cambios cuándo? ¿En Navidad?`,`Un punto es un punto, que diría mi abuelo`,`Ni ganamos ni perdemos: lo de siempre`],
+  L:[`#${c.replace(/\s/g,"")}Dimisión`,`Qué vergüenza de equipo, de verdad`,`Me devuelven los 2 € de la entrada o me presento en el bar`,`Con este míster no subimos ni al primer piso`,`${o.sc||""} contra ${opp}. Me voy a hacer del ${opp}`],
+  derbiW:[`¡¡${opp} LLORA!! Derbi para nosotros 😂`,`Que alguien llame a una ambulancia para ${opp}`],derbiL:[`Perder contra ${opp} es lo peor que me ha pasado este año. Y me he divorciado`,`No salgo de casa hasta el próximo derbi`],
+  hate:[`A partir de hoy, ${opp} es el enemigo. Que lo sepan`,`Ya no compro en la panadería del de ${opp}`],up:[`¡¡ASCENSO!! Mañana nadie trabaja`,`De ${o.from||"aquí"} a la gloria`],sign:[`Bienvenido ${o.p}, ya eres de los nuestros`,`¿${o.p}? ¿Quién es ese? Bueno, si lo dice el míster…`]}[k];if(!T)return;
+  S.feed=S.feed||[];const n=k==="W"||k==="L"?2:1;for(let i=0;i<n;i++){S.feed.unshift({h:pick(HANDLES),t:pick(T),k,w:S.week,lk:rnd(1,40)*(S.fans>100?Math.round(S.fans/50):1)})}S.feed=S.feed.slice(0,40)}
+function redesAfter(res,opp,derbi,sc,mvp){S.redes=clamp(Math.round((S.redes||0)*.7+(res==="W"?25:res==="L"?-25:0)*(derbi?1.6:1)),-100,100);feedPost(res,{opp,sc,mvp});if(derbi)feedPost(res==="W"?"derbiW":res==="L"?"derbiL":"D",{opp})}
+function redesWeek(){const r=S.redes||0;if(r>=50){S.fans=Math.round((S.fans||3)*1.02+1);return ["Las redes os adoran: +2 % de afición",0]}if(r<=-50&&S.board){S.board.trust=clamp(S.board.trust-3,0,100);feedPost("L",{});return ["Las redes piden tu cabeza: la directiva se pone nerviosa",0]}return null}
+function prePressHTML(P,opp){const o=[["resp","Respeto al rival","«Es un equipo muy digno.» No pasa nada."],["prov","Provocar","«Les vamos a pintar la cara.» Los dos equipos salen enchufados; la afición se viene arriba."],["humil","Hacerse el pequeño","«Somos un equipo humilde.» El rival se relaja un poco."]];
+  return `<section class="win"><div class="bar">Rueda de prensa previa <small>Radio Fuentes</small></div><div class="body"><p class="hint">«Míster, ¿qué le dice a ${esc(opp.n)}?»</p><div class="list">${o.map(([k,n,d])=>`<div class="offer"><div><b>${n}</b><small>${d}</small></div>${P.prePress===k?`<span class="tag pos">DICHO</span>`:P.prePress?"":`<button class="btn mini" data-act="prepress" data-v="${k}">Decir</button>`}</div>`).join("")}</div></div></section>`}
+function redesBox(){const F=S.feed||[];const r=S.redes||0;return `<section class="win"><div class="bar">Redes del club <small>${r>=50?"😍 os adoran":r>=15?"🙂 contentos":r>-15?"😐 tibios":r>-50?"😠 cabreados":"🔥 piden tu cabeza"}</small></div><div class="body">
+  <div class="meter"><span>Ambiente</span><div class="cmpbar"><i style="width:${Math.round((r+100)/2)}%"></i></div><em>${r}</em></div>
+  <p class="hint">Si el ambiente pasa de 50, la afición crece sola cada semana. Si baja de −50, la directiva pierde confianza en ti.</p>
+  <div class="feed">${F.length?F.map(x=>`<div class="post ${x.k==="L"||x.k==="derbiL"?"bad":x.k==="W"||x.k==="derbiW"||x.k==="up"?"good":""}"><b>${esc(x.h)}</b><p>${esc(x.t)}</p><small>❤ ${x.lk} · semana ${x.w}</small></div>`).join(""):`<p class="hint">Aún nadie ha escrito nada. Juega un partido.</p>`}</div></div></section>`}
 /* ---------- avisos ---------- */
 function olNotify(title,text,tag){
   const seen=olCfg().seen||{};if(tag&&seen[tag])return;if(tag){seen[tag]=Date.now();const k=Object.keys(seen);if(k.length>200)k.sort((a,b)=>seen[a]-seen[b]).slice(0,100).forEach(x=>delete seen[x]);olSetCfg({seen})}
@@ -3804,7 +3837,7 @@ function render(){
   if(S.tab==="pueblo"){S.tab="squad";sub("squad");S.sub.squad="fichar"}if(S.tab==="datos"){S.tab="comp";sub("comp");S.sub.comp="datos"}
   const VIEWS={club:viewClub,squad:viewSquad,comp:()=>{const k=sub("comp");return k==="historia"?historyBox():k==="datos"?viewDatos():k==="copa"?(S.cup?cupSection():`<section class="win"><div class="bar">Copa del Rey</div><div class="body"><p class="hint">La copa se sortea al empezar la temporada.</p></div></section>`):viewComp()},
     online:viewOnline,
-    campo:()=>{const k=sub("campo");return k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
+    campo:()=>{const k=sub("campo");return k==="redes"?redesBox():k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
   v.innerHTML=(S.tab==="club"&&natBlocksClub()?`<div class="natban">${flagSVG(ME,40,"wave")}<span>Ahora toca partido de España.</span><button class="btn mini" data-act="natview" data-v="nat">Ir a España</button></div>`:"")+(S.tab!=="prep"?subBar(S.tab):"")+(VIEWS[S.tab]||viewClub)();
   paintFaces(v);paintCrests(v);olBanner();bgSync();natHeader();
   const fc=$("#fieldcv");if(fc)drawCampo(fc);
@@ -3821,7 +3854,7 @@ function drinkSession(i,t){
   const ps=S.players.filter(p=>!p.injured&&!p.real);const cost=ps.length*2;
   if(S.money<cost){toast(`No te llega ni para las latas (${cost} €).`);return}
   hangTick();S.money-=cost;const out=[];
-  ps.forEach(p=>{const g=rnd(5,11),dg=rnd(4,9)+(p.dep>50?3:0);p.conf=clamp((p.conf||0)+g,0,100);p.dep=clamp((p.dep||0)+dg,0,100);p.drank=true;
+  ps.forEach(p=>{const g=Math.round(rnd(5,11)*(ctr("juerguista")?1.5:1)),dg=rnd(4,9)+(p.dep>50?3:0);p.conf=clamp((p.conf||0)+g,0,100);p.dep=clamp((p.dep||0)+dg,0,100);p.drank=true;
     p.hang=2;p.energy=clamp(p.energy+t.en,20,100)});
   const star=pick(ps);
   if(star)out.push(pick([`${short(star)} se bebe nueve latas y canta el himno del Betis encima del capó.`,`${short(star)} acaba llorando y diciendo que sois su familia.`,`${short(star)} se lleva las latas que sobran «para luego».`,`${short(star)} propone otra ronda. Nadie le dice que no.`,`${short(star)} vomita en la portería sur. Ya tiene red.`]));
@@ -3864,7 +3897,7 @@ function weekTick(){
   S.players.forEach(p=>{if(p.knock>0)p.knock--;if(stf("psico")){p.dep=clamp((p.dep||0)-2*stf("psico"),0,100)}if(p.injured)p.injured--;p.energy=clamp(p.energy+Math.max(25,45-tierNow()*2.5)+(sst("masajista")?8:0),20,100);
     if(!p.drank){if((p.dep||0)>=40){p.conf=clamp((p.conf||0)-8,0,100);p.mono=true}else p.mono=false;p.dep=clamp((p.dep||0)-3,0,100);p.conf=clamp((p.conf||0)-2,0,100)}else p.mono=false;
     p.drank=false;p.hang=0});
-  scoutWeek();try{genTOffer()}catch(e){}
+  scoutWeek();try{genTOffer()}catch(e){}try{const rw=redesWeek();if(rw)addNews(rw[0])}catch(e){}if(S.alcSub>0)S.alcSub--;
   S.reports=(S.reports||[]).slice(0,8);S.tmarket=genTransfers();
   return tot;
 }
@@ -4170,7 +4203,7 @@ function startMatch(olo){
   if(S.adapt>0&&S.comp.type==="league"){M.mod*=.86+.015*(8-S.adapt)}if(has("videoarb"))M.mod*=1.03;
   if(!olo&&S.comp.type!=="online"){M.oppStyle=styleOf(T);const sd=S.comp.type==="nat"?null:studied(T,S.comp.tier);if(sd){M.oppStyle=sd.style;M.studied=true}M.diffK=diffK(1.1,.9)}
   M.ref=refFor(S.comp,opp);M.weather=weatherFor(S.comp,opp);S.fixNext=false;weatherApply();
-  {const tm=tacMods(0,0,M.form,[]);M.oppStr*=tm.opp;M.mod*=reportBonus(T);if(T.tag==="↑")M.omod*=1.03;if(S.rival&&T.n===S.rival)M.derbi=true}
+  {const tm=tacMods(0,0,M.form,[]);M.oppStr*=tm.opp;M.mod*=reportBonus(T);if(T.tag==="↑")M.omod*=1.03;if(isRiv(T.n))M.derbi=true;if(S.grudge&&S.grudge===T.n){M.omod*=1.05;M.grudgeLog=1;S.grudge=null}}
   const ready=sq.filter(p=>arr[p.id]===0);
   S.lineup.forEach((id,i)=>{if(id&&ready.some(p=>p.id===id))M.slots[i]=id});
   const filled=[];M.slots.forEach((id,i)=>{if(id)return;const b=bestFor(roleOf(i),ready.filter(p=>!M.slots.includes(p.id)));if(b){M.slots[i]=b.id;filled.push(b)}});
@@ -4186,7 +4219,9 @@ function startMatch(olo){
   if(!sq.length){addLog(0,"No ha llegado nadie. El árbitro os da el partido por perdido 0-3 por incomparecencia.","bad");M.them=3;M.early="Incomparecencia.";endMatch(false);return}
   if(M.oppStyle){const st=STY[M.oppStyle];addLog(0,M.studied?`El entrenador de ${T.n} os tiene estudiados: siempre jugáis igual. Hoy sale ${st.n} para pillaros.${st.good?` Lo que le hace daño: «${TACN[st.good]}».`:""}`:`${T.n} juega ${st.n}.${st.good&&(unl("report")||stf("segundo"))?` Tu segundo dice: «Con ${TACN[st.good]} les hacemos daño; con ${TACN[st.bad]} nos matan».`:""}`,M.studied?"bad":"ev")}
   if(S.adapt>0&&S.comp.type==="league")addLog(0,`Seguís adaptándoos a la categoría: aquí se corre más y se piensa más rápido. (${S.adapt} partido${S.adapt>1?"s":""} más)`,"bad");
-  if(M.derbi)addLog(0,`¡DERBI contra ${T.n}! Hoy no vale empatar. En la grada hay más tensión que en una boda.`,"goal");
+  if(M.derbi)addLog(0,S.heat&&S.heat[T.n]&&S.heat[T.n].h>=3&&T.n!==S.rival?`¡PARTIDO DE RIVALIDAD contra ${T.n}! Desde que ${S.heat[T.n].why[0]||"pasó lo que pasó"}, esto es la guerra.`:`¡DERBI contra ${T.n}! Hoy no vale empatar. En la grada hay más tensión que en una boda.`,"goal");if(M.grudgeLog)addLog(0,`${T.n} sale picadísimo por lo que dijiste en la prensa. Vienen a por vosotros.`,"bad");
+  {const pp=S.prep&&S.prep.prePress;if(pp==="prov"){M.mod*=1.04;M.omod*=1.04;addLog(0,"Después de tu rueda de prensa, los dos equipos salen como motos.","ev")}else if(pp==="humil"){M.omod*=.98;addLog(0,"El rival se ha creído que sois unos paquetes. Se relajan.","ev")}}
+  if(coachLv())M.mod*=1+coachLv()*.01;if(ctr("estudioso"))M.mod*=1.02;
   addLog(0,`Arbitra ${M.ref.n} (${REF_T[M.ref.t].toLowerCase()}).${M.weather!=="sol"?" "+WEATHER_LOG[M.weather]:""}`,"ev");
   if(P.informe)addLog(0,`Salís como dijo el ojeador: ${S.formation} y «${TACN[M.tactic]}».`,"ev");
   addLog(0,`Pitido inicial en ${v.n}. ${T.n} sale con un ${of}.${FORM_NOTE[of]?" "+FORM_NOTE[of]:""}`,"ev");
@@ -4251,13 +4286,15 @@ function endMatch(normal){
   const betWin=bets.reduce((a,b)=>a+b.pay,0);S.betNet=(S.betNet||0)+betWin-bets.reduce((a,b)=>a+b.amt,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
   const pizzas=Math.max(1,Math.ceil((M.sq.length+1)/3));const free=S.perks.comida>0;const pizzaCost=free?0:nice(pizzas*6*ek(c.tier,.45));S.money-=pizzaCost;led("Pizzería Belsay",-pizzaCost);
   const bote=nice((res==="W"?40+c.tier*30:res==="D"?15+c.tier*10:0)*ek(c.tier,.6));S.money+=bote;led("Bote del torneo por el resultado",bote);
-  const taq=M.ours?Math.round((has("ambigu")?1.2:1)*((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2*ek(S.comp.tier,.5)+Math.round(Math.min((S.fans||3)*TICKETS[S.tprice!=null?S.tprice:2].att,fieldCap())*TICKET[S.comp.tier]*TICKETS[S.tprice!=null?S.tprice:2].pm*(M.derbi?1.5:1)*(has("vip")?1.15:1)*(has("hospitality")?1.1:1)*(sst("taquillero")?1.1:1)*(has("pantalla")?1.05:1)*(has("palcolujo")?1.2:1))):0;S.money+=taq;led("Taquilla",taq);const gtq=M.ours&&glN()?Math.round(taq*.1*glN()):0;if(gtq){S.money+=gtq;led("Taquilla extra por las viejas glorias",gtq)}
+  const taq=M.ours?Math.round((has("ambigu")?1.2:1)*((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2*ek(S.comp.tier,.5)+Math.round(Math.min((S.fans||3)*TICKETS[S.tprice!=null?S.tprice:2].att,fieldCap())*TICKET[S.comp.tier]*TICKETS[S.tprice!=null?S.tprice:2].pm*(M.derbi?1.5:1)*(has("vip")?1.15:1)*(has("hospitality")?1.1:1)*(sst("taquillero")?1.1:1)*(has("pantalla")?1.05:1)*(has("palcolujo")?1.2:1)*(S.feriaNext?2:1))):0;if(M.ours)S.feriaNext=false;S.money+=taq;led("Taquilla",taq);const gtq=M.ours&&glN()?Math.round(taq*.1*glN()):0;if(gtq){S.money+=gtq;led("Taquilla extra por las viejas glorias",gtq)}
   const mvpId=Object.keys(M.goals).sort((a,b)=>M.goals[b]-M.goals[a])[0];
   const pool=onIds().length?onIds():M.sq.map(p=>p.id);
   const mvp=(mvpId&&findAny(+mvpId))||(pool.length&&sqP(pick(pool)))||S.players[0]||null;
   const opN=c.teams[M.opp].n;
   addNews(`${c.stage[c.r]}: ${m.a===0?`${clubName()} ${M.us}-${M.them} ${opN}`:`${opN} ${M.them}-${M.us} ${clubName()}`}.${M.early?" Acabado antes de tiempo.":""}`);
   M.report={home:m.a===0,res,us:M.us,them:M.them,opN,pens:r.pens,win:r.win,scorers:M.scorers,riv:M.rivScorers,own:M.own,inj,reveal,dead:dead.map(fullName),outs:[...M.out].filter(([,w])=>w!=="lesión"&&w!=="DEP").map(([id,w])=>`${short(sqP(id))}: ${w}`),bets,betWin,pizzas,pizzaCost,free,taq,bote,tcost:S.prep.cost||0,mvp,early:M.early};
+  {const on=c.teams[M.opp].n;if(M.them-M.us>=3)addHeat(on,1,`os metieron ${M.them}-${M.us}`);if(M.us-M.them>=4)addHeat(on,1,`les metisteis ${M.us}-${M.them}`);if((M.reds||0)+(M.oreds||0)>=2)addHeat(on,1,"el partido acabó a patadas");if(c.type==="cup"&&r.win!=null&&r.win!==0)addHeat(on,2,"os echaron de la Copa");
+   try{redesAfter(res,on,M.derbi,`${M.us}-${M.them}`,mvp?short(mvp):"")}catch(e){}coachXP(res==="W"?3+(M.derbi?3:0):res==="D"?1:0)}
   if(c.type==="cup")cupAdvance(c);else advance(c);
   {const me=c.teams[0];const pos=c.type==="league"&&me&&me.pts!=null?1+c.teams.filter((t,i)=>i&&(t.pts>me.pts||(t.pts===me.pts&&t.gf-t.gc>me.gf-me.gc))).length:null;
    S.results=[{s:S.season,c:c.name,o:opN,h:m.a===0,us:M.us,them:M.them,r:res,pos}].concat(S.results||[]).slice(0,60)}
@@ -4316,6 +4353,7 @@ function compEnd(){
   const up=pos<=2&&c.tier<TIERS.length-1,down=pos>=N-1&&c.tier>0;S.adapt=up?8:0;
   const nextTier=up?c.tier+1:down?c.tier-1:c.tier;
   const prize=nice(((N-pos+1)*(10+c.tier*12)+(pos===1?100+c.tier*150:0))*EK[c.tier]);S.money+=prize;
+  heatSeason();coachXP(pos===1?50:0);if(up){coachXP(30);feedPost("up",{})}
   if(pos===1){S.trophies.push(`${c.name} ${seasonLbl()}`);S.coach.moral=clamp(S.coach.moral+20,0,100);if(c.type==="league"&&c.tier===TIERS.length-1&&!S.nat){S.nat={offer:true};addNews("La Federación ha llamado al bar preguntando por el míster.")}}
   if(up)S.trophies.push(`Ascenso ${S.season}`);if(down)S.coach.moral=clamp(S.coach.moral-15,0,100);
   const ev=[];
@@ -4429,6 +4467,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  prepress:v=>{const P=S.prep;if(!P||P.prePress)return;P.prePress=v;const opp=reportOpp();if(v==="prov"&&opp){S.fans=Math.round((S.fans||3)*1.02+1);addHeat(opp.n,1,"les provocaste antes del partido");feedPost("hate",{opp:opp.n})}save();render()},
   olwatch:v=>presWatch(v),olwatchoff:()=>{OL.watch=null;closeModal()},olmsgto:v=>{OL.watch=null;presMsgBox(v)},
   olmsgsend:v=>{const t=$("#ol-msg")&&$("#ol-msg").value;presSend(v,t);closeModal()},olmsgq:v=>{const i=v.indexOf("|");presSend(v.slice(0,i),v.slice(i+1));if(!OL.watch)closeModal()},
   glory:v=>gloryDo(v),
@@ -4621,7 +4660,7 @@ const A={
     addLog(M.min,{normal:"Táctica normal.",bus:"Os encerráis atrás. Se cansan menos.",arriba:"¡Al ataque! Se cansan más rápido.",patadon:"Patadón y a correr. Sistema clásico de la Campiña."}[v],"ev")},
   shout:()=>{if(!M||M.ended||M.shouts<=0)return;M.shouts--;$("#m-shout").textContent=`Gritar (${M.shouts})`;if(!M.shouts)$("#m-shout").disabled=true;
     if(S.coach.moral<25){addLog(M.min,"Intentas gritar, pero se te quiebra la voz. Nadie te mira.","bad");return}
-    M.boost=8;addLog(M.min,`${S.coach.nick}: «${pick(SHOUTS)}»`,"ev")},
+    M.boost=ctr("bruto")?14:8;addLog(M.min,`${S.coach.nick}: «${pick(SHOUTS)}»`,"ev")},
   arrfill:()=>{if(!M)return;autoFill();M.hold=false;arrResume()},
   arrpick:()=>{if(!M)return;closeModal();M.paused=false;renderSquad();if(!M.hold){M.timer=setTimeout(run,300)}else toast("Toca un hueco y elige quién entra.")},
   arrok:()=>{if(!M)return;M.hold=false;arrResume()},
