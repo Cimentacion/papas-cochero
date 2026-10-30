@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="14.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="14.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -209,6 +209,7 @@ body.fm .subcmp{background:#262b72;border-color:#c13cf0}
 .euhero{color:#fff;text-align:center;padding:14px 10px;border-radius:8px;margin-bottom:8px;text-shadow:0 2px 4px #0008}.euhero h2{font-family:var(--f-display);letter-spacing:.08em;margin:4px 0}.eustars{color:#ffd23f;letter-spacing:.3em;font-size:13px;animation:trophy 3s infinite}.euhero small{opacity:.85}
 .rkr{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid #0002}.rkr small{display:block;font-size:11px;opacity:.75}.rkr.me{background:#ffd23f55;font-weight:700}.rkr.fr{background:#2fbf6a33}.rkn{font-family:var(--f-mono);font-size:20px;text-align:center}.rkv{text-align:right;font-weight:700}
 .rtl{display:flex;flex-wrap:wrap;gap:5px}.rt{display:inline-flex;align-items:center;gap:3px;background:#0001;border-radius:6px;padding:3px 7px;font-size:13px;line-height:1.3}.rt b{font-family:var(--f-mono);margin-left:3px}.rt.top{background:#2fbf6a44}.rt.bad{background:#c8233a33}
+.place.open{background:#ffd23f22;border-left:4px solid #ffd23f}.placelist{margin:0 0 10px 10px;padding-left:8px;border-left:3px solid #ffd23f}
 .flag{display:inline-block;vertical-align:middle;border-radius:2px;box-shadow:0 1px 2px #0005;flex:none}
 .flag.wave{animation:flagwave 2.6s ease-in-out infinite;transform-origin:left center;border-radius:4px;box-shadow:0 4px 12px #0007}
 @keyframes flagwave{0%,100%{transform:perspective(200px) rotateY(0) skewY(0)}25%{transform:perspective(200px) rotateY(-12deg) skewY(-2deg)}75%{transform:perspective(200px) rotateY(8deg) skewY(2deg)}}
@@ -1733,14 +1734,12 @@ function transferBox(){
 }
 function viewPueblo(){
   const open=S.openPlace;const opened=PLACES.filter(placeOpen);const locked=PLACES.filter(pl=>!placeOpen(pl));
-  const rows=opened.map(pl=>{const n=(S.sites[pl.id]||[]).length;return `<div class="place"><div><b>${esc(pl.n)}</b><p>${esc(pl.d)}</p></div><button class="btn mini ${open===pl.id?"primary":""}" data-act="place" data-v="${pl.id}">${n?`Ver (${n})`:"Nadie"}</button></div>`}).join("");
-  const pl=PLACES.find(x=>x.id===open)||opened[0];const cand=S.sites[pl.id]||[];
+  const rows=opened.map(pl=>{const cs=S.sites[pl.id]||[];const n=cs.length,isO=open===pl.id;return `<div class="place ${isO?"open":""}" id="pl-${pl.id}"><div><b>${esc(pl.n)}</b><p>${esc(pl.d)}</p></div><button class="btn mini ${isO?"primary":""}" data-act="place" data-v="${pl.id}">${isO?"Cerrar ▲":n?`Ver (${n}) ▼`:"Nadie"}</button></div>${isO?`<div class="placelist"><p class="hint">${n} disponible${n===1?"":"s"} · plantilla ${S.players.length}/22</p><div class="list">${n?cs.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div>`:""}`}).join("");
   const cap=HOUSES[S.house||0].scouts;const mine=(S.scouts||[]);
   const scoutRows=SCOUTS.map(sc=>{const hired=mine.includes(sc.id);const lock=(sc.t||0)>(S.reach||0);
     return `<div class="place"><div><b>${esc(sc.n)}</b><p>${esc(sc.d)} Cobra ${sc.w} €/semana${sc.c?` y ${sc.c} € por firmar`:""}.</p></div>${hired?`${(()=>{const t=(S.trips||[]).find(x=>x.sid===sc.id);return t?`<small>De viaje en ${esc(TRIPS.find(x=>x.id===t.dest).n)}, vuelve en ${Math.max(1,t.back-S.week)} sem.</small>`:sc.ojo>=1?`<button class="btn mini primary" data-act="tripui" data-v="${sc.id}">Mandar de viaje</button>`:""})()}<button class="btn mini" data-act="unscout" data-v="${sc.id}">Despedir</button>`:lock?`<span class="hint">Sube de categoría</span>`:`<button class="btn mini primary" data-act="scout" data-v="${sc.id}" ${mine.length>=cap?"disabled":""}>Contratar</button>`}</div>`}).join("");
   S.newRep=0;
   return `${S.reports&&S.reports.length?`<section class="win"><div class="bar">Informes de tus ojeadores <small>Posición confirmada · faltan un 20-25 % menos</small></div><div class="body"><p class="hint">Cada ojeador te trae un jugador nuevo cada vez que pasa una semana (al pasar semana o después de cada partido de liga). Pulsa «Fichar» en el que te guste.</p><div class="list">${S.reports.map(p=>prow(p,"report")).join("")}</div></div></section>`:mine.length?`<section class="win"><div class="bar">Informes de tus ojeadores</div><div class="body"><p class="hint">Cuando pasa la semana (al darle a «Pasar semana» o al jugar el partido de liga), cada ojeador te avisa si ha venido alguien bueno al pueblo. Aparece en su sitio de abajo con la lupa 🔎 y sale en el teletexto. Los partidos online no pasan semanas.</p></div></div></section>`:`<section class="win"><div class="bar">Ojeadores</div><div class="body"><p class="hint">No tienes ningún ojeador contratado. Contrata uno abajo (el primo Rafi es gratis).</p></div></section>`}
-  <section class="win"><div class="bar">${esc(pl.n)} <small>${cand.length} disponibles · plantilla ${S.players.length}/22</small></div><div class="body"><div class="list">${cand.length?cand.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div></section>
   <section class="win"><div class="bar">Sitios de ${HOME} y alrededores <small>${opened.length}/${PLACES.length} descubiertos</small></div><div class="body">
    <p class="hint">Cada semana hay caras nuevas. Los <span class="unk">???</span> no saben ni de qué juegan: se descubre entrenando o jugando. La media va de 1 a 99: aquí, de 10 a 20 ya es mucho.</p>${rows}
    ${locked.length?`<p class="hint">Sin descubrir: ${locked.length} sitios más. Aparecen al subir de categoría.</p>`:""}</div></section>
@@ -2895,7 +2894,7 @@ function viewPrep(){
      <button class="btn play" data-act="trip">Iniciar trayecto</button>
      <div class="row" style="margin-top:6px"><button class="btn mini" data-act="busmode" data-v="0">Organizar a mano (coches, buses de línea…)</button></div></div></section>`}
   if(P.step==="viaje"){
-    const V=vehicles();
+    const V=vehicles();if(S.autoGas)V.forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true});
     const opts=p=>{const list=["casa"];V.forEach(v=>{if(!vehOk(v))return;if(v.driver===p.id||v.driver==null||usable(v))list.push(v.id)});if(canWalk())list.push("pie");P.routes.forEach(r=>list.push("bus:"+r.id));
       return list.map(v=>`<option value="${v}" ${P.assign[p.id]===v?"selected":""}>${esc(optLabel(p,v))}</option>`).join("")};
     const vrows=V.map(v=>{const drv=v.driver!=null?pById(v.driver):null;const occ=seatsUsed(v);const g=gasCost(v);
@@ -2913,7 +2912,7 @@ function viewPrep(){
      <div>${vrows}</div>${routeCards?`<div class="routes">${routeCards}</div>`:""}
      <div class="list">${rows}</div>
      ${unpaid?`<div class="warn">${unpaid} vehículo${unpaid>1?"s":""} con gente dentro y sin gasolina pagada.</div>`:""}
-     <div class="row"><button class="btn mini" data-act="autoassign">Reparto automático</button><span class="hint">Coste: <b>${travelCost()} €</b></span></div>
+     <div class="row"><button class="btn mini" data-act="autoassign">Reparto automático</button><button class="btn mini ${S.autoGas?"primary":""}" data-act="autogas">Gasolina automática: ${S.autoGas?"SÍ":"NO"}</button><span class="hint">Coste: <b>${travelCost()} €</b></span></div>
      ${clubBus()?`<div class="row"><button class="btn mini primary" data-act="busmode" data-v="1">Subirlos a todos al ${esc(clubBus().n.toLowerCase())}</button></div>`:""}
      <button class="btn play" data-act="trip">Iniciar trayecto</button></div></section>`;
   }
@@ -4718,6 +4717,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  autogas:()=>{S.autoGas=!S.autoGas;if(S.autoGas&&S.prep&&S.prep.step==="viaje")vehicles().forEach(v=>{if(!v.own&&vehInUse(v))S.prep.gas[v.id]=true});save();const y=window.scrollY;render();window.scrollTo(0,y);toast(S.autoGas?"Desde ahora se paga la gasolina de todos los coches que se usen.":"Gasolina a mano.")},
   rkcat:v=>{OL.rkCat=v;render()},mksend:()=>mkSend(),mkcancel:v=>mkCancel(v),mkbuy:v=>mkBuy(v),mkno:v=>mkReject(v),
   euplay:()=>euPlay(),eupost:()=>euPost(),euafter:()=>euAfter(),eucancel:()=>euCancel(),eugo:()=>{S.tab="comp";S.sub=S.sub||{};S.sub.comp="europa";save();render();window.scrollTo(0,0)},
   prepress:v=>{const P=S.prep;if(!P||P.prePress)return;P.prePress=v;const opp=reportOpp();if(v==="prov"&&opp){S.fans=Math.round((S.fans||3)*1.02+1);addHeat(opp.n,1,"les provocaste antes del partido");feedPost("hate",{opp:opp.n})}save();render()},
@@ -4797,7 +4797,7 @@ const A={
   "c-nophoto":()=>{C.photo=null;render()},
   "c-sign":()=>{if(!C.name.trim()){toast("Pon un nombre. Aunque sea un mote.");return}startGame();try{scoutWeek();save();render()}catch(e){}},
   nophoto:()=>{S.coach.photo=null;save();render()},
-  place:v=>{S.openPlace=v;save();render();window.scrollTo(0,0)},
+  place:v=>{S.openPlace=S.openPlace===v?null:v;const y=window.scrollY;save();render();window.scrollTo(0,y);if(S.openPlace){const e=document.getElementById("pl-"+v);if(e){const r=e.getBoundingClientRect();if(r.top<130||r.top>window.innerHeight*.6)window.scrollTo(0,window.scrollY+r.top-130)}}},
   drill:v=>runDrill(v),
   job:v=>runJob(v),
   buyt:(v,el)=>{const id=+el.dataset.id;const p=(S.tmarket||[]).find(x=>x.id===id);if(!p)return;if(S.players.length>=22){toast("Plantilla llena: 22.");return}if(S.money<p.fee){toast("No te llega.");return}
