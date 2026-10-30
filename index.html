@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="16.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2496,11 +2496,37 @@ function canteraBox(){
 const MERCH=[{id:"bufanda",n:"Bufanda de punto",d:"Hecha por las abuelas del hogar del pensionista. Se vende en el bar después de los partidos.",c:150,t:0,r:0.104167},{id:"camiseta",n:"Camiseta réplica (talla única: XL)",d:"La equipación del club estampada en el polígono. Al que le quede pequeña, que adelgace.",c:600,t:0,r:0.416667},{id:"taza",n:"Taza con el escudo",d:"El escudo se borra en el tercer lavado. Regalo perfecto para el Día del Padre.",c:100,t:0,r:0.0694444},{id:"calendario",n:"Calendario de la plantilla sin camiseta",d:"Doce meses de barrigas. Las peñas lo compran por pena y las madres por orgullo.",c:400,t:1,r:0.0525924},{id:"colonia",n:"Colonia «Eau de Cochero»",d:"Huele a césped, linimento y aceituna. Se vende en droguerías de toda la provincia.",c:30000,t:3,r:0.285577},{id:"tapas",n:"Bar oficial del club",d:"Una franquicia de bares con el escudo en la puerta: montaditos, cañas y los partidos en la tele.",c:150000,t:4,r:0.375879},{id:"app",n:"App oficial con suscripción",d:"Vídeos de los goles, entrevistas y la cara del míster en pegatinas. Cobra 3 € al mes a los socios.",c:2500000,t:6,r:0.456871},{id:"gira",n:"Gira de verano por Asia",d:"Diez días de amistosos por Japón, Corea y China. Millones de aficionados nuevos que compran camisetas a precio de oro. La mayor fuente de ingresos de un club grande.",c:15000000,t:7,r:0.782317}];
 const merchRate=m=>Math.round(Math.min(m.r*(S.fans||3)*(1+curTier()*.15)*ek(curTier(),.5),m.c/20)*(has("tiendacentro")?1.5:1));
 const merchIncome=()=>!unl("merch")?0:MERCH.filter(m=>(S.merch||{})[m.id]).reduce((a,m)=>a+merchRate(m),0);
+/* ---------- gira de verano por Asia ---------- */
+const GIRA_RIV=[["Tokio Kaminari FC","Tokio","#c8233a"],["Seúl Dragons United","Seúl","#2a5bd7"],["Shanghái Golden Pandas","Shanghái","#e0a00b"]];
+function goGira(){if(!(S.merch||{}).gira||S.phase!=="pre"||S.giraDone===S.season)return;S.giraDone=S.season;
+  const t=curTier();const us=(()=>{try{const pw=power(lineupPlayers(),S.formation,{home:false});return (pw.a+pw.d)/2}catch(e){return TIER_Q[t]}})();
+  const res=GIRA_RIV.map(([n,city,col])=>{const them=TIER_Q[Math.max(0,t-1)]*(0.85+Math.random()*.4);const pu=us/(us+them);const a=Math.max(0,Math.round(pu*3.2+rnd(-1,1))),b=Math.max(0,Math.round((1-pu)*3.2+rnd(-1,1)));return{n,city,col,a,b}});
+  const per=nice(150000*Math.pow(EK[t]/300,.6));const wins=res.filter(r=>r.a>r.b).length;const cash=per*3+nice(per*.5)*wins;const f0=S.fans||3;S.fans=Math.round(f0*(1.06+wins*.03)+5);
+  ledSync();S.money+=cash;led("Gira de verano por Asia",cash);S.players.forEach(p=>p.energy=clamp(p.energy-18,20,100));S.coach.moral=clamp(S.coach.moral+(wins>=2?8:2),0,100);
+  addNews(`${clubName()} vuelve de la gira por Asia: ${res.map(r=>`${r.a}-${r.b} al ${r.n}`).join(", ")}.`);save();render();
+  modal("Gira de verano por Asia",`<canvas class="cinecv" id="giracv" width="640" height="400"></canvas>
+   <div class="sec"><h4>RESULTADOS</h4><ul>${res.map(r=>`<li><b>${esc(r.city)}:</b> ${esc(clubName())} ${r.a} – ${r.b} ${esc(r.n)}</li>`).join("")}</ul></div>
+   <p>Estadios llenos, camisetas a 120 € y fotos con niños que no saben dónde está Fuentes. <b>+${cash.toLocaleString("es-ES")} €</b> y <b>+${(S.fans-f0).toLocaleString("es-ES")} aficionados</b>.</p><p class="hint">Vuelven reventados del viaje: −18 de energía para todos.</p>
+   <button class="btn play" data-act="close">Volver a casa</button>`);
+  const cv=$("#giracv");let g=null;try{g=cv&&cv.getContext("2d")}catch(e){}if(!g)return;const t0=performance.now();const K=ourKit();
+  const pts=[[120,300,"Fuentes"],[500,170,"Tokio"],[440,150,"Seúl"],[400,195,"Shanghái"]];
+  const draw=now=>{if($("#giracv")!==cv||$("#modal").hidden)return;const tt=Math.max(0,(now-t0)/1000),c=g,W=640,H=400;
+    const sk=c.createLinearGradient(0,0,0,H);sk.addColorStop(0,"#0d2a5c");sk.addColorStop(1,"#2a6cb8");c.fillStyle=sk;c.fillRect(0,0,W,H);
+    c.fillStyle="#2f8f5a";[[60,260,140,90],[330,110,200,140],[250,220,90,70],[520,140,50,70]].forEach(([x,y,w,h])=>{c.beginPath();c.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,7);c.fill()});
+    const leg=Math.min(3,Math.floor(tt/2.2)),k=Math.min(1,(tt%2.2)/1.8);
+    c.setLineDash([6,8]);c.strokeStyle="rgba(255,255,255,.6)";c.lineWidth=2;c.beginPath();c.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<=leg;i++)c.lineTo(pts[i][0],pts[i][1]);c.stroke();c.setLineDash([]);
+    pts.forEach(([x,y,n],i)=>{c.fillStyle=i<=leg?"#ffd23f":"#fff8";c.beginPath();c.arc(x,y,6,0,7);c.fill();c.fillStyle="#fff";c.font="bold 14px Archivo Narrow, sans-serif";c.textAlign="center";c.fillText(n,x,y-12);
+      if(i>0&&i<=leg&&res[i-1]){const r=res[i-1];c.fillStyle=r.a>r.b?"#3cff7a":r.a<r.b?"#ff6a6a":"#fff";c.font="18px Bungee, Impact, sans-serif";c.fillText(`${r.a}-${r.b}`,x,y+26)}});
+    if(leg<3){const a=pts[leg],b=pts[leg+1];const x=a[0]+(b[0]-a[0])*k,y=a[1]+(b[1]-a[1])*k-Math.sin(k*Math.PI)*40;const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);
+      c.save();c.translate(x,y);c.rotate(ang);c.fillStyle="#f2f2f2";c.beginPath();c.ellipse(0,0,26,6,0,0,7);c.fill();c.fillStyle=K.c1;c.fillRect(-20,-2,30,4);c.fillStyle="#ddd";c.beginPath();c.moveTo(-4,0);c.lineTo(-14,-20);c.lineTo(-8,-20);c.lineTo(6,0);c.lineTo(-8,20);c.lineTo(-14,20);c.closePath();c.fill();c.restore()}
+    else{c.fillStyle="#ffd23f";c.font="30px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText("¡GIRA COMPLETADA!",320,60)}
+    c.fillStyle="#fff";c.font="18px Bungee, Impact, sans-serif";c.textAlign="left";c.fillText("GIRA DE VERANO · ASIA",16,30);
+    requestAnimationFrame(draw)};requestAnimationFrame(draw)}
 function merchBox(){
   if(!unl("merch"))return lockedBox("Tienda del club","merch");
   return `<section class="win"><div class="bar">Tienda del club <small>${merchIncome()} €/sem</small></div><div class="body"><p class="hint">Lo que se vende depende de cuántos aficionados tengas (${(S.fans||3).toLocaleString("es-ES")}).</p>
    <div class="list">${MERCH.map(m=>{const own=(S.merch||{})[m.id];const w=merchRate(m);const lock=(S.reach||0)<m.t;const pay=w>0?Math.ceil(m.c/w):0;
-     return `<div class="offer"><div><b>${esc(m.n)}</b><small>${esc(m.d)}</small><small>${own?`<b>A la venta: ${eur(w).replace("+","")} por semana.</b>`:lock?`🔒 ${unlTxtShort(m.t)}.`:`Cuesta ${m.c.toLocaleString("es-ES")} € y ahora daría unos <b>${w.toLocaleString("es-ES")} € por semana</b>${pay?` (lo recuperas en ${pay>200?"más de 200":pay} semanas${pay>80?": todavía no compensa, te faltan aficionados":""})`:""}.`}</small></div>${own?`<span class="tag pos">EN VENTA</span>`:lock?`<small class="tag">🔒</small>`:`<button class="btn mini primary" data-act="merch" data-v="${m.id}" ${S.money<m.c?"disabled":""}>${m.c.toLocaleString("es-ES")} €</button>`}</div>`}).join("")}</div></div></section>`;
+     return `<div class="offer"><div><b>${esc(m.n)}</b><small>${esc(m.d)}</small><small>${own?`<b>A la venta: ${w.toLocaleString("es-ES")} € por semana.</b>${m.id==="gira"?(S.giraDone===S.season?" Este verano ya habéis ido.":S.phase==="pre"?" ¡Es pretemporada: podéis iros de gira!":" La gira se hace en pretemporada (una por verano)."):""}`:lock?`🔒 ${unlTxtShort(m.t)}.`:`Cuesta ${m.c.toLocaleString("es-ES")} € y ahora daría unos <b>${w.toLocaleString("es-ES")} € por semana</b>${pay?` (lo recuperas en ${pay>200?"más de 200":pay} semanas${pay>80?": todavía no compensa, te faltan aficionados":""})`:""}.`}</small></div>${own?(m.id==="gira"?(S.phase==="pre"&&S.giraDone!==S.season?`<button class="btn mini primary" data-act="gira">✈️ Irse de gira</button>`:`<span class="tag pos">${S.giraDone===S.season?"GIRA HECHA":"EN VENTA"}</span>`):`<span class="tag pos">EN VENTA</span>`):lock?`<small class="tag">🔒</small>`:`<button class="btn mini primary" data-act="merch" data-v="${m.id}" ${S.money<m.c?"disabled":""}>${m.c.toLocaleString("es-ES")} €</button>`}</div>`}).join("")}</div></div></section>`;
 }
 /* ---------- estrellas ---------- */
 const DEMANDS=[
@@ -5259,6 +5285,7 @@ const A={
   academy:()=>{const lv=S.academy||0,nx=ACAD[lv+1];if(!nx)return;if(S.money<nx.c){toast(`Necesitas ${nx.c} €.`);return}S.money-=nx.c;S.academy=lv+1;S.youth=S.youth||[];if(!S.youth.length)for(let i=0;i<1+S.academy;i++)S.youth.push(genYouth());addNews(`El club monta: ${nx.n}.`);save();render()},
   promote:(v,el)=>{const id=+el.dataset.id;const p=(S.youth||[]).find(x=>x.id===id);if(!p)return;if(S.players.length>=22){toast("Plantilla llena: 22.");return}S.youth=S.youth.filter(x=>x!==p);p.origen="Canterano";p.energy=100;S.players.push(p);S.promoted=(S.promoted||0)+1;if(S.promoted>=3)ach("cantera");addNews(`${fullName(p)} sube de la cantera al primer equipo. Su madre llora en la grada.`);save();render()},
   release:(v,el)=>{const id=+el.dataset.id;S.youth=(S.youth||[]).filter(x=>x.id!==id);save();render()},
+  gira:()=>goGira(),
   merch:v=>{const m=MERCH.find(x=>x.id===v);if(!m||(S.reach||0)<m.t)return;if(S.money<m.c){toast(`Necesitas ${m.c} €.`);return}S.money-=m.c;S.merch=S.merch||{};S.merch[v]=true;addNews(`A la venta: ${m.n}.`);save();render()},
   talk:(v,el)=>{const p=(S.stars||[]).find(x=>x.id===+el.dataset.id);if(!p)return;modal("Negociación",talkHTML(p));paintFaces($("#mod-b"))},
   haggle:(v,el)=>{const p=(S.stars||[]).find(x=>x.id===+el.dataset.id);if(!p)return;p.haggled=true;if(Math.random()<.45){S.stars=S.stars.filter(x=>x!==p);save();render();modal("Negociación",`<p>${esc(p.agent)}: «¿Nos estás tomando el pelo?» Se levantan y se van. ${esc(short(p))} ficha por otro equipo.</p><button class="btn play" data-act="close">Vaya</button>`);return}
