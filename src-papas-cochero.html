@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2926,7 +2926,7 @@ function viewPrep(){
     const us=(pw.a+pw.d)/2,them=opp.str,pu=us/(us+them);
     const od=x=>Math.max(1.15,Math.round(.92/x*10)/10);P.odds={W:od(pu*.75),D:od(.25),L:od((1-pu)*.75)};
     const scSel=P.scPick||S.lastScPick||"";const scorerOpts=arrived.map(p=>`<option value="u${p.id}">${esc(short(p))} (tuyo) · x${scOdds(p)}</option>`).join("")+(fewArrived()?"":opp.roster.map((r,i)=>r.pos==="POR"?"":`<option value="r${i}">${esc(r.n)} (${esc(opp.n)}) · x${rivOdds(r)}</option>`).join(""));
-    return matchPreview(c,m.a===0?m.b:m.a)+`<section class="win"><div class="bar">${c.type==="nat"?"Convocatoria":"4 · Llegada"} <small>${arrived.length} ${c.type==="nat"?"disponibles":"en el campo"}</small></div><div class="body">
+    return (P.ol?"":`<div style="margin:0 0 10px"><button class="btn play" data-act="kick">Saltar al campo</button></div>`)+matchPreview(c,m.a===0?m.b:m.a)+`<section class="win"><div class="bar">${c.type==="nat"?"Convocatoria":"4 · Llegada"} <small>${arrived.length} ${c.type==="nat"?"disponibles":"en el campo"}</small></div><div class="body">
      <p>${c.type==="nat"?"Convocados":"Han llegado"}: ${arrived.map(p=>esc(short(p))+(P.arrive[p.id].min>0?` (al ${P.arrive[p.id].min}')`:"")).join(", ")||"nadie"}.</p><p class="hint">Ahora que sabes quién ha llegado, monta el once. Los que llegan tarde pueden empezar en el banquillo.</p>${c.type==="euro"?`<div class="pc-act"><button class="btn mini" data-act="eucancel">Dejarlo para luego</button></div>`:""}</div></section>`+lineupSection()+`
     ${c.type==="league"||c.type==="cup"?prePressHTML(P,opp):""}${S.bookie?bookieHTML(P,opp,pu,scorerOpts,scSel):`<section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
      <p class="hint">Se apuesta al resultado de los 90 minutos. A favor o en contra, aquí no se juzga a nadie.${fewArrived()?" Pero con menos de 11 en el campo, Paco no te deja apostar contra tu equipo: sería demasiado fácil.":""}</p>
