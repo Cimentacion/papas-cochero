@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -272,9 +272,9 @@ body.fm .bub.them{background:#232766;border-color:#3a3f8a}body.fm .bub.me{backgr
 .pfc{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}.ppos{font-family:var(--f-display);font-size:20px;line-height:1;background:#000;color:#ffd23f;padding:4px 6px;min-width:56px;text-align:center}.ppos.unk{color:#ff6b6b}
 .pcount{position:sticky;top:calc(var(--toph,64px) + 52px);z-index:4;background:#000;color:#ffd23f;padding:6px 10px;margin:-4px 0 8px;font-size:14px}.pcount b{font-size:18px}
 .plink{cursor:pointer;text-decoration:underline dotted;color:inherit}.plink small{font-size:11px;opacity:.7;text-decoration:none}
-.pcard{position:relative;overflow:hidden;border-radius:14px;padding:14px;color:#1b1b1b;border:3px solid #0006;box-shadow:inset 0 0 0 2px #fff5,0 8px 24px #0006}
-.pcard>*{position:relative}.pc-shine{position:absolute!important;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 48%,transparent 56%);animation:pcshine 4.5s ease-in-out infinite;pointer-events:none;z-index:2}
-@keyframes pcshine{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+.pcard{position:relative;overflow:hidden;overflow:clip;touch-action:pan-y;border-radius:14px;padding:14px;color:#1b1b1b;border:3px solid #0006;box-shadow:inset 0 0 0 2px #fff5,0 8px 24px #0006}
+.pcard>*{position:relative}.pc-shine{position:absolute!important;inset:0;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.45) 50%,transparent 58%);background-size:300% 100%;background-repeat:no-repeat;animation:pcshine 4.5s ease-in-out infinite;pointer-events:none;z-index:2;touch-action:pan-y}
+@keyframes pcshine{0%{background-position:100% 0}55%,100%{background-position:0 0}}
 .pc-tier{position:absolute!important;top:0;right:0;font-family:var(--f-display);font-size:10px;letter-spacing:.12em;padding:3px 10px;border-bottom-left-radius:10px;background:#0008;color:#fff;z-index:3}
 .pcard.elite{background:linear-gradient(160deg,#e8d9ff,#8a5bd7 40%,#2b1a5c);color:#fff}.pcard.elite .pc-ovr{background:#fff3;border-color:#fff8}.pcard.elite .pc-stats>div{background:#fff2}.pcard.elite .hint{color:#eee}.pcard.elite .pcb b{color:#fff!important}.pcard.elite .pc-chips span{background:#fff3}.pcard.elite .pc-sub{opacity:1}
 .pcard.icon{background:linear-gradient(160deg,#ffffff,#f4e7c1 40%,#c8a24a);border-color:#8a6a1a}.pcard.icon .pc-tier{background:#8a6a1a}
@@ -338,7 +338,7 @@ nav.tabs button.sel{background:var(--desk2);color:var(--gold);border-color:#000 
 .holdb{background:#000;color:var(--gold);font-family:var(--f-mono);font-size:18px;padding:6px 8px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 #modal{position:fixed;inset:0;z-index:30;background:rgba(5,10,30,.72);display:flex;align-items:center;justify-content:center;padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px));padding-left:var(--gut);padding-right:var(--gutr)}
 #modal .win{width:100%;max-width:520px;max-height:100%;display:flex;flex-direction:column}
-#modal .body{overflow:auto}
+#modal .body{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 .res{font-family:var(--f-display);font-size:20px;text-align:center;line-height:1.2;text-wrap:balance}
 .res em{display:block;font-style:normal;font-size:13px;color:var(--red);letter-spacing:.08em}
 .res.w em{color:var(--green)}
