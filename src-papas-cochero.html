@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="14.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -210,6 +210,7 @@ body.fm .subcmp{background:#262b72;border-color:#c13cf0}
 .rkr{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid #0002}.rkr small{display:block;font-size:11px;opacity:.75}.rkr.me{background:#ffd23f55;font-weight:700}.rkr.fr{background:#2fbf6a33}.rkn{font-family:var(--f-mono);font-size:20px;text-align:center}.rkv{text-align:right;font-weight:700}
 .rtl{display:flex;flex-wrap:wrap;gap:5px}.rt{display:inline-flex;align-items:center;gap:3px;background:#0001;border-radius:6px;padding:3px 7px;font-size:13px;line-height:1.3}.rt b{font-family:var(--f-mono);margin-left:3px}.rt.top{background:#2fbf6a44}.rt.bad{background:#c8233a33}
 .place.open{background:#ffd23f22;border-left:4px solid #ffd23f}.placelist{margin:0 0 10px 10px;padding-left:8px;border-left:3px solid #ffd23f}
+.trd{margin:8px 0;border:1px solid #0002;border-radius:6px;padding:4px 8px}.trd summary{cursor:pointer;font-weight:700;padding:4px 0}
 .flag{display:inline-block;vertical-align:middle;border-radius:2px;box-shadow:0 1px 2px #0005;flex:none}
 .flag.wave{animation:flagwave 2.6s ease-in-out infinite;transform-origin:left center;border-radius:4px;box-shadow:0 4px 12px #0007}
 @keyframes flagwave{0%,100%{transform:perspective(200px) rotateY(0) skewY(0)}25%{transform:perspective(200px) rotateY(-12deg) skewY(-2deg)}75%{transform:perspective(200px) rotateY(8deg) skewY(2deg)}}
@@ -2837,10 +2838,11 @@ function viewMister(){
 const prepLocked=()=>!!(S&&(S.olSwap||S.natSwap||S.euroSwap||(S.prep&&S.prep.step!=="conv")));
 function startPrep(){
   if(S.prep){S.tab="prep";save();render();window.scrollTo(0,0);return}
+  const xi0=S.lineup.slice();
   if(!S.natSwap&&!S.euroSwap&&S.comp&&S.comp.type!=="online"&&euBlocksClub()){toast("Ahora toca partido europeo: Torneo › Europa.");S.tab="comp";S.sub=S.sub||{};S.sub.comp="europa";render();return}
   if(!S.natSwap&&S.comp&&S.comp.type!=="online"&&natBlocksClub()){toast("Ahora le toca jugar a España. Toca el nombre del club, arriba, y cambia a España.");return}
   const m=ourFixture();if(!m)return;const v=venueOf(m);
-  S.prep={step:"conv",venue:v,conv:{},absent:{},assign:{},gas:{},routes:(!v.ours&&v.town!==HOME&&v.d>=5)?genRoutes(v.town):[],bets:[],amt:10,arrive:null,cost:0};
+  S.prep={step:"conv",venue:v,conv:{},absent:{},assign:{},gas:{},routes:(!v.ours&&v.town!==HOME&&v.d>=5)?genRoutes(v.town):[],bets:[],amt:10,arrive:null,cost:0,xi0};
   const lined=new Set(S.lineup.filter(Boolean));const av=S.players.filter(p=>!p.injured);
   av.forEach(p=>{if(lined.has(p.id))S.prep.conv[p.id]=true});
   av.filter(p=>!lined.has(p.id)).sort((a,b)=>shownOvr(b)-shownOvr(a)).slice(0,Math.max(0,18-lined.size)).forEach(p=>S.prep.conv[p.id]=true);
@@ -2874,6 +2876,7 @@ function viewPrep(){
     const inj=S.players.filter(p=>p.injured);
     const seats=av.filter(p=>P.conv[p.id]&&p.veh).reduce((a,p)=>a+p.veh.plazas,0)+(!S.coach.story.carnet?3:S.coach.story.madre?2:0);
     return head+`<section class="win"><div class="bar">1 · Convocatoria <small>${n} avisados · ${seats} plazas en vehículos</small></div><div class="body">
+     <div class="row"><button class="btn" data-act="${OLc?"olcancel":"tab"}" data-v="club">Volver</button><button class="btn primary" data-act="conv-ok" style="flex:1">Avisar a los ${n}</button></div>
      <p class="hint">Elige a quién avisas. Fíjate en quién trae coche: luego hay que subir a todos. ${inj.length?`Lesionados: ${inj.map(p=>esc(short(p))).join(", ")}.`:""}</p>
      <div class="list">${rows}</div>
      <div class="row"><button class="btn" data-act="${OLc?"olcancel":"tab"}" data-v="club">Volver</button><button class="btn primary" data-act="conv-ok" style="flex:1">Avisar a los ${n}</button></div></div></section>`;
@@ -2888,16 +2891,16 @@ function viewPrep(){
   }
   if(P.step==="viaje"&&P.busMode&&clubBus()){const B=clubBus();const ins=goers().filter(p=>P.assign[p.id]===B.id),rest=goers().filter(p=>P.assign[p.id]&&P.assign[p.id]!==B.id&&P.assign[p.id]!=="casa");
     return head+`<section class="win"><div class="bar">3 · Viaje en el ${esc(B.n)} <small>${P.venue.town===HOME?"dentro del pueblo":km(P.venue.d)+" km"}</small></div><div class="body">
+     <button class="btn play" data-act="trip">Iniciar trayecto</button>
      <p>Todo el mundo al ${esc(B.n.toLowerCase())}. ${ins.length} dentro${rest.length?`; ${rest.length} no caben y van por su cuenta`:""}. Gasolina incluida.</p>
      <p class="hint">${ins.map(p=>esc(short(p))).join(", ")}${rest.length?` · Por su cuenta: ${rest.map(p=>esc(short(p))).join(", ")}`:""}</p>
      <p class="hint">Coste del viaje: <b>${travelCost()} €</b>.</p>
-     <button class="btn play" data-act="trip">Iniciar trayecto</button>
      <div class="row" style="margin-top:6px"><button class="btn mini" data-act="busmode" data-v="0">Organizar a mano (coches, buses de línea…)</button></div></div></section>`}
   if(P.step==="viaje"){
     const V=vehicles();if(S.autoGas)V.forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true});
     const opts=p=>{const list=["casa"];V.forEach(v=>{if(!vehOk(v))return;if(v.driver===p.id||v.driver==null||usable(v))list.push(v.id)});if(canWalk())list.push("pie");P.routes.forEach(r=>list.push("bus:"+r.id));
       return list.map(v=>`<option value="${v}" ${P.assign[p.id]===v?"selected":""}>${esc(optLabel(p,v))}</option>`).join("")};
-    const vrows=V.map(v=>{const drv=v.driver!=null?pById(v.driver):null;const occ=seatsUsed(v);const g=gasCost(v);
+    const vrows=V.filter(v=>v.own||vehInUse(v)).map(v=>{const drv=v.driver!=null?pById(v.driver):null;const occ=seatsUsed(v);const g=gasCost(v);
       return `<div class="veh"><div><b>${esc(v.n)}</b><small>${occ}/${v.seats} pasajeros${!vehOk(v)?" · no llega tan lejos":drv&&!usable(v)?" · el conductor no la lleva":""} · ${v.type==="vespa"||v.type==="moto"?"riesgo de control":v.slow?"muy lento":"avería "+Math.round(v.brk*100)+" %"}</small></div>
        ${v.own?`<small>Tu coche</small>`:`<button class="btn mini ${P.gas[v.id]?"primary":""}" data-act="gas" data-v="${v.id}">${P.gas[v.id]?`Gasolina pagada · ${g} €`:`Pagar gasolina · ${g} €`}</button>`}</div>`}).join("")||`<p class="hint">No hay ningún vehículo.</p>`;
     const unpaid=V.filter(v=>!v.own&&vehInUse(v)&&!P.gas[v.id]).length;
@@ -2906,15 +2909,16 @@ function viewPrep(){
        <ol>${r.legs.map(l=>`<li>${hhmm(l.dep)} ${esc(l.from)} → ${hhmm(l.arr)} ${esc(l.to)}${l.wait?` · espera ${l.wait}′`:""}</li>`).join("")}</ol>
        <small>${(r.cost*2).toFixed(2).replace(".",",")} € por cabeza, ida y vuelta · fiabilidad ${Math.round(r.rel*100)} % · ${esc(r.note)} · Van: ${n}</small></div>`}).join("");
     const rows=goers().map(p=>`<div class="crow"><div class="tb">${posLabel(p)}</div><div class="cn"><b>${esc(short(p))}</b><small>Energía ${p.energy}${p.veh?` · ${esc(p.veh.n)}`:""}</small></div><select data-pid="${p.id}" aria-label="Cómo va ${esc(short(p))}">${opts(p)}</select></div>`).join("");
+    const inCar=goers().filter(p=>P.assign[p.id]&&P.assign[p.id]!=="casa").length,stay=goers().length-inCar;
     return head+`<section class="win"><div class="bar">3 · Itinerario <small>${P.venue.town===HOME?"dentro del pueblo":km(P.venue.d)+" km"}</small></div><div class="body">
-     ${P.routes.length?`<canvas class="mapcv" id="mapcv" width="320" height="200"></canvas>`:""}
-     <p class="hint">${P.venue.town===HOME?`Se juega en el pueblo, a ${km(P.venue.d)} km de la plaza. Coches, motos o andando, que andando se llega tarde y sudado.`:"No hay dinero para alquilar un autobús. Coches, motos o el bus de línea con sus transbordos."} Si no pagas la gasolina, el conductor no arranca.</p>
-     <div>${vrows}</div>${routeCards?`<div class="routes">${routeCards}</div>`:""}
-     <div class="list">${rows}</div>
-     ${unpaid?`<div class="warn">${unpaid} vehículo${unpaid>1?"s":""} con gente dentro y sin gasolina pagada.</div>`:""}
-     <div class="row"><button class="btn mini" data-act="autoassign">Reparto automático</button><button class="btn mini ${S.autoGas?"primary":""}" data-act="autogas">Gasolina automática: ${S.autoGas?"SÍ":"NO"}</button><span class="hint">Coste: <b>${travelCost()} €</b></span></div>
+     <button class="btn play" data-act="trip">Iniciar trayecto</button>
+     <div class="row" style="margin-top:6px"><button class="btn mini ${S.autoGas?"primary":""}" data-act="autogas">⛽ Gasolina automática: ${S.autoGas?"SÍ":"NO"}</button><span class="hint">Coste: <b>${travelCost()} €</b> · van ${inCar}${stay?` · se quedan ${stay}`:""}</span></div>
+     ${unpaid?`<div class="warn">${unpaid} vehículo${unpaid>1?"s":""} con gente dentro y sin gasolina pagada: si no la pagas, no arrancan.</div><div class="row"><button class="btn primary" data-act="gasall" style="flex:1">⛽ Pagar la gasolina de todos</button></div>`:""}
+     <div class="gasl">${vrows}</div>
      ${clubBus()?`<div class="row"><button class="btn mini primary" data-act="busmode" data-v="1">Subirlos a todos al ${esc(clubBus().n.toLowerCase())}</button></div>`:""}
-     <button class="btn play" data-act="trip">Iniciar trayecto</button></div></section>`;
+     <details class="trd"><summary>Quién va en cada coche (${goers().length})</summary><div class="row"><button class="btn mini" data-act="autoassign">Reparto automático</button></div><div class="list">${rows}</div></details>
+     ${P.routes.length?`<details class="trd"><summary>Mapa y autobuses de línea</summary><canvas class="mapcv" id="mapcv" width="320" height="200"></canvas>${routeCards?`<div class="routes">${routeCards}</div>`:""}</details>`:""}
+     <p class="hint">${P.venue.town===HOME?`Se juega en el pueblo, a ${km(P.venue.d)} km de la plaza.`:"No hay dinero para alquilar un autobús: coches, motos o el bus de línea."}</p></div></section>`;
   }
   if(P.step==="apuestas"){
     const arrived=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90);
@@ -4717,6 +4721,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  gasall:()=>{const P=S.prep;if(!P)return;vehicles().forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true});save();const y=window.scrollY;render();window.scrollTo(0,y)},
   autogas:()=>{S.autoGas=!S.autoGas;if(S.autoGas&&S.prep&&S.prep.step==="viaje")vehicles().forEach(v=>{if(!v.own&&vehInUse(v))S.prep.gas[v.id]=true});save();const y=window.scrollY;render();window.scrollTo(0,y);toast(S.autoGas?"Desde ahora se paga la gasolina de todos los coches que se usen.":"Gasolina a mano.")},
   rkcat:v=>{OL.rkCat=v;render()},mksend:()=>mkSend(),mkcancel:v=>mkCancel(v),mkbuy:v=>mkBuy(v),mkno:v=>mkReject(v),
   euplay:()=>euPlay(),eupost:()=>euPost(),euafter:()=>euAfter(),eucancel:()=>euCancel(),eugo:()=>{S.tab="comp";S.sub=S.sub||{};S.sub.comp="europa";save();render();window.scrollTo(0,0)},
@@ -4894,7 +4899,9 @@ const A={
     ledSync();S.money-=P.amt;b.amt=P.amt;P.bets.push(b);led(`Apuesta: ${b.label}`,-P.amt);save();render();toast(`✔ Apostados ${P.amt} € a ${b.label}. Si aciertas cobras ${Math.round(P.amt*b.odds)} €.`)},
   kick:()=>startMatch(),
   form:v=>setFormation(v,false),
-  auto:()=>{autoLineup();save();render();toast("Once hecho a ojo de buen cubero.")},
+  auto:()=>{const P=S.prep;if(P&&P.xi0){const ok=id=>{const p=pById(id);return p&&prepAvail(p)&&!(P.arrive&&P.arrive[id]&&P.arrive[id].min>0)};const keep=P.xi0.map(id=>id&&ok(id)?id:null);const roles=FORMS[S.formation];
+      const pool=S.players.filter(p=>ok(p.id)&&!keep.includes(p.id)).map(p=>({...p,mE:p.energy}));let filled=0;keep.forEach((id,i)=>{if(id)return;const b=bestFor(roles[i],pool.filter(x=>!keep.includes(x.id)));if(b){keep[i]=b.id;filled++}});S.lineup=keep;save();render();toast(filled?`Tu once de siempre. Faltan ${filled}: entran suplentes.`:"Tu once de siempre.");return}
+    autoLineup();save();render();toast("Once hecho a ojo de buen cubero.")},
   fire:(v,el)=>{const id=+el.dataset.id;
     if(pendingFire!==id){pendingFire=id;render();return}
     const p=pById(id);legendCheck(p);S.players=S.players.filter(x=>x.id!==id);S.lineup=S.lineup.map(x=>x===id?null:x);pendingFire=null;addNews(`${short(p)} deja el equipo. Se lleva el peto.`);save();render();toast(`${short(p)} se va a su casa.`)},
