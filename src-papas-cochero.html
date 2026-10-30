@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="12.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="12.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -376,10 +376,9 @@ body.fm .sw{border-color:#343a7c;border-radius:5px}
     <div class="mform"><label for="m-form">FORMACIÓN</label><select id="m-form"></select></div>
     <div class="mrow">
       <button class="btn primary" data-act="shout" id="m-shout">Gritar (3)</button>
-      <button class="btn" data-act="pause" id="m-pause">Pausa</button>
+      <button class="btn primary" data-act="subui" id="m-sub">Cambio (0/5)</button>
       <button class="btn" data-act="speed" id="m-speed">Normal</button>
       <button class="btn" data-act="skip">Al final</button>
-      <button class="btn primary" data-act="subui" id="m-sub">Cambio (0/5)</button>
     </div>
   </div>
   <button class="btn play" id="m-done" data-act="post1" hidden>Rueda de prensa</button>
@@ -939,6 +938,11 @@ const goers=()=>S.players.filter(p=>S.prep.conv[p.id]&&!S.prep.absent[p.id]);
 const canWalk=()=>S.prep.venue.d<5;
 function bestRoute(){const R=S.prep.routes;if(!R.length)return null;return R.filter(r=>r.arr<=KO).sort((a,b)=>b.rel-a.rel)[0]||R[0]}
 function fallbackMode(){if(canWalk())return "pie";const r=bestRoute();return r?"bus:"+r.id:"casa"}
+function clubBus(){const V=vehicles();return V.filter(v=>CLUBVEH.some(x=>x.id===v.id)&&vehOk(v)).sort((a,b)=>b.seats-a.seats)[0]||null}
+function busAssign(){const P=S.prep,B=clubBus();if(!B)return;P.assign={};let n=0;const g=goers().sort((a,b)=>ovr(b)-ovr(a));
+  g.forEach(p=>{if(n<B.seats){P.assign[p.id]=B.id;n++}});
+  const V=vehicles();g.filter(p=>!P.assign[p.id]).forEach(p=>{const own=V.find(v=>v.driver===p.id&&vehOk(v));if(own){P.assign[p.id]=own.id;return}const v=V.find(v=>vehOk(v)&&usable(v)&&v.id!==B.id&&seatsUsed(v)<v.seats);P.assign[p.id]=v?v.id:fallbackMode()});
+  P.gas[B.id]=true;V.forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true})}
 function autoAssign(){
   const P=S.prep;P.assign={};const V=vehicles();
   goers().forEach(p=>{const v=V.find(v=>v.driver===p.id);if(v&&vehOk(v))P.assign[p.id]=v.id});
@@ -2610,6 +2614,13 @@ function viewPrep(){
      ${g.length<11?`<p class="tag bad">Sois menos de 11. Se jugará con huecos.</p>`:""}
      <button class="btn play" data-act="to-trip">Subir a la gente</button></div></section>`;
   }
+  if(P.step==="viaje"&&P.busMode&&clubBus()){const B=clubBus();const ins=goers().filter(p=>P.assign[p.id]===B.id),rest=goers().filter(p=>P.assign[p.id]&&P.assign[p.id]!==B.id&&P.assign[p.id]!=="casa");
+    return head+`<section class="win"><div class="bar">3 · Viaje en el ${esc(B.n)} <small>${P.venue.town===HOME?"dentro del pueblo":km(P.venue.d)+" km"}</small></div><div class="body">
+     <p>Todo el mundo al ${esc(B.n.toLowerCase())}. ${ins.length} dentro${rest.length?`; ${rest.length} no caben y van por su cuenta`:""}. Gasolina incluida.</p>
+     <p class="hint">${ins.map(p=>esc(short(p))).join(", ")}${rest.length?` · Por su cuenta: ${rest.map(p=>esc(short(p))).join(", ")}`:""}</p>
+     <p class="hint">Coste del viaje: <b>${travelCost()} €</b>.</p>
+     <button class="btn play" data-act="trip">Iniciar trayecto</button>
+     <div class="row" style="margin-top:6px"><button class="btn mini" data-act="busmode" data-v="0">Organizar a mano (coches, buses de línea…)</button></div></div></section>`}
   if(P.step==="viaje"){
     const V=vehicles();
     const opts=p=>{const list=["casa"];V.forEach(v=>{if(!vehOk(v))return;if(v.driver===p.id||v.driver==null||usable(v))list.push(v.id)});if(canWalk())list.push("pie");P.routes.forEach(r=>list.push("bus:"+r.id));
@@ -2630,6 +2641,7 @@ function viewPrep(){
      <div class="list">${rows}</div>
      ${unpaid?`<div class="warn">${unpaid} vehículo${unpaid>1?"s":""} con gente dentro y sin gasolina pagada.</div>`:""}
      <div class="row"><button class="btn mini" data-act="autoassign">Reparto automático</button><span class="hint">Coste: <b>${travelCost()} €</b></span></div>
+     ${clubBus()?`<div class="row"><button class="btn mini primary" data-act="busmode" data-v="1">Subirlos a todos al ${esc(clubBus().n.toLowerCase())}</button></div>`:""}
      <button class="btn play" data-act="trip">Iniciar trayecto</button></div></section>`;
   }
   if(P.step==="apuestas"){
@@ -3420,7 +3432,7 @@ function startMatch(olo){
   document.querySelectorAll("[data-act=tac]").forEach(b=>b.classList.toggle("sel",b.dataset.v==="normal"));
   $("#m-form").innerHTML=Object.keys(FORMS).map(f=>`<option value="${f}" ${f===M.form?"selected":""}>${f}</option>`).join("");
   voxInit();vo("intro",null,true);
-  $("#m-shout").textContent="Gritar (3)";$("#m-shout").disabled=false;$("#m-speed").textContent="Normal";$("#m-pause").textContent="Pausa";$("#m-pause").classList.remove("paused");
+  $("#m-shout").textContent="Gritar (3)";$("#m-shout").disabled=false;$("#m-speed").textContent="Normal";{const mp=$("#m-pause");if(mp){mp.textContent="Pausa";mp.classList.remove("paused")}}
   $("#match").hidden=false;$("#match").scrollTop=0;
   if(!sq.length){addLog(0,"No ha llegado nadie. El árbitro os da el partido por perdido 0-3 por incomparecencia.","bad");M.them=3;M.early="Incomparecencia.";endMatch(false);return}
   if(M.oppStyle){const st=STY[M.oppStyle];addLog(0,M.studied?`El entrenador de ${T.n} os tiene estudiados: siempre jugáis igual. Hoy sale ${st.n} para pillaros.${st.good?` Lo que le hace daño: «${TACN[st.good]}».`:""}`:`${T.n} juega ${st.n}.${st.good&&(unl("report")||stf("segundo"))?` Tu segundo dice: «Con ${TACN[st.good]} les hacemos daño; con ${TACN[st.bad]} nos matan».`:""}`,M.studied?"bad":"ev")}
@@ -3795,7 +3807,8 @@ const A={
   "conv-ok":()=>{const P=S.prep;const ids=Object.keys(P.conv).map(Number);if(!ids.length){toast("No has avisado a nadie.");return}
     P.absent={};ids.forEach(id=>{const p=pById(id);if(!p)return;p.nconv=(p.nconv||0)+1;const hk=HOUSES[S.house||0].abs*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1)*(p.rel||1);for(const[w,t]of ABS){if(Math.random()<w(p)*hk){P.absent[id]=t(p);break}}});
     Object.keys(P.absent).forEach(id=>{const p=pById(+id);if(p){p.nfalta=(p.nfalta||0)+1;p.exc=[P.absent[id]].concat(p.exc||[]).slice(0,3)}});P.step="bajas";save();render();window.scrollTo(0,0)},
-  "to-trip":()=>{const P=S.prep;P.gas={};autoAssign();P.step="viaje";save();render();window.scrollTo(0,0)},
+  "to-trip":()=>{const P=S.prep;P.gas={};autoAssign();if(clubBus()){busAssign();P.busMode=true}P.step="viaje";save();render();window.scrollTo(0,0)},
+  busmode:v=>{const P=S.prep;if(!P)return;P.busMode=v==="1";if(P.busMode)busAssign();else autoAssign();save();render()},
   gas:v=>{const P=S.prep;P.gas[v]=!P.gas[v];save();render()},
   autoassign:()=>{autoAssign();save();render();toast("Repartidos. Que nadie se maree.")},
   trip:()=>{const P=S.prep;if(!goers().some(p=>P.assign[p.id]&&P.assign[p.id]!=="casa")){toast("No sale nadie. Así no hay partido.");return}
@@ -3934,7 +3947,10 @@ function visIdle(){
   const mine=teamOf(h.side),other=teamOf(h.side==="us"?"them":"us"),dir=h.side==="us"?1:-1;
   if(Math.random()<.06){V.q.push({k:"out",x:clamp(h.x+rnd(-4,4),3,PW-3),y:h.y<34?-1.2:PH+1.2,dur:.55,lab:"Fuera de banda"},{k:"throw",side:h.side==="us"?"them":"us"});V.wait=now+300;return}
   if(Math.random()<.035){const fw=mine.filter(p=>p.role==="DEL").sort((a,c)=>(c.x-a.x)*dir)[0];if(fw&&fw!==h){V.q.push({k:"pass",to:fw,dur:.9,lab:`Balón largo a ${fw.name}`},{k:"offside",side:h.side});V.wait=now+300;return}}
-  if(Math.random()<.17&&other.length){const t=nearestTo(other.filter(p=>p.role!=="POR"),h.x,h.y)||other[0];V.q.push({k:"pass",to:t,dur:.45,lab:`Roba ${t.name}`});}
+  if(Math.random()<.17&&other.length){const opp=other.filter(p=>p.role!=="POR");
+    if(Math.random()<.5){const t=nearestTo(opp,h.x,h.y)||other[0];V.q.push({k:"tackle",by:t,from:h})}
+    else{const cand=mine.filter(p=>p!==h&&p.role!=="POR");const tm=cand.length?pick(cand):null;if(tm){const mx=(h.x+tm.x)/2,my=(h.y+tm.y)/2;const t=nearestTo(opp,mx,my)||other[0];t.ov={x:mx,y:my};V.q.push({k:"wait",ms:250},{k:"pass",to:t,dur:.5,lab:`¡Corta ${t.name}!`,after:()=>{t.ov=null}})}}}
+  else if(Math.random()<.22&&h.role!=="POR"){const tx=clamp(h.x+dir*rnd(6,11),3,PW-3),ty=clamp(h.y+rnd(-5,5),4,PH-4);h.ov={x:tx,y:ty};V.q.push({k:"wait",ms:900},{k:"unov",who:h});setLabel(`Conduce ${h.name}`,1000)}
   else{const cand=mine.filter(p=>p!==h&&p.role!=="POR");if(!cand.length)return;
     const t=wpick(cand,p=>{const d=Math.hypot(p.x-h.x,p.y-h.y);return(1/(1+Math.abs(d-14)/6))*((p.x-h.x)*dir>0?1.5:1)});
     const d=Math.hypot(t.x-h.x,t.y-h.y);V.q.push({k:"pass",to:t,dur:clamp(d/19,.35,1.2),lab:Math.random()<.5?`${h.name} para ${t.name}`:`Pase de ${h.name}`})}
@@ -3970,6 +3986,9 @@ function runAction(a){
   else if(a.k==="cross"){const t=a.to;const tx=t.ov?t.ov.x:t.x,ty=t.ov?t.ov.y:t.y;b.move={x0:b.x,y0:b.y,z0:0,x1:tx,y1:ty,z1:1.6,t:0,dur:1.05,arc:4.5,to:t,end:()=>{V.holder=t;a.from.ov=null}};SFX.kick(.3);setLabel(`Centro de ${a.from.name}`,1100)}
   else if(a.k==="throw"){const T2=teamOf(a.side);const tk=nearestTo(T2.filter(p=>p.role!=="POR"),b.x,b.y);if(!tk){V.holder=null;return}const sy=b.y<34?.3:PH-.3;tk.ov={x:b.x,y:sy};tk.pose="throw";b.y=sy;b.z=0;setLabel("Saque de banda",1200);V.wait=performance.now()+900;const mate=nearestTo(T2.filter(p=>p!==tk&&p.role!=="POR"),b.x,b.y);V.q.unshift({k:"pass",to:mate||tk,dur:.6,arc:1.2,lab:`Saca ${tk.name}`,after:()=>{tk.ov=null}});V.q.unshift({k:"wait",ms:700})}
   else if(a.k==="wait"){V.wait=performance.now()+a.ms}
+  else if(a.k==="unov"){if(a.who){a.who.ov=null}}
+  else if(a.k==="tackle"){const t=a.by,f=a.from;if(!t||!f)return;t.ov={x:f.x,y:f.y};setLabel(`Entrada de ${t.name}`,1000);V.wait=performance.now()+500;V.q.unshift({k:"take",by:t,from:f})}
+  else if(a.k==="take"){const t=a.by;V.holder=t;t.ov=null;if(a.from)a.from.pose=Math.random()<.4?"sad":null;setTimeout(()=>{if(a.from&&a.from.pose==="sad")a.from.pose=null},800);setLabel(`Roba ${t.name}`,1000);SFX.kick(.12);V.wait=performance.now()+350}
   else if(a.k==="offside"){V.offsideUntil=performance.now()+1800;setLabel("¡Fuera de juego!",1500);SFX.whistle(1);const other=teamOf(a.side==="us"?"them":"us");const def=nearestTo(other.filter(p=>p.role==="DEF"),b.x,b.y)||other[0];teamOf(a.side).forEach(p=>p.ov=null);if(def)V.q.unshift({k:"pass",to:def,dur:.8,lab:`Saca ${def.name} la falta`});V.wait=performance.now()+1300}
   else if(a.k==="gkick"){const us2=a.side==="us",gx=us2?0:PW,dir=us2?1:-1;const gk=teamOf(a.side).find(p=>p.role==="POR");b.move=null;b.x=gx+dir*5.5;b.y=rnd(28,40);b.z=0;V.holder=null;if(gk){gk.ov={x:b.x-dir*1.2,y:b.y};gk.stg=true}
     const tgt=teamOf(a.side).filter(p=>p.role!=="POR").sort((x,y)=>dir*(y.x-x.x))[Math.floor(Math.random()*3)];setLabel("Saque de puerta",1200);V.wait=performance.now()+900;
@@ -3993,6 +4012,10 @@ function visUpdate(dt){
   const V=M.vis;if(!V)return;const now=performance.now();const b=V.ball;animUpdate(dt,now);
   if(b.move){const m=b.move;if(m.to){const dir2=m.to.side==="us"?1:-1;m.x1=(m.to.ov?m.to.ov.x:m.to.x)+dir2*.8;m.y1=(m.to.ov?m.to.ov.y:m.to.y)+.4}m.t+=dt;const k=Math.min(1,m.t/m.dur);b.x=m.x0+(m.x1-m.x0)*k;b.y=m.y0+(m.y1-m.y0)*k;b.z=m.z0+(m.z1-m.z0)*k+m.arc*4*k*(1-k);if(k>=1){b.move=null;b.z=m.z1>0&&!V.holder?0:b.z;m.end&&m.end()}}
   else if(V.holder){const h=V.holder,dir=h.side==="us"?1:-1;b.x=h.x+dir*.8;b.y=h.y+.4;b.bz=Math.max(0,(b.bz||0)-dt*1.4);b.z=b.bz>0?Math.abs(Math.sin(now/95))*b.bz:0}
+  if(!b.move&&!V.holder&&!V.q.length&&now>=V.wait&&!M.paused&&!M.hold&&(b.x<-.3||b.x>PW+.3||b.y<-.3||b.y>PH+.3)){
+    const last=V.lastPoss||"us",other=last==="us"?"them":"us";
+    if(b.y<-.3||b.y>PH+.3){b.y=clamp(b.y,-.3,PH+.3);b.x=clamp(b.x,2,PW-2);V.q.push({k:"throw",side:other})}
+    else{const endUs=b.x>PW;const def=endUs?"them":"us";if(last===def)V.q.push({k:"corner",side:other,taker:teamOf(other).find(p=>p.role!=="POR")||teamOf(other)[0],dur:1.1},{k:"cross",from:teamOf(other).find(p=>p.role!=="POR")||teamOf(other)[0],to:teamOf(other).filter(p=>p.role!=="POR").slice(-1)[0]||teamOf(other)[0],dur:1.1});else V.q.push({k:"gkick",side:def})}}
   if(!b.move&&now>=V.wait&&!M.paused&&!M.hold){if(V.q.length)runAction(V.q.shift());else if(!M.ended&&now>=(M.busyUntil||0))visIdle()}
   const poss=V.holder?V.holder.side:(b.move&&V.lastPoss?V.lastPoss:null);if(poss)V.lastPoss=poss;
   const T=now/1000;
