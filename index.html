@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="12.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="12.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -3373,7 +3373,7 @@ function tick(){
   else if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
   updScore();
   if(clockEnd(m))return;
-  if(hole&&M.slots.includes(null)){if(canFill()){autoFill();addLog(m,`Hueco tapado con el más apto del banquillo. Si quieres otro, toca el puesto y cámbialo.`,"ev")}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
+  if(hole&&M.slots.includes(null)){if(canFill()){if(M.skipping)autoFill();else holeStop()}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
   renderSquad();
 }
 function shootout(){
@@ -3426,9 +3426,18 @@ function subComment(o,i,role){const a=Math.round(ovrAs(o,role)),b=Math.round(ovr
   if(d<=-4)return `¿Pero qué hace? Sale ${short(o)}, que era de lo poco bueno, y entra ${short(i)}. No hay quien lo entienda.`;
   if(i.pos!==role&&i.known)return `Entra ${short(i)} fuera de su sitio. A ver qué inventa el míster.`;
   return `Cambio de los que no cambian nada: ${short(o)} por ${short(i)}. Por mover el banquillo.`}
+function holeStop(){const i=M.slots.findIndex(x=>!x);if(i<0)return;const b=bestFor(roleOf(i),benchList());if(!b){autoFill();return}
+  M.paused=true;M.subPaused=true;clearTimeout(M.timer);if(M.online)setTimeout(()=>olLivePub(true),10);
+  addLog(M.min,`Se para el partido: hay un hueco de ${POSN[roleOf(i)]}. ${castNames()[0]}: «A ver a quién mete el míster.»`,"ev");M.subSel={hole:i,in:b.id};setTimeout(subModal,60)}
 function subModal(){
   if(!M)return;const ss=M.subSel||(M.subSel={});const roleAt=i=>roleOf(i);
   const ons=M.slots.map((id,i)=>id?{p:sqP(id),i}:null).filter(x=>x&&x.p);const bench=benchList();
+  if(ss.hole!=null){const i=ss.hole,role=roleAt(i),inn=ss.in!=null?sqP(ss.in):null,gone=[...M.out].slice(-1)[0];const goneP=gone?sqP(gone[0]):null;
+    const row=(p,sel)=>`<button class="chip ${sel?"sel":""}" data-act="subin" data-v="${p.id}"><span class="cp">${role} · ${posLabel(p)}</span><span class="nm">${esc(short(p))}</span><span class="cv">media ${Math.round(ovrAs(p,role))} · energía ${Math.round(p.mE)}%</span><i class="cbar"><i style="width:${p.mE}%;background:${ecol(p.mE)}"></i></i></button>`;
+    modal(`¡Cambio obligado! · ${M.subs}/5`,`<p>${goneP?`<b>${esc(short(goneP))}</b> se ha ido (${esc(gone[1])}). `:""}Queda un hueco de <b>${POSN[role]}</b>. Te he marcado al más apto del banquillo; puedes elegir otro.</p>
+     <div class="chips2">${bench.map(p=>row(p,ss.in===p.id)).join("")}</div>
+     ${inn?`<p class="quote">«${esc(Math.round(ovrAs(inn,role))>=TIER_Q[curTier()]-2?`${short(inn)} cumple de sobra de ${POSN[role]}.`:inn.pos===role&&inn.known?`${short(inn)} es de ese puesto. Lo que hay.`:`${short(inn)} no ha jugado de ${POSN[role]} en su vida. Que sea lo que Dios quiera.`)}»</p>`:""}
+     <div class="pc-act"><button class="btn primary" data-act="subdo" ${inn?"":"disabled"}>Meter a ${inn?esc(short(inn)):"…"}</button><button class="btn" data-act="subcancel">Seguir con uno menos</button></div>`);return}
   const outI=ss.out!=null?ss.out:null;const role=outI!=null?roleAt(outI):null;const out=outI!=null?sqP(M.slots[outI]):null;const inn=ss.in!=null?sqP(ss.in):null;
   const row=(p,r,sel,act,v)=>`<button class="chip ${sel?"sel":""}" data-act="${act}" data-v="${v}"><span class="cp">${r} · ${posLabel(p)}</span><span class="nm">${esc(short(p))}</span><span class="cv">media ${Math.round(ovrAs(p,r))} · energía ${Math.round(p.mE)}%</span><i class="cbar"><i style="width:${p.mE}%;background:${ecol(p.mE)}"></i></i></button>`;
   modal(`Cambio · ${M.subs}/5`,`<p class="hint">Toca quién sale y luego quién entra. Te digo la media de cada uno en ese puesto y su energía.</p>
@@ -3436,7 +3445,11 @@ function subModal(){
    <p class="pc-h">Entra${role?` (para jugar de ${POSN[role]})`:""}</p><div class="chips2">${bench.length?bench.map(p=>row(p,role||p.pos,ss.in===p.id,"subin",p.id)).join(""):`<span class="hint">No queda nadie en el banquillo.</span>`}</div>
    ${out&&inn?`<div class="subcmp"><div><b>${esc(short(out))}</b><small>media ${Math.round(ovrAs(out,role))} · ${Math.round(out.mE)}%</small></div><div class="subarr">⇄</div><div><b>${esc(short(inn))}</b><small>media ${Math.round(ovrAs(inn,role))} · ${Math.round(inn.mE)}%</small></div></div><p class="quote">«${esc(subComment(out,inn,role))}»</p>`:""}
    <div class="pc-act"><button class="btn primary" data-act="subdo" ${out&&inn?"":"disabled"}>Hacer el cambio</button><button class="btn" data-act="subcancel">Seguir sin cambiar</button></div>`)}
-function subDo(){const ss=M.subSel||{};const i=ss.out,id=ss.in;if(i==null||id==null)return;const out=sqP(M.slots[i]),inn=sqP(id);if(!out||!inn)return;if(M.subs>=5){toast("Ya has hecho los 5 cambios.");return}
+function subDo(){const ss=M.subSel||{};
+  if(ss.hole!=null){const i=ss.hole,id=ss.in,inn=sqP(id);if(!inn||M.slots[i])return subClose();if(onIds().length>=maxOn()){toast("Con expulsados no se puede rellenar.");return subClose()}const cnt=fillCounts();if(cnt===null){toast("Ya has hecho los 5 cambios. Jugáis con uno menos.");return subClose()}
+    M.slots[i]=id;addLog(M.min,`Entra ${short(inn)} de ${POSN[roleOf(i)]} a tapar el hueco${cnt?` (cambio ${M.subs}/5)`:""}.`,"ev");olEmit(`Entra ${short(inn)} por el hueco.`);if(M.vis){M.subEnter=id;setLabel(`Entra ${short(inn)}`,1600)}M.subSel=null;
+    if(M.slots.includes(null)&&canFill()){renderSquad();return holeStop()}return subClose()}
+  const i=ss.out,id=ss.in;if(i==null||id==null)return;const out=sqP(M.slots[i]),inn=sqP(id);if(!out||!inn)return;if(M.subs>=5){toast("Ya has hecho los 5 cambios.");return}
   const role=roleOf(i),com=subComment(out,inn,role);M.subs++;M.slots[i]=id;M.sel=null;
   addLog(M.min,`Cambio (${M.subs}/5): sale ${short(out)}${out.mE<30?" arrastrando los pies":""}, entra ${short(inn)} de ${POSN[role]}.`,"ev");addLog(M.min,`${castNames()[1]}: «${com}»`,"ev");olEmit(`Cambio: sale ${short(out)}, entra ${short(inn)}.`);
   if(M.vis){const V=M.vis;const sp=V.us.find(x=>x.id===out.id);V.exits=V.exits||[];if(sp)V.exits.push({x:sp.x,y:sp.y,ty:PH+2.5,tx:52.5,look:sp.look,until:performance.now()+5000});M.subEnter=id;setLabel(`Cambio: entra ${short(inn)}`,1800)}
@@ -4350,7 +4363,7 @@ if(S&&!S.mafiaFix){S.mafiaFix=1;if(S.debt>0||S.embargo||S.mafiaStrikes){S.debt=0
 render();requestAnimationFrame(loop);
 setTimeout(()=>{try{olStart()}catch(e){}},1500);
 document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olOn())olPublish(true)}catch(e){}});
-window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer});
+window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop});
 })();
 </script>
 </body></html>
