@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="13.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="13.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -708,11 +708,23 @@ function genPlayer(place,boost,lvl){
   if(!pl.noveh&&Math.random()<.38){const v=wpick(VEH,x=>x.w);p.veh={t:v.t,n:pick(v.ns),plazas:v.plazas,brk:v.brk,gasK:v.gasK,slow:v.slow||0}}
   p.wage=wageFor(ovr(p),tier);p.ct=rnd(1,3);
   p.cost=lvl==null?Math.max(0,Math.round((ovr(p)-base)*2+rnd(-6,8))):Math.max(0,Math.round(Math.max(0,ovr(p)-TIER_Q[tier]+8)*(3+tier*2)*diffK(1.25,.8)+rnd(-6,8)));
-  p.pot=potFor(p,tier);
+  p.pot=potFor(p,tier);xattr(p);
   return p;
 }
 const diffK=(hard,easy)=>[easy,1,hard][S&&S.diff!=null?S.diff:1];
 function wageFor(o,tier){return Math.max(1,Math.round(o*.2-1+Math.max(0,o-TIER_Q[Math.max(0,tier-1)])*.25*(1+tier*.15)))}
+function xattr(p){if(p.foot&&p.alt&&p.spd!=null&&p.build)return p;const r=seeded((p.seed||hashStr(p.n||fullName(p)||String(p.id)))+911);
+  if(!p.foot){const x=r();p.foot=x<.7?"D":x<.92?"I":"A"}
+  if(!p.alt)p.alt=Math.round((p.pos==="POR"?183:p.pos==="DEF"?179:p.pos==="DEL"?177:174)+(r()*16-8)-(p.female?9:0));
+  if(!p.build){let bl=false;try{bl=p.first?lookOf(p).belly:r()<.3}catch(e){}p.build=bl?"gordo":p.trait==="cachas"?"fuerte":r()<.3?"delgado":"normal"}
+  if(p.spd==null){const f=p.fis!=null?p.fis:(p.q||30);p.spd=clamp(Math.round(f*.7+r()*30-(p.age>35?(p.age-35)*1.2:0)-(p.build==="gordo"?12:0)+(p.build==="delgado"?5:0)),1,99)}return p}
+const FOOTN={D:"Diestro",I:"Zurdo",A:"Ambidiestro"},BUILDN={delgado:"Delgado",normal:"Normal",fuerte:"Fuerte",gordo:"Gordo"};
+const spdN=v=>v>=75?"Una bala":v>=60?"Rápido":v>=40?"Normal":v>=25?"Lento":"Tortuga";
+function attrK(p,role,sub){xattr(p);let k=1;const side=sub?(/^(LI|MI|EI)$/.test(sub)?"L":/^(LD|MD|ED)$/.test(sub)?"R":"C"):"C";
+  if(side==="L")k*=p.foot==="I"?1.05:p.foot==="A"?1.03:.95;else if(side==="R")k*=p.foot==="D"?1.02:p.foot==="A"?1.03:.95;
+  if(role==="DEL"||role==="MED")k*=1+(p.spd-50)/450;else if(role==="DEF")k*=1+(p.spd-50)/700;
+  if(role==="POR")k*=1+(p.alt-183)/260;else if(role==="DEF"||role==="DEL")k*=1+(p.alt-178)/500;
+  if(p.build==="gordo")k*=role==="POR"?1.02:.95;else if(p.build==="fuerte")k*=role==="DEF"?1.03:1.01;return k}
 function potFor(p,tier){
   const r=seeded((p.seed||p.id*7919)+13),o=ovr(p),q=TIER_Q[tier||0];
   const age=p.age<21?14:p.age<25?10:p.age<30?6:p.age<36?3:p.age<45?1:0;
@@ -726,7 +738,7 @@ function wToPlayer(wp,t,club,tmp){
   const p={id:tmp?-(1+hashStr(wp.n)%900000):S.nextId++,first:clean.slice(0,-1).join(" ")||clean[0],mote:m?m[1]:"",sur:clean.length>1?clean[clean.length-1]:"",female:false,age:wp.age,pos:wp.pos,known:true,origen:`Viene del ${club}`,place:"club",seed:hashStr(wp.n),energy:100,injured:0,goals:0,games:0,veh:null};
   const b=()=>Math.round(wp.q+R()*8-4);p.atk=b();p.def=b();p.fis=b();p.cab=b();
   if(wp.pos==="POR"){p.def+=6;p.atk-=8}else if(wp.pos==="DEF"){p.def+=4;p.atk-=4}else if(wp.pos==="DEL"){p.atk+=4;p.def-=4}
-  ["atk","def","fis","cab"].forEach(k=>p[k]=clamp(p[k],1,99));p.trait=R()<.7?"normal":pick(["muro","punteria","pierna","hacienda"]);
+  ["atk","def","fis","cab"].forEach(k=>p[k]=clamp(p[k],1,99));if(wp.foot)p.foot=wp.foot;if(wp.alt)p.alt=wp.alt;if(wp.build)p.build=wp.build;if(wp.spd!=null)p.spd=wp.spd;xattr(p);p.trait=R()<.7?"normal":pick(["muro","punteria","pierna","hacienda"]);
   if(R()<.45){const v=wpick(VEH,x=>x.w);p.veh={t:v.t,n:pick(v.ns),plazas:v.plazas,brk:v.brk,gasK:v.gasK,slow:v.slow||0}}
   p.wage=wageFor(ovr(p),t);p.ct=rnd(1,3);p.pot=Math.max(ovr(p),wp.pot||ovr(p));p.wid=wp.n;p.wclub=club;return p}
 function genTransfers(){
@@ -805,7 +817,7 @@ function strOfQ(q){const P=TIER_Q.map((x,t)=>[x,TIERS[t].s+TIERS[t].r/2]);if(q<=
 function wName(R,t){const f=MALE[Math.floor(R()*MALE.length)],s=SUR[Math.floor(R()*SUR.length)];return t<=2&&R()<.35?`${f} "${MOTE[Math.floor(R()*MOTE.length)]}" ${s}`:`${f} ${s}`}
 function wPlayer(R,t,pos,boost){const pro=t>=4;const age=pro?18+Math.floor(R()*16):17+Math.floor(R()*(t<=1?40:25));
   const q=Math.max(4,Math.round(TIER_Q[t]+(boost||0)+(R()*12-6)-(age>33&&!pro?Math.max(0,age-40)*.3:0)));
-  const pot=Math.min(95,q+Math.max(0,Math.round((age<21?14:age<25?8:age<29?3:0)*(.4+R()))));return{n:wName(R,t),pos,age,q,pot}}
+  const pot=Math.min(95,q+Math.max(0,Math.round((age<21?14:age<25?8:age<29?3:0)*(.4+R()))));const x=R();const o={n:wName(R,t),pos,age,q,pot,foot:x<.7?"D":x<.92?"I":"A"};o.alt=Math.round((pos==="POR"?183:pos==="DEF"?179:177)+R()*16-8);o.build=R()<.15&&t<4?"gordo":R()<.3?"delgado":"normal";o.spd=clamp(Math.round(q*.6+R()*35-(age>33?(age-33)*1.5:0)-(o.build==="gordo"?12:0)),1,99);return o}
 function wSquad(n,t){const R=seeded(hashStr(n)+t*7);return W_SHAPE.map(pos=>wPlayer(R,t,pos,-3))}
 function wXI(ps,form){const roles=FORMS[form]||FORMS["4-4-2"];const pool=ps.slice().sort((a,b)=>b.q-a.q);const xi=[];
   roles.forEach(r=>{let i=pool.findIndex(p=>p.pos===r);if(i<0)i=pool.findIndex(p=>(p.pos==="POR")===(r==="POR"));if(i<0)i=0;if(pool[i]){xi.push(Object.assign({},pool[i],{role:r,q:pool[i].pos===r?pool[i].q:pool[i].q*.85}));pool.splice(i,1)}});return xi}
@@ -814,6 +826,7 @@ function wCoach(R,t,seed){R=R||seeded(seed||Math.floor(Math.random()*1e9));const
   return{n:`${MALE[Math.floor(R()*MALE.length)]} ${SUR[Math.floor(R()*SUR.length)]}`,m:R()<.4?COACH_MOTE[Math.floor(R()*COACH_MOTE.length)]:"",age,exp,rep:Math.round(30+R()*40+t*2),st:["ofensivo","defensivo","del patadón","de toque","de los de antes","pesado con la táctica"][Math.floor(R()*6)],since:S.season,car:[],w:0,d:0,l:0}}
 function wCoachOf(c){if(!c.coach)c.coach=wCoach(seeded(hashStr(c.n)+99),c.t);return c.coach}
 const coachName=k=>k?`${k.n}${k.m?` «${k.m}»`:""}`:"—";
+function wStyle(c){const st=c.coach&&c.coach.st;return st==="ofensivo"?"ataque":st==="defensivo"?"contra":st==="del patadón"?"patadon":st==="de toque"?"toque":"normal"}
 function wStr(c){const xi=wXI(c.ps,c.form);if(!xi.length)return 5;const k=wCoachOf(c);return +(strOfQ(xi.reduce((a,p)=>a+p.q,0)/11)*(.95+Math.min(100,k.rep)/1000)).toFixed(1)}
 function wExtraName(t,used){const towns=Object.keys(GEO).filter(x=>x!==HOME);const pre=["CD","UD","Atlético","CF","Racing","Real","Deportivo"];
   for(let k=0;k<400;k++){const R=seeded(t*1000+k);const n=t===0?pick(LOCAL_TEAMS.concat(COMARCA_TEAMS)):`${pre[Math.floor(R()*pre.length)]} ${towns[Math.floor(R()*towns.length)]}`;if(!used.has(n))return[n,towns[k%towns.length]]}return[`Club ${t}-${used.size}`,towns[0]]}
@@ -882,6 +895,8 @@ function wSeason(c,ourPos){
       const pos=W_SHAPE.find((x,i)=>cl.ps.filter(p=>p.pos===x).length<W_SHAPE.filter(y=>y===x).length)||pick(["DEF","MED","DEL"]);
       const budget=Math.max(0,cl.money*.35);let boost=0;while(boost<8&&price(TIER_Q[t]+boost+2)<budget)boost+=2;
       const np=wPlayer(seeded(hashStr(cl.n)+S.season*13+buys*7+cl.ps.length),t,pos,boost-2);const cost=price(np.q);
+      if((np.pos==="DEF"||np.pos==="MED")&&cl.ps.filter(p=>(p.pos==="DEF"||p.pos==="MED")&&p.foot==="I").length<2)np.foot="I";
+      if(np.pos==="DEL"&&wStyle(cl)==="contra")np.spd=Math.max(np.spd,60+Math.floor(Math.random()*25));if(np.pos==="DEL"&&wStyle(cl)==="patadon")np.alt=Math.max(np.alt,186);
       if(cl.ps.length>=16){const worst=cl.ps.filter(p=>p.pos===np.pos).sort((a,b)=>a.q-b.q)[0];if(!worst||worst.q>=np.q-2||cl.money<cost)break;cl.ps=cl.ps.filter(p=>p!==worst)}
       cl.money-=Math.min(cl.money,cost);cl.ps.push(np);buys++;
       if(t===nt&&np.q>=TIER_Q[t]+6&&lines.length<10)lines.push(`El ${cl.n} ficha a ${np.n} (${POSN[np.pos]}, media ${np.q}).`);
@@ -1428,7 +1443,7 @@ function lineupPlayers(){const ss=slotSubs(S.formation);return S.lineup.map((id,
 function power(list,form,o){
   const roles=FORMS[form];const sA=roles.reduce((s,r)=>s+WA[r],0),sD=roles.reduce((s,r)=>s+WD[r],0);
   let A=0,D=0;
-  list.forEach(({p,role,sub})=>{const f=fit(p,role)*subFit(p,sub)*(.5+p.mE/200)*(p.drunk?.72:1)*(p.hang>0?.86:1)*(p.knock>0?.9:1)*(role==="POR"?1+.06*stf("porteros"):1);const sp=specs(p);A+=(p.atk*.7+p.fis*.15+p.cab*.15)*f*WA[role]*(sp.includes("Killer")?1.05:1);D+=(p.def*.65+p.fis*.15+p.cab*.2)*f*WD[role]*(sp.includes("Muro")?1.05:1)});
+  list.forEach(({p,role,sub})=>{const f=fit(p,role)*subFit(p,sub)*attrK(p,role,sub)*(.5+p.mE/200)*(p.drunk?.72:1)*(p.hang>0?.86:1)*(p.knock>0?.9:1)*(role==="POR"?1+.06*stf("porteros"):1);const sp=specs(p);A+=(p.atk*.7+p.fis*.15+p.cab*.15)*f*WA[role]*(sp.includes("Killer")?1.05:1);D+=(p.def*.65+p.fis*.15+p.cab*.2)*f*WD[role]*(sp.includes("Muro")?1.05:1)});
   A=A/sA*Math.sqrt(sA/SA0);D=D/sD*Math.sqrt(sD/SD0);
   const t=TACT[o.tactic||"normal"];const ta=o.tactic==="patadon"?.7+Math.random()*.7:t.a;
   const k=(o.home?1+fieldBonus()*.01:1)*(.9+S.coach.moral/100*.2)*(o.boost?1.12:1)*(o.mod||1)*(list.some(x=>specs(x.p).includes("Líder"))?1.02:1)*(unl("chem")?1+Math.min(.06,chem(list)*.02):1)*feudPen(list)*(o.home?1+Math.min(.06,(S.fans||3)/FANS_CAP[curTier()]*.06):1);
@@ -1685,7 +1700,7 @@ function cardHTML(p){
   const exc=(p.exc||[]).map(e=>`<li>${esc(e)}</li>`).join("");
   const d=o-(p.ovr0!=null?p.ovr0:o);
   return `<div class="pcard ${tierc}">
-   <div class="pc-head"><div><div class="pc-name">${esc(fullName(p))}</div><div class="pc-sub">${posLabel(p)} · ${p.age} años · ${esc(p.origen)}</div></div><div class="pc-ovr"><b>${shownOvr(p)}</b><span>${p.known?p.pos:"???"}</span></div></div>
+   <div class="pc-head"><div><div class="pc-name">${esc(fullName(p))}</div><div class="pc-sub">${posLabel(p)} · ${p.age} años · ${esc(p.origen)}</div><div class="pc-sub">${(xattr(p),FOOTN[p.foot])} · ${(p.alt/100).toFixed(2).replace(".",",")} m · ${BUILDN[p.build]} · ${spdN(p.spd)} (${p.spd})</div></div><div class="pc-ovr"><b>${shownOvr(p)}</b><span>${p.known?p.pos:"???"}</span></div></div>
    <div class="pc-top"><canvas id="radar" class="radar" width="300" height="270"></canvas><div class="pc-photo"><canvas class="face pc-face" data-face="${p.id}" width="200" height="200"></canvas></div></div>
    <hr class="pc-hr">
    <div class="pc-stats">
@@ -1878,7 +1893,7 @@ function matchPreview(c,oppIdx,o){
    ${nl?"":row2(us.pts,"Puntos",opp.pts,cmp(us.pts,opp.pts))+row2(`${us.gf}:${us.gc}`,"Goles",`${opp.gf}:${opp.gc}`,cmp(us.gf-us.gc,opp.gf-opp.gc))+row2(fc(teamForm(c,0)),"Forma",fc(teamForm(c,oppIdx)),"")}
    ${row2(esc(teamTop(us,0)),"Pichichi",esc(teamTop(opp,oppIdx)),"")}${S.rival&&opp.n===S.rival?`<div class="mp-r"><span></span><small style="color:#c8233a;font-weight:700">⚔ DERBI</small><span></span></div>`:""}${opp.tag?`<div class="mp-r"><span></span><small>${opp.tag==="↓"?"Recién descendido":"Recién ascendido"}</small><span></span></div>`:""}${friendly?"":rivalReport(opp)}
    ${(()=>{if(friendly)return "";const rf=refFor(c,oppIdx),wt=weatherFor(c,oppIdx);return `<div class="mp-r"><span>${esc(rf.n)}</span><small>Árbitro</small><span>${rf.t==="comprado"?"Muy simpático":REF_T[rf.t]}</span></div><div class="mp-r"><span></span><small>Previsión</small><span>${WEATHER[wt]}</span></div>`})()}
-   ${row2(S.formation,"Formación",friendly||c.tier<=1?"¿?":(opp.form||"4-4-2"),"")}
+   ${row2(S.formation,"Formación",friendly||c.tier<=1?"¿?":oppForm(opp,c)+(oppForm(opp,c)!==(opp.form0||opp.form)?` (suele ${opp.form0||opp.form})`:""),"")}
    ${friendly?"":(()=>{const st=STY[(studied(opp,c.tier)||{}).style||styleOf(opp)];const info=unl("report")||stf("segundo");return `<div class="mp-r"><span>${(S.tacHist||[]).length?"Tú: "+esc(TACN[(S.tacHist||[]).slice(-1)[0]]||""):""}</span><small>Estilo</small><span>${esc(st.n)}${info&&st.good?` · mejor «${TACN[st.good]}»`:""}</span></div>`})()}
    ${S.world&&S.world.clubs[opp.n]?row2(esc(S.coach.name),"Entrenador",esc(coachName(wCoachOf(S.world.clubs[opp.n]))),""):""}
    ${S.world&&S.world.clubs[opp.n]?`<div class="pc-act"><button class="btn mini" data-act="wclub" data-v="${esc(opp.n)}">Ver la plantilla de ${esc(opp.n)}</button></div>`:""}
@@ -3322,6 +3337,12 @@ function scoutWeek(){
 /* ================= partido ================= */
 const STY={ataque:{n:"ofensivo",good:"bus",bad:"arriba"},autobus:{n:"encerrado atrás",good:"arriba",bad:"bus"},patadon:{n:"de patadón",good:"normal",bad:"arriba"},toque:{n:"de toque",good:"patadon",bad:"normal"},presion:{n:"de presión alta",good:"patadon",bad:"bus"},normal:{n:"sin un estilo claro",good:null,bad:null}};
 const TACN={normal:"Normal",bus:"Encerrarse",arriba:"Al ataque",patadon:"Patadón"};
+function oppForm(T,c){if(!T)return "4-4-2";c=c||S.comp;const base=T.form0||(T.form0=T.form||"4-4-2");if(!c||c.tier<=1||CRAZY_FORMS.includes(base))return base;
+  let us=20;try{const pw=power(lineupPlayers(),S.formation,{home:true});us=(pw.a+pw.d)/2}catch(e){}const r=(T.str||us)/Math.max(1,us);const R=seeded(hashStr(T.n)+(c.r||0)*31+S.season);
+  const cl=S.world&&S.world.clubs[T.n];const sty=cl?wStyle(cl):"normal";
+  let pool=r<.85?["5-4-1","5-3-2","4-5-1"]:r>1.15?["4-3-3","3-4-3","4-2-4"]:[base,base,"4-4-2","4-3-3","4-5-1"];
+  if(sty==="contra")pool=pool.concat(["5-3-2","4-5-1"]);if(sty==="ataque")pool=pool.concat(["4-3-3","3-4-3"]);
+  return pool[Math.floor(R()*pool.length)]}
 function styleOf(T){const c=S.world&&S.world.clubs[T.n];const st=c&&c.coach?c.coach.st:null;const map={"ofensivo":"ataque","defensivo":"autobus","del patadón":"patadon","de toque":"toque","de los de antes":"normal","pesado con la táctica":"presion"};if(st&&map[st])return map[st];return ["ataque","autobus","patadon","toque","normal","presion"][hashStr(T.n)%6]}
 function studied(T,tier){const h=S.tacHist||[];if(h.length<4||tier<1)return null;const cnt={};h.forEach(x=>cnt[x]=(cnt[x]||0)+1);const main=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];if(cnt[main]/h.length<.7)return null;
   const c=S.world&&S.world.clubs[T.n];const rep=c&&c.coach?c.coach.rep:40+tier*5;if(rep<40&&tier<3)return null;const k=Object.keys(STY).find(x=>STY[x].good===main);return k?{main,style:k}:null}
@@ -3564,7 +3585,7 @@ function startMatch(olo){
   const P=S.prep;const m=ourFixture();const opp=m.a===0?m.b:m.a;const v=P.venue;
   const sq=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).map(p=>({...p,mE:clamp(p.energy+P.arrive[p.id].en-(p.hang>0?15:0),10,100),drunk:Math.random()<(p.dep||0)/180}));
   const arr={};sq.forEach(p=>arr[p.id]=P.arrive[p.id].min);
-  const T=S.comp.teams[opp];const of=T.form||"4-4-2";const F2=slotXY(of);const sh=shapeOf(of);
+  const T=S.comp.teams[opp];const of=S.comp.type==="online"?(T.form||"4-4-2"):oppForm(T);const F2=slotXY(of);const sh=shapeOf(of);
   M={m,opp,outHoles:0,addLeft:0,addN:0,a1:0,a2:0,lost:0,ht:false,home:v.home,ours:v.ours,venue:v,oppStr:T.str*(.9+Math.random()*.2)*(v.home||S.comp.type==="cup"?1:1.06),us:0,them:0,min:0,sq,arr,form:S.formation,slots:Array(11).fill(null),out:new Map(),
     tactic:"normal",shouts:3,boost:0,pause:0,mod:1,omod:1,drain:0,fires:[],used:new Set(),warned:new Set(),inj:{},dead:[],goals:{},rivScorers:[],own:[],subs:0,sel:null,hold:false,skipping:false,ended:false,speed:1,paused:false,
     scorers:[],early:null,timer:0,ball:{x:80,y:50},ballT:{x:80,y:50},col:T.col,cine:null,cineUntil:0,net:null,
@@ -3748,6 +3769,7 @@ function compEnd(){
   const html=(heir?`<div class="sec"><h4>DESCANSE EN PAZ, MÍSTER</h4><p><b>${esc(heir.old.name)}</b> ha muerto este verano a los ${heir.old.age} años, en el banquillo de su vida. Lo entierran con el chándal del club y una lata en la mano.</p><p>Su hijo <b>${esc(S.coach.name)}</b> (${S.coach.age} años), hijo de ${esc(heir.mother)}, coge el equipo. Hereda el dinero, el campo y a los jugadores.</p></div>`:"")+`<p>Acabáis <b>${pos}º de ${N}</b> en ${esc(c.name)}. Campeón: <b>${esc(champ)}</b>.</p>
    <p><b>${up?`¡ASCENSO! La temporada que viene jugáis en ${esc(TIERS[nextTier].n)}: ${TIERS[nextTier].teams} equipos, ${(TIERS[nextTier].teams-1)*2} jornadas.`:down?`Descenso a ${esc(TIERS[nextTier].n)}.`:`Seguís en ${esc(TIERS[nextTier].n)}.`}</b></p>
    <p class="hint">Premio de la liga: ${prize} €. Pasa un año: el míster cumple ${S.coach.age} y todos los jugadores un año más.</p>
+   ${up&&nextTier===1?`<div class="sec"><h4>¡CAMISETAS OFICIALES!</h4><div class="mp-top"><div class="mp-team">${crestCv({us:1,n:clubName(),col:ourKit().c1},60,1)}<b>${esc(clubName())}</b></div></div><p>La federación os obliga a ir uniformados. Se acabaron los chándales del mercadillo y las camisetas de propaganda: ${esc(clubName())} saldrá al campo con su <b>equipación oficial</b>. El utillero llora de emoción.</p></div>`:""}
    ${wl.length?`<div class="sec"><h4>EL RESTO DE CLUBES</h4><ul>${wl.slice(0,12).map(e=>`<li>${esc(e)}</li>`).join("")}</ul></div>`:""}
    <div class="sec"><h4>EL VERANO</h4><ul>${ev.length?ev.map(e=>`<li>${esc(e)}</li>`).join(""):"<li>Nadie se ha jubilado, muerto ni ido a la cárcel. Raro.</li>"}</ul></div>
    ${nextTier>c.tier&&PLACES.some(pl=>pl.t===nextTier)?`<p class="hint">Nuevos sitios para buscar jugadores en el pueblo.</p>`:""}${boardTxt}${newU.length?`<div class="sec"><h4>DESBLOQUEADO</h4><ul>${newU.map(k=>`<li>${{board:"Junta directiva y objetivos (Club › Directiva)",tac:"Instrucciones tácticas y charla del descanso",derbi:"Derbis contra tu rival histórico",staff:"Cuerpo técnico (Club › Staff)",chem:"Química del vestuario",pretemp:"Pretemporadas especiales",report:"Informes del rival",cantera:"Cantera de cadetes y juveniles (Equipo › Cantera)",merch:"Tienda del club (Club › Tienda)",wage:"Límite salarial",stars:"Fichajes de estrellas (Equipo › Estrellas)"}[k]}</li>`).join("")}</ul></div>`:""}`;
@@ -4074,8 +4096,8 @@ function visInit(){
 function visSync(){
   const V=M.vis;if(!V)return;const xy=slotXY(M.form),roles=FORMS[M.form];const keep=V.us;
   V.us=M.slots.map((id,i)=>{if(!id)return null;const p=sqP(id);if(!p)return null;let o=keep.find(x=>x.id===id);const bx=xy[i].x/160*PW*.95,by=xy[i].y/100*PH;
-    if(!o)o=Object.assign({side:"us",id,x:M.subEnter===id?52.5:i===0?-2:bx,y:M.subEnter===id?PH+2:i===0?PH+2:by,ph:Math.random()*6,look:spriteLook("",p)},garbFor(id*131+S.season,S.comp.tier));
-    Object.assign(o,{name:short(p),role:roles[i],bx,by,num:dorsal(id)});return o}).filter(Boolean);
+    if(!o)o=Object.assign({side:"us",id,x:M.subEnter===id?52.5:i===0?-2:bx,y:M.subEnter===id?PH+2:i===0?PH+2:by,ph:Math.random()*6,look:spriteLook("",p)},(S.comp.tier>=1&&!S.embargo?{garb:0}:garbFor(id*131+S.season,S.comp.tier)));
+    Object.assign(o,{name:short(p),role:roles[i],bx,by,num:dorsal(id),hs:clamp(((xattr(p)).alt||178)/178,.9,1.12),wide:p.build==="gordo"});return o}).filter(Boolean);
   if(V.holder&&V.holder.side==="us"&&!V.us.includes(V.holder))V.holder=V.us.find(p=>p.role!=="POR")||V.them[5]||null;
 }
 const teamOf=side=>side==="us"?M.vis.us:M.vis.them;
@@ -4276,7 +4298,7 @@ function drawMatchView(cv){
   ents.sort((a,b)=>a.y-b.y).forEach(e=>{
     if(e.ref){drawRef(c,P,T);return}
     if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
-    const p=e.p,q=P(p.x,p.y),s=q.s*1.5,lg=p.run?Math.sin(T/70+p.ph):0;
+    const p=e.p,q=P(p.x,p.y),s=q.s*1.5*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
     c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(q.x,q.y,6*s,2*s,0,0,7);c.fill();
     c.fillStyle="#1d1d1d";c.fillRect(q.x-3*s+lg*1.5*s,q.y-8*s,2.4*s,8*s);c.fillRect(q.x+.6*s-lg*1.5*s,q.y-8*s,2.4*s,8*s);
     const gb=p.shirtOff?4:(p.garb||0),sk=p.look.skin;
@@ -4359,7 +4381,7 @@ function drawFieldView(cv){
   V.them.forEach(p=>ents.push({y:p.y,p,col:p.role==="POR"?"#222":M.col,sh:"#1a1a1a"}));ents.push({y:V.ball.y,ball:1});
   ents.sort((a,b)=>a.y-b.y).forEach(e=>{
     if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
-    const p=e.p,q=P(p.x,p.y),s=q.s*1.5*(V.ps||1),lg=p.run?Math.sin(T/70+p.ph):0;
+    const p=e.p,q=P(p.x,p.y),s=q.s*1.5*(V.ps||1)*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
     c.globalAlpha=p.ghost?.45:1;c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(q.x,q.y,6*s,2*s,0,0,7);c.fill();
     c.fillStyle="#1d1d1d";c.fillRect(q.x-3*s+lg*1.5*s,q.y-8*s,2.4*s,8*s);c.fillRect(q.x+.6*s-lg*1.5*s,q.y-8*s,2.4*s,8*s);
     const gb=p.garb||0,sk=p.look.skin;
