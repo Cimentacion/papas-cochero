@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="13.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="13.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -622,11 +622,16 @@ const TIERS=[
  {n:"Primera División",teams:20,s:87,r:15}
 ];
 const REL=[1,.85,.7,.55,.42,.32,.22,.15,.1,.06];
-const GEOFAR={"Valladolid":[41.65,-4.72],"Miranda de Ebro":[42.69,-2.95],"Madrid":[40.42,-3.70],"Barcelona":[41.39,2.17],"Valencia":[39.47,-0.38],"Bilbao":[43.26,-2.93],"San Sebastián":[43.32,-1.98],"Vigo":[42.24,-8.72],"Pamplona":[42.81,-1.64],"Getafe":[40.31,-3.73],"Villarreal":[39.94,-0.10],"Palma":[39.57,2.65],"Girona":[41.98,2.82],"Vitoria":[42.85,-2.67],"Las Palmas":[28.12,-15.43],"Leganés":[40.33,-3.76],"Málaga":[36.72,-4.42],"Granada":[37.18,-3.60],"Almería":[36.84,-2.46],"Zaragoza":[41.65,-0.88],"Gijón":[43.53,-5.66],"Oviedo":[43.36,-5.85],"Santander":[43.46,-3.80],"A Coruña":[43.36,-8.41],"Eibar":[43.18,-2.47],"Tenerife":[28.46,-16.25],"Elche":[38.27,-0.70],"Burgos":[42.34,-3.70],"Albacete":[38.99,-1.86],"Castellón":[39.99,-0.05],"Huesca":[42.14,-0.41],"Ferrol":[43.48,-8.24],"Mérida":[38.92,-6.34],"Alicante":[38.35,-0.48],"Sabadell":[41.55,2.11],"Murcia":[37.99,-1.13],"Ibiza":[38.91,1.43],"Alcorcón":[40.35,-3.82],"Fuenlabrada":[40.28,-3.79],"Tarragona":[41.12,1.25],"Algeciras":[36.13,-5.45],"Sanlúcar de Barrameda":[36.78,-6.35],"Cartagena":[37.60,-0.98],"Ponferrada":[42.55,-6.60],"Salamanca":[40.97,-5.66],"Badajoz":[38.88,-6.97],"Talavera":[39.96,-4.83],"Logroño":[42.47,-2.45],"Lugo":[43.01,-7.56]};
+const GEOFAR={"Pilas":[37.30,-6.30],"Gerena":[37.53,-6.16],"Las Cabezas de San Juan":[36.98,-5.94],"Castilleja de la Cuesta":[37.39,-6.06],"Cantillana":[37.61,-5.82],"Brenes":[37.55,-5.87],"Olivares":[37.42,-6.16],"Bollullos Par del Condado":[37.34,-6.54],"Ayamonte":[37.21,-7.40],"Lepe":[37.25,-7.20],"Cartaya":[37.28,-7.15],"Pozoblanco":[38.38,-4.85],"Conil":[36.28,-6.09],"Arcos de la Frontera":[36.75,-5.81],"Los Barrios":[36.18,-5.49],"Linares":[38.09,-3.64],"Jaén":[37.77,-3.79],"Estepona":[36.43,-5.15],"Vélez-Málaga":[36.78,-4.10],"Motril":[36.75,-3.52],"El Ejido":[36.78,-2.81],"Torremolinos":[36.62,-4.50],"Granada":[37.18,-3.60],"Málaga":[36.72,-4.42],"Almería":[36.84,-2.46],"Mancha Real":[37.79,-3.61],"Marbella":[36.51,-4.88],"La Línea":[36.17,-5.35],"Porcuna":[37.87,-4.19],"Rota":[36.62,-6.36],"Chiclana":[36.42,-6.15],"Ronda":[36.74,-5.16],"Sanlúcar de Barrameda":[36.78,-6.35],"Valladolid":[41.65,-4.72],"Miranda de Ebro":[42.69,-2.95],"Madrid":[40.42,-3.70],"Barcelona":[41.39,2.17],"Valencia":[39.47,-0.38],"Bilbao":[43.26,-2.93],"San Sebastián":[43.32,-1.98],"Vigo":[42.24,-8.72],"Pamplona":[42.81,-1.64],"Getafe":[40.31,-3.73],"Villarreal":[39.94,-0.10],"Palma":[39.57,2.65],"Girona":[41.98,2.82],"Vitoria":[42.85,-2.67],"Las Palmas":[28.12,-15.43],"Leganés":[40.33,-3.76],"Málaga":[36.72,-4.42],"Granada":[37.18,-3.60],"Almería":[36.84,-2.46],"Zaragoza":[41.65,-0.88],"Gijón":[43.53,-5.66],"Oviedo":[43.36,-5.85],"Santander":[43.46,-3.80],"A Coruña":[43.36,-8.41],"Eibar":[43.18,-2.47],"Tenerife":[28.46,-16.25],"Elche":[38.27,-0.70],"Burgos":[42.34,-3.70],"Albacete":[38.99,-1.86],"Castellón":[39.99,-0.05],"Huesca":[42.14,-0.41],"Ferrol":[43.48,-8.24],"Mérida":[38.92,-6.34],"Alicante":[38.35,-0.48],"Sabadell":[41.55,2.11],"Murcia":[37.99,-1.13],"Ibiza":[38.91,1.43],"Alcorcón":[40.35,-3.82],"Fuenlabrada":[40.28,-3.79],"Tarragona":[41.12,1.25],"Algeciras":[36.13,-5.45],"Sanlúcar de Barrameda":[36.78,-6.35],"Cartagena":[37.60,-0.98],"Ponferrada":[42.55,-6.60],"Salamanca":[40.97,-5.66],"Badajoz":[38.88,-6.97],"Talavera":[39.96,-4.83],"Logroño":[42.47,-2.45],"Lugo":[43.01,-7.56]};
 const BIG={
  7:[["Algeciras CF","Algeciras"],["Recreativo de Huelva","Huelva"],["Atlético Sanluqueño","Sanlúcar de Barrameda"],["Mérida AD","Mérida"],["Hércules CF","Alicante"],["CE Sabadell","Sabadell"],["Real Murcia","Murcia"],["UD Ibiza","Ibiza"],["AD Alcorcón","Alcorcón"],["CF Fuenlabrada","Fuenlabrada"],["Gimnàstic de Tarragona","Tarragona"],["CD Badajoz","Badajoz"],["CF Talavera","Talavera"],["SD Logroñés","Logroño"],["CD Lugo","Lugo"],["SD Ponferradina","Ponferrada"],["Unionistas de Salamanca","Salamanca"],["Betis Deportivo","Sevilla"],["Sevilla Atlético","Sevilla"]],
  8:[["Málaga CF","Málaga"],["Córdoba CF","Córdoba"],["Granada CF","Granada"],["UD Almería","Almería"],["Cádiz CF","Cádiz"],["Real Zaragoza","Zaragoza"],["Sporting de Gijón","Gijón"],["Real Oviedo","Oviedo"],["Racing de Santander","Santander"],["Deportivo de La Coruña","A Coruña"],["SD Eibar","Eibar"],["CD Tenerife","Tenerife"],["Elche CF","Elche"],["Burgos CF","Burgos"],["Albacete Balompié","Albacete"],["CD Castellón","Castellón"],["SD Huesca","Huesca"],["Racing de Ferrol","Ferrol"],["FC Cartagena","Cartagena"],["Real Valladolid","Valladolid"],["Levante UD","Valencia"],["CD Mirandés","Miranda de Ebro"]],
  9:[["Real Madrid","Madrid"],["FC Barcelona","Barcelona"],["Atlético de Madrid","Madrid"],["Sevilla FC","Sevilla"],["Real Betis","Sevilla"],["Athletic Club","Bilbao"],["Real Sociedad","San Sebastián"],["Villarreal CF","Villarreal"],["Valencia CF","Valencia"],["RC Celta","Vigo"],["CA Osasuna","Pamplona"],["Getafe CF","Getafe"],["Rayo Vallecano","Madrid"],["RCD Mallorca","Palma"],["Girona FC","Girona"],["Deportivo Alavés","Vitoria"],["RCD Espanyol","Barcelona"],["UD Las Palmas","Las Palmas"],["CD Leganés","Leganés"]]};
+const TIER_REAL={
+ 3:[["Marchena Balompié","Marchena"],["CD Mairena","Mairena del Alcor"],["Osuna Bote Club","Osuna"],["CD La Rinconada","La Rinconada"],["CD Paradas","Paradas"],["Lora CF","Lora del Río"],["Palma del Río CF","Palma del Río"],["CD Pilas","Pilas"],["CD Gerena","Gerena"],["CD Cantillana","Cantillana"],["CD Brenes","Brenes"],["Olivares CF","Olivares"],["Castilleja CF","Castilleja de la Cuesta"],["Estepa Industrial","Estepa"],["CD Viso","El Viso del Alcor"],["Atlético Palaciego","Los Palacios"],["UD Lebrijana","Lebrija"],["CD Carmona","Carmona"],["CD Cañada Rosal","Cañada Rosal"],["CD La Campana","La Campana"]],
+ 4:[["CD Alcalá","Alcalá de Guadaíra"],["CD Dos Hermanas San Andrés","Dos Hermanas"],["UD Tomares","Tomares"],["Atlético Antoniano","Lebrija"],["CD Cabecense","Las Cabezas de San Juan"],["Arahal Balompié","El Arahal"],["Morón CF","Morón"],["Montilla CF","Montilla"],["UD Bollullos","Bollullos Par del Condado"],["Cartaya AD","Cartaya"],["Ayamonte CF","Ayamonte"],["San Roque de Lepe","Lepe"],["Conil CF","Conil"],["Arcos CF","Arcos de la Frontera"],["Córdoba CF B","Córdoba"],["CD Pozoblanco","Pozoblanco"],["Sevilla FC C","Sevilla"],["Puebla de Cazalla CF","La Puebla de Cazalla"]],
+ 5:[["CD Utrera","Utrera"],["Coria CF","Coria del Río"],["Écija Balompié","Écija"],["Xerez DFC","Jerez de la Frontera"],["Puente Genil FC","Puente Genil"],["UD Los Barrios","Los Barrios"],["Cádiz Mirandilla","Cádiz"],["Ciudad de Lucena","Lucena"],["Atlético Central","Sevilla"],["Recreativo de Huelva B","Huelva"],["CD Rota","Rota"],["Chiclana CF","Chiclana"],["UD Ronda","Ronda"],["Atlético Onubense","Huelva"],["Sanlúcar CD","Sanlúcar de Barrameda"]],
+ 6:[["Xerez CD","Jerez de la Frontera"],["San Fernando CD","San Fernando"],["Antequera CF","Antequera"],["Real Jaén","Jaén"],["Linares Deportivo","Linares"],["UD Estepona","Estepona"],["Vélez CF","Vélez-Málaga"],["Motril CF","Motril"],["CD El Ejido","El Ejido"],["Juventud Torremolinos","Torremolinos"],["Atlético Malagueño","Málaga"],["Recreativo Granada","Granada"],["UD Almería B","Almería"],["Atlético Mancha Real","Mancha Real"],["CD Marbella","Marbella"],["Real Balompédica Linense","La Línea"],["Atlético Porcuna","Porcuna"]]};
 const LOCAL_TEAMS=["Panaderos Asociados CCOO","Bar Manolo","Cerveza Cruzcampo","Peña Bética El Tractor","CD Aceituna Gorda","Deportivo Mosto","Hermandad del Rocío FC"];
 const COMARCA_TEAMS=["Bar El Paso","Peña Flamenca La Soleá","Cooperativa Olivarera San José","Taller de Chapa El Rubio","Funeraria La Paz","Talleres Hermanos Rueda","Autoescuela La Sevillana","Construcciones Paco e Hijos","Gestoría Rocío","Electrodomésticos Romero","Seguros La Previsora","Peña Cultural El Botijo","Agrícola Hermanos Gil"];
 const TOP_TEAMS=[["Sevilla Atlético","Sevilla"],["Betis Deportivo","Sevilla"],["Écija Balompié","Écija"],["Antequera CF","Antequera"],["Xerez CD","Jerez de la Frontera"],["San Fernando CD","San Fernando"],["Ciudad de Lucena","Lucena"],["Recreativo de Huelva B","Huelva"]];
@@ -804,7 +809,7 @@ function tierTeams(tier){
   else if(tier===1)list=COMARCA_TEAMS.map((x,i)=>[x,towns[i]]);
   else{const r=seeded(tier*977);const pre=["CD","UD","Atlético","CF","Club Deportivo","Unión Deportiva","Racing","Real"];
     const pool=towns.slice(Math.min(tier*2,towns.length-n));
-    list=(tier>=5?TOP_TEAMS.slice(0,tier===6?8:4):[]).concat(pool.map(t=>[`${pre[Math.floor(r()*pre.length)]} ${t}`,t]));
+    list=(TIER_REAL[tier]||[]).concat(tier>=5?TOP_TEAMS.slice(0,tier===6?8:4):[]).concat(pool.map(t=>[`${pre[Math.floor(r()*pre.length)]} ${t}`,t]));
     const seen=new Set();list=list.filter(([nm])=>!seen.has(nm)&&seen.add(nm));}
   S.tierTeams[tier]=list.slice(0,n);return S.tierTeams[tier];
 }
@@ -878,6 +883,20 @@ function wInit(){
       W.tiers[t].push(n)});
     if(t===me)W.tiers[t].push("__us")}
   S.world=W;return W}
+const REAL_ALL=()=>{const s=new Set();Object.values(BIG).concat(Object.values(TIER_REAL),[TOP_TEAMS]).forEach(l=>l.forEach(x=>s.add(x[0])));LOCAL_TEAMS.concat(COMARCA_TEAMS).forEach(x=>s.add(x));return s};
+function wRealize(){const W=S.world;if(!W||W.v!==1)return;const real=REAL_ALL();const rx=/^(CD|UD|Atlético|CF|Club Deportivo|Unión Deportiva|Racing|Real|Deportivo) (.+)$/;
+  for(let t=3;t<=6;t++){const pool=(TIER_REAL[t]||[]).filter(([n])=>!W.clubs[n]);W.tiers[t].forEach((n,i)=>{const cl=W.clubs[n];if(!cl||real.has(n))return;const m=n.match(rx);if(!m||!(GEO[m[2]]||GEOFAR[m[2]]))return;const nx=pool.shift();if(!nx)return;
+    delete W.clubs[n];cl.n=nx[0];cl.town=nx[1];cl.col=RIVC[hashStr(nx[0])%RIVC.length];W.clubs[nx[0]]=cl;W.tiers[t][i]=nx[0];if(S.rival===n)S.rival=nx[0]})}S.tierTeams={}}
+function glN(){return S.players.filter(p=>p.glory).length}
+function glFee(g){return Math.round(Math.pow(g.pk,2)*.6*(1+g.t*.6)*diffK(1.2,.85))}
+function glPlayer(g,tmp){const yrs=Math.max(0,g.age-31);const wp={n:g.n,pos:g.pos,age:g.age,q:Math.max(8,Math.round(g.pk-yrs*3)),pot:0,foot:g.foot,alt:g.alt,spd:Math.max(5,Math.round((g.spd||50)-yrs*4)),build:g.age>45&&hashStr(g.n)%2?"gordo":g.build};
+  const p=wToPlayer(wp,curTier(),g.club,tmp);p.fis=Math.max(5,p.fis-Math.round(yrs*3));p.pot=ovr(p);p.glory=true;p.origen=`Vieja gloria del ${g.club}`;p.trait="normal";p.conf=80;p.veh=null;p.wage=Math.round(wageFor(g.pk,curTier())*1.5);p.ct=1;if(tmp)NATTMP["p"+p.id]=p;return p}
+function gloriesBox(){const G=(S.world&&S.world.glories)||[];if(!G.length)return "";
+  return `<section class="win"><div class="bar">Viejas glorias <small>retirados que aman los fans</small></div><div class="body"><p class="hint">Ya no corren, pero llenan el campo: cada vieja gloria en tu plantilla sube la afición tras cada partido y la taquilla en casa. Traerlas cuesta un pastizal.</p>
+   <div class="list">${G.slice(0,12).map((g,i)=>{const p=glPlayer(g,true);return `<div class="offer"><div><b><a class="plink" data-act="card" data-id="${p.id}">${esc(g.n)}</a> · ${g.pos} · ${g.age} años</b><small>Leyenda del ${esc(g.club)} (${esc(TIERS[g.t].n)}) · media en su día ${g.pk}, ahora ${ovr(p)} · pide ${p.wage} €/sem</small></div><button class="btn mini primary" data-act="glory" data-v="${i}">${glFee(g).toLocaleString("es-ES")} €</button></div>`}).join("")}</div></div></section>`}
+function gloryDo(i){const G=S.world&&S.world.glories;const g=G&&G[+i];if(!g)return;const fee=glFee(g);if(S.players.length>=22){toast("Plantilla llena: 22.");return}if(S.money<fee){toast(`Te pide ${fee.toLocaleString("es-ES")} € por volver.`);return}
+  const p=glPlayer(g,false);ledSync();S.money-=fee;led(`Fichaje de la vieja gloria ${g.n}`,-fee);S.players.push(p);G.splice(+i,1);fansInit();const before=S.fans;S.fans=Math.round(S.fans*1.15+5+g.t*4);
+  addNews(`¡${g.n} vuelve a los ${g.age} años y ficha por ${clubName()}! Colas en la taquilla.`);save();render();toast(`${g.n} ficha. La afición pasa de ${before} a ${S.fans}.`)}
 function wSync(tier){const W=wInit();const cur=W.tiers.findIndex(l=>l.includes("__us"));if(cur===tier)return;
   if(cur>=0){const other=W.tiers[tier][Math.floor(Math.random()*W.tiers[tier].length)];W.tiers[cur][W.tiers[cur].indexOf("__us")]=other;W.tiers[tier][W.tiers[tier].indexOf(other)]="__us";const c=W.clubs[other];if(c)c.t=cur}
   else{const out=W.tiers[tier].pop();W.tiers[tier].push("__us");if(out)delete W.clubs[out]}}
@@ -922,10 +941,12 @@ function wSeason(c,ourPos){
       if(b){const fee=Math.round(Math.pow(star.q,2)*(.05+b.t*.15));cl.ps=cl.ps.filter(x=>x!==star);b.ps.push(star);b.money-=fee;cl.money+=fee;if(cl.t===nt0()||b.t===nt0())lines0.push(`El ${cl.n}, sin dinero, vende a ${star.n} (media ${star.q}) al ${b.n}.`)}}});
   // envejecer, progresar, retirarse
   Object.values(W.clubs).forEach(cl=>{const t=cl.t,pro=t>=4;const R=Math.random;
-    cl.ps=cl.ps.filter(p=>{p.age++;
+    cl.ps=cl.ps.filter(p=>{p.age++;p.pk=Math.max(p.pk||0,p.q);p.pt=Math.max(p.pt||0,t);
       if(p.age<24)p.q=Math.min(p.pot,p.q+Math.floor(R()*4));else if(p.age<30)p.q=Math.min(p.pot,p.q+Math.floor(R()*3)-1);else if(p.age<34)p.q-=Math.floor(R()*3);else p.q-=1+Math.floor(R()*4);p.q=Math.max(3,p.q);
       const retire=pro?(p.age>=38||(p.age>=34&&R()<.3)):(p.age>=62||(p.age>=50&&R()<.15)||R()<.06);
       if(retire&&nt>=0&&Math.abs(t-nt)<=0&&R()<.3)lines.push(`${p.n} (${p.age}) se retira en el ${cl.n}.`);
+      if(retire&&(p.pt||t)>=3&&(p.pk||p.q)>=TIER_Q[p.pt||t]-1){W.glories=W.glories||[];W.glories.push({n:p.n,pos:p.pos,age:p.age,pk:p.pk||p.q,t:p.pt||t,club:cl.n,foot:p.foot,alt:p.alt,spd:p.spd,build:p.build,s:S.season});if((p.pt||t)>=6&&lines.length<14)lines.push(`Se retira ${p.n} (${p.age}), mito del ${cl.n}. Ya es una vieja gloria: se le puede fichar… pagando.`)}
+      if(!retire&&R()<(p.age>55?.03:p.age>35?.004:.0008)){if(Math.abs(t-nt)<=1&&lines.length<14)lines.push(`Fallece ${p.n} (${p.age}), jugador del ${cl.n}. Minuto de silencio en toda la categoría.`);return false}
       return !retire});
     // fichajes según el dinero
     let buys=0;const price=q=>Math.round(Math.pow(Math.max(1,q),2.2)*(pro?.9:.05));
@@ -941,6 +962,7 @@ function wSeason(c,ourPos){
       if(buys>8)break}
     if(cl.ps.length>20)cl.ps=cl.ps.sort((a,b)=>b.q-a.q).slice(0,20)});
   const mv=[];if(nt>=0){W.tiers[nt].forEach(n=>{const cl=W.clubs[n];if(cl&&cl.tag)mv.push(`${cl.n} ${cl.tag==="↑"?"sube":"baja"} a ${TIERS[nt].n}.`)})}
+  {W.glories=(W.glories||[]).filter(g=>{g.age++;const pd=g.age>=100?1:g.age>=60?(g.age-58)*.012:.002;if(Math.random()<pd){if(g.t>=5&&lines.length<16)lines.push(`Muere ${g.n} a los ${g.age} años, leyenda del ${g.club}. Los fans le lloran en la puerta del estadio.`);return false}return true}).sort((a,b)=>b.pk+b.t*4-a.pk-a.t*4).slice(0,30)}
   return mv.concat(lines)}
 const mktVal=(q,tier,age)=>Math.round(Math.max(15,(q-TIER_Q[tier]+12)*(6+tier*7))*(age<24?1.3:age>31?.7:1)*diffK(1.25,.8));
 function huntMult(wp){return 5+(hashStr(wp.n+S.season)%51)/10}
@@ -1624,7 +1646,7 @@ function autoLineup(){
 function cleanLineup(){S.lineup=S.lineup.map(id=>id&&pById(id)&&!pById(id).injured?id:null)}
 function viewSquad(){
   const ps=[...S.players].sort((a,b)=>shownOvr(b)-shownOvr(a));
-  {const k=sub("squad");if(k==="estrellas")return starsBox();if(k==="cantera")return canteraBox();if(k==="once")return lineupSection()+tacBox();if(k==="fichar")return viewPueblo()}
+  {const k=sub("squad");if(k==="estrellas")return starsBox();if(k==="cantera")return canteraBox();if(k==="once")return lineupSection()+tacBox();if(k==="fichar")return gloriesBox()+viewPueblo()}
   return `
   <section class="win"><div class="bar">Plantilla <small>${S.players.length}/22</small></div><div class="body">
    <div class="pcount"><b>${S.players.length}</b> jugadores · ${["POR","DEF","MED","DEL"].map(r=>`${S.players.filter(p=>p.known&&p.pos===r).length} ${r}`).join(" · ")}${S.players.some(p=>!p.known)?` · ${S.players.filter(p=>!p.known).length} ???`:""}${S.players.some(p=>p.injured)?` · ${S.players.filter(p=>p.injured).length} lesionados`:""}</div>
@@ -4154,7 +4176,7 @@ function endMatch(normal){
   dead.forEach(legendCheck);
   M.sq.forEach(sp=>{const p=pById(sp.id);if(p&&p.dem&&p.dem.includes("tit")&&!(M.slots.includes(sp.id)||M.out.has(sp.id)))p.bench=(p.bench||0)+1});
   S.players.filter(p=>p.dem&&p.dem.includes("tit")&&(p.bench||0)>=3).forEach(p=>{legendCheck(p);S.players=S.players.filter(x=>x!==p);S.lineup=S.lineup.map(x=>x===p.id?null:x);addNews(`${fullName(p)} se va del club: le prometiste que sería titular.`)});
-  {fansInit();const dv=M.us-M.them,k=M.derbi?2:1,cap=FANS_CAP[c.tier]*1.2;const fk=(has("megafonia")?1.2:1)*(has("marcador")?1.1:1)*(has("zonafan")?1.15:1)*(has("pantalla")?1.05:1)*(M.ours?TICKETS[S.tprice!=null?S.tprice:2].fg:1);S.fans=Math.round(clamp(S.fans+(res==="W"?Math.max(2,S.fans*.10*fk):res==="D"?S.fans*.02*fk:-S.fans*.04)*k+(res==="W"?rnd(1,4):0),3,Math.max(cap,fieldCap()*1.1)));
+  {fansInit();const dv=M.us-M.them,k=M.derbi?2:1,cap=FANS_CAP[c.tier]*1.2;const fk=(1+.12*glN())*(has("megafonia")?1.2:1)*(has("marcador")?1.1:1)*(has("zonafan")?1.15:1)*(has("pantalla")?1.05:1)*(M.ours?TICKETS[S.tprice!=null?S.tprice:2].fg:1);S.fans=Math.round(clamp(S.fans+(res==="W"?Math.max(2,S.fans*.10*fk):res==="D"?S.fans*.02*fk:-S.fans*.04)*k+(res==="W"?rnd(1,4):0),3,Math.max(cap,fieldCap()*1.1)));
    if(M.derbi){co.moral=clamp(co.moral+(res==="W"?10:res==="L"?-10:0),0,100);if(res==="W")ach("derbi")}
    if(res==="W"&&dv>=5)ach("goleada");if(res==="W"&&onIds().length<=9)ach("win9");if(M.sq.filter(x=>x.drunk).length>=5)ach("borrachos");if(res==="W"&&S.embargo&&M.ours)ach("calle");if(res==="W"&&M.htUs!=null&&M.htUs<M.htThem)ach("remontada");
    S.seasonRec=S.seasonRec||{};const sc=m.a===0?`${M.us}-${M.them} vs ${c.teams[M.opp].n}`:`${M.them}-${M.us} en casa de ${c.teams[M.opp].n}`;
@@ -4164,7 +4186,7 @@ function endMatch(normal){
   const betWin=bets.reduce((a,b)=>a+b.pay,0);S.betNet=(S.betNet||0)+betWin-bets.reduce((a,b)=>a+b.amt,0);ledSync();S.money+=betWin;bets.forEach(b=>led(b.won?`Premio apuesta acertada: ${b.label}`:`Apuesta perdida: ${b.label} (${b.amt} € ya pagados)`,b.pay,true));
   const pizzas=Math.max(1,Math.ceil((M.sq.length+1)/3));const free=S.perks.comida>0;const pizzaCost=free?0:pizzas*6;S.money-=pizzaCost;led("Pizzería Belsay",-pizzaCost);
   const bote=res==="W"?40+c.tier*30:res==="D"?15+c.tier*10:0;S.money+=bote;led("Bote del torneo por el resultado",bote);
-  const taq=M.ours?Math.round((has("ambigu")?1.2:1)*((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2+Math.round(Math.min((S.fans||3)*TICKETS[S.tprice!=null?S.tprice:2].att,fieldCap())*TICKET[S.comp.tier]*TICKETS[S.tprice!=null?S.tprice:2].pm*(M.derbi?1.5:1)*(has("vip")?1.15:1)*(has("hospitality")?1.1:1)*(sst("taquillero")?1.1:1)*(has("pantalla")?1.05:1))):0;S.money+=taq;led("Taquilla",taq);
+  const taq=M.ours?Math.round((has("ambigu")?1.2:1)*((6+fieldBonus()*1.4+(has("grada")?25:0)+rnd(0,6))*(1+S.comp.tier*.8))*2+Math.round(Math.min((S.fans||3)*TICKETS[S.tprice!=null?S.tprice:2].att,fieldCap())*TICKET[S.comp.tier]*TICKETS[S.tprice!=null?S.tprice:2].pm*(M.derbi?1.5:1)*(has("vip")?1.15:1)*(has("hospitality")?1.1:1)*(sst("taquillero")?1.1:1)*(has("pantalla")?1.05:1))):0;S.money+=taq;led("Taquilla",taq);const gtq=M.ours&&glN()?Math.round(taq*.1*glN()):0;if(gtq){S.money+=gtq;led("Taquilla extra por las viejas glorias",gtq)}
   const mvpId=Object.keys(M.goals).sort((a,b)=>M.goals[b]-M.goals[a])[0];
   const pool=onIds().length?onIds():M.sq.map(p=>p.id);
   const mvp=(mvpId&&findAny(+mvpId))||(pool.length&&sqP(pick(pool)))||S.players[0]||null;
@@ -4342,6 +4364,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  glory:v=>gloryDo(v),
   natclick:()=>{if(S.natSwap||M||!S.nat)return;closeModal();if(!S.nat.on)natOffer();else natSwitch()},
   natview:v=>{closeModal();if(v==="nat"&&!natOn()){if(S.nat)natOffer();return}if(v==="nat"&&prepLocked()){toast("Termina antes de preparar el partido del club.");return}S.view=v;save();render();window.scrollTo(0,0)},
   natyes:()=>{const off=S.nat;natInit();S.view="nat";closeModal();if(S.phase==="season"&&S.comp&&!S.comp.done&&S.comp.type!=="online"){natMaybeStart()}addNews(`${S.coach.name}, nuevo seleccionador nacional. En el bar no se lo creen.`);save();render();window.scrollTo(0,0)},
@@ -4487,7 +4510,7 @@ const A={
     if(v==="w")S.wife=null;else if(v==="ex0")S.exFree=true;else S.exWives.splice(+v,1);S.coach.moral=clamp(S.coach.moral+15,0,100);addNews(`El míster le paga ${cost} € a ${n} y es libre. Lo celebra con unas latas en la plaza.`);save();render();toast(`¡Libre! −${cost} €.`)},
   divorce:()=>{const w=S.wife;if(!w)return;S.exWives=(S.exWives||[]).concat([{n:w.n,cost:Math.round(w.cost*.8)}]);S.wife=null;addNews(`${w.n} y el míster se divorcian. Ella se queda con el coche.`);save();render();toast("Divorciado otra vez.")},
   startcomp:()=>{if((S.renew||[]).length){toast("Antes decide las renovaciones de contrato (arriba, en Inicio).");S.tab="club";render();window.scrollTo(0,0);return}if(S.players.length<11){toast("Necesitas 11 como mínimo.");return}S.idle=0;
-    S.eds=(S.eds||0)+1;S.comp=newComp(S.tierNext,S.eds);S.cup=newCup(S.comp);S.league=null;setObjective(S.comp);if(unl("derbi")){const tw=S.comp.teams.slice(1).sort((a,b)=>(a.town===HOME?99:kmS(stop(HOME),stop(a.town)))-(b.town===HOME?99:kmS(stop(HOME),stop(b.town))));const mar=S.comp.teams.find(t=>/Marchena/.test(t.n));S.rival=(mar||tw[0]||{}).n||null}S.phase="season";cleanLineup();if(S.lineup.filter(Boolean).length<11)autoLineup();
+    try{wRealize()}catch(e){}S.eds=(S.eds||0)+1;S.comp=newComp(S.tierNext,S.eds);S.cup=newCup(S.comp);S.league=null;setObjective(S.comp);if(unl("derbi")){const tw=S.comp.teams.slice(1).sort((a,b)=>(a.town===HOME?99:kmS(stop(HOME),stop(a.town)))-(b.town===HOME?99:kmS(stop(HOME),stop(b.town))));const mar=S.comp.teams.find(t=>/Marchena/.test(t.n));S.rival=(mar||tw[0]||{}).n||null}S.phase="season";cleanLineup();if(S.lineup.filter(Boolean).length<11)autoLineup();
     addNews(`Arranca la temporada ${S.season} en ${S.comp.name}.`);natMaybeStart();S.tab="comp";save();render();window.scrollTo(0,0)},
   prep:()=>startPrep(),
   conv:(v,el)=>{const id=+el.dataset.id;const P=S.prep;if(P.conv[id])delete P.conv[id];else{if(Object.keys(P.conv).length>=18){toast("Máximo 18 convocados: 11 titulares y 7 suplentes.");return}P.conv[id]=true}save();render()},
@@ -4960,6 +4983,6 @@ if(S&&!S.mafiaFix){S.mafiaFix=1;if(S.debt>0||S.embargo||S.mafiaStrikes){S.debt=0
 render();requestAnimationFrame(loop);
 setTimeout(()=>{try{olStart()}catch(e){}},1500);
 document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olOn())olPublish(true)}catch(e){}});
-window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop});
+window.PCDBG=()=>({wSeason,wRealize,wInit,S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop});
 })();
 </script>
