@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="12.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="12.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -182,6 +182,7 @@ body.fm .olfx.me{background:#262b72}body.fm .oltb tr.me{background:#ffd23f}body.
 .chip .cv{display:block;font-size:11px;opacity:.85;font-family:var(--f-mono)}
 .subcmp{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;background:#fff3b0;border:2px solid #000;padding:6px 8px;margin:8px 0}.subcmp small{display:block}.subarr{font-size:24px}
 body.fm .subcmp{background:#262b72;border-color:#c13cf0}
+.gxi{display:flex;flex-wrap:wrap;gap:4px;align-items:baseline;margin:3px 0}.gxi b{min-width:34px}.gxi span{background:#0001;padding:2px 6px;border-radius:4px;font-size:13px}.gxi span.us{background:#ffd23f;font-weight:700}.gxi small{display:block;font-size:11px;opacity:.75}
 .bet2{display:grid;grid-template-columns:1fr auto;gap:6px}
 .amts{display:flex;gap:4px}
 .amts .btn{flex:1;font-size:11px;padding:6px 0}
@@ -759,7 +760,7 @@ function record(c,a,b,ga,gb){
   A.pj++;B.pj++;A.gf+=ga;A.gc+=gb;B.gf+=gb;B.gc+=ga;
   if(ga>gb){A.g++;B.p++;A.pts+=3}else if(ga<gb){B.g++;A.p++;B.pts+=3}else{A.e++;B.e++;A.pts++;B.pts++}
   c.results.push({r:c.r,a,b,ga,gb});
-  if(isKO(c)){if(ga!==gb)return{win:ga>gb?a:b,pens:null};let pa,pb;do{pa=rnd(2,5);pb=rnd(2,5)}while(pa===pb);return{win:pa>pb?a:b,pens:[pa,pb]}}
+  if(isKO(c)){if(ga!==gb)return{win:ga>gb?a:b,pens:null};if(c.pensRes){const[pa,pb]=c.pensRes;c.pensRes=null;return{win:pa>pb?a:b,pens:[pa,pb]}}let pa,pb;do{pa=rnd(2,5);pb=rnd(2,5)}while(pa===pb);return{win:pa>pb?a:b,pens:[pa,pb]}}
   return{win:null,pens:null};
 }
 function simGame(c,a,b){const sa=c.teams[a].str||14,sb=c.teams[b].str||14;return[poisson(1.3*Math.pow(sa/sb,1.3)),poisson(1.15*Math.pow(sb/sa,1.3))]}
@@ -2606,14 +2607,14 @@ function viewPrep(){
     const pw=power(arrived.slice(0,11).map((p,i)=>({p:{...p,mE:p.energy},role:FORMS[S.formation][i]})),S.formation,{home:P.venue.home});
     const us=(pw.a+pw.d)/2,them=opp.str,pu=us/(us+them);
     const od=x=>Math.max(1.15,Math.round(.92/x*10)/10);P.odds={W:od(pu*.75),D:od(.25),L:od((1-pu)*.75)};
-    const scorerOpts=arrived.map(p=>`<option value="u${p.id}">${esc(short(p))} (tuyo) · x${scOdds(p)}</option>`).join("")+(fewArrived()?"":opp.roster.map((r,i)=>r.pos==="POR"?"":`<option value="r${i}">${esc(r.n)} (${esc(opp.n)}) · x${rivOdds(r)}</option>`).join(""));
+    const scSel=P.scPick||S.lastScPick||"";const scorerOpts=arrived.map(p=>`<option value="u${p.id}">${esc(short(p))} (tuyo) · x${scOdds(p)}</option>`).join("")+(fewArrived()?"":opp.roster.map((r,i)=>r.pos==="POR"?"":`<option value="r${i}">${esc(r.n)} (${esc(opp.n)}) · x${rivOdds(r)}</option>`).join(""));
     return matchPreview(c,m.a===0?m.b:m.a)+`<section class="win"><div class="bar">4 · Llegada <small>${arrived.length} en el campo</small></div><div class="body">
      <p>Han llegado: ${arrived.map(p=>esc(short(p))+(P.arrive[p.id].min>0?` (al ${P.arrive[p.id].min}')`:"")).join(", ")||"nadie"}.</p><p class="hint">Ahora que sabes quién ha llegado, monta el once. Los que llegan tarde pueden empezar en el banquillo.</p></div></section>`+lineupSection()+`
     <section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
      <p class="hint">Se apuesta al resultado de los 90 minutos. A favor o en contra, aquí no se juzga a nadie.${fewArrived()?" Pero con menos de 11 en el campo, Paco no te deja apostar contra tu equipo: sería demasiado fácil.":""}</p>
      <div class="amts">${[5,10,20,50].map(a=>`<button class="btn ${P.amt===a?"sel":""}" data-act="amt" data-v="${a}">${a} €</button>`).join("")}</div>
      <div class="bet"><button class="btn ${P.bets.some(b=>b.pick==="W")?"sel":""}" data-act="bet" data-v="W">Ganan los Papas<small>x${P.odds.W}</small></button><button class="btn ${P.bets.some(b=>b.pick==="D")?"sel":""}" data-act="bet" data-v="D">Empate<small>x${P.odds.D}</small></button><button class="btn ${P.bets.some(b=>b.pick==="L")?"sel":""}" data-act="bet" data-v="L" ${fewArrived()?"disabled":""}>Gana el rival<small>${fewArrived()?"bloqueado":"x"+P.odds.L}</small></button></div>
-     <div class="bet2"><select id="sc-pick" aria-label="Goleador">${scorerOpts}</select><button class="btn" data-act="betsc">Que marca</button></div>
+     <div class="bet2"><select id="sc-pick" aria-label="Goleador" data-sc="1">${scorerOpts.replace(`value="${scSel}"`,`value="${scSel}" selected`)}</select><button class="btn" data-act="betsc">Que marca</button></div>
      <p class="hint">Tienes <b>${eur(S.money)}</b>. Cada toque en un botón es una apuesta de <b>${P.amt} €</b>, que se paga en el momento.</p>
      ${P.bets.length?`<div class="betok"><b>✔ TUS APUESTAS (${P.bets.length}) · ${P.bets.reduce((a,b)=>a+b.amt,0)} € apostados, ya descontados</b>${P.bets.map((b,i)=>`<div><span>${b.amt} € a ${esc(b.label)} · x${b.odds} → cobras ${Math.round(b.amt*b.odds)} €</span><button class="btn mini" data-act="unbet" data-v="${i}">Quitar</button></div>`).join("")}</div>`:`<p class="hint" style="text-align:center">Todavía no has apostado nada.</p>`}
      ${P.ol?(P.ol.ready?`<p class="hint" style="text-align:center">Listos. Esperando a ${esc(OLc.oppN)} (o a que se acabe el tiempo)…</p>`:`<button class="btn play" data-act="olready">¡Listos para jugar!</button>`):`<button class="btn play" data-act="kick">Saltar al campo</button>`}</div></section>`;
@@ -3103,8 +3104,23 @@ const TRIPS=[
  {id:"rumania",n:"Rumanía",d:"Futbolistas con hambre que piden poco sueldo.",w:3,c:250,kinds:["chollo","promesa"],lv:1},
  {id:"marruecos",n:"Marruecos",d:"Técnica de calle y regate. Algún talento escondido.",w:3,c:250,kinds:["promesa","chollo"],lv:1},
  {id:"cesion",n:"Clubes grandes de Andalucía",d:"Te ceden a un jugador por una temporada: el club grande le paga el sueldo.",w:2,c:300,kinds:["cedido"],lv:2,req:2},
- {id:"argentina",n:"Argentina",d:"Talentos con mucha calidad. El viaje es caro.",w:5,c:900,kinds:["promesa","chollo","cedido"],lv:2.5,req:3}];
+ {id:"argentina",n:"Argentina",d:"Talentos con mucha calidad. El viaje es caro.",w:5,c:900,kinds:["promesa","chollo","cedido"],lv:2.5,req:3},
+ {id:"zambia",n:"Zambia",d:"Nadie sabe qué va a traer. Ni el ojeador.",w:4,c:400,kinds:["promesa","chollo"],lv:1.5,req:1},
+ {id:"brasil",n:"Brasil",d:"Jogo bonito. Algunos vienen con su familia entera.",w:5,c:1200,kinds:["promesa","chollo"],lv:3,req:4}];
 const SPECIAL={promesa:"Promesa: joven, mucho potencial, contrato largo y barato",chollo:"Chollo: bueno, barato y con sueldo bajo",cedido:"Cedido una temporada: el sueldo lo paga su club",veterano:"Veterano: exprofesional, rinde ya, cobra casi nada y dura poco"};
+const SCOUT_JOKES=[
+ (s,t,p,pos)=>`Tu ojeador encontró a ${p} en ${t}. No tiene muy claro si le dijo que juega de ${pos} o que a su burro se lo llevó una riada.`,
+ (s,t,p,pos)=>`${s} conoció a ${p} en ${t}, en una boda. Dice que es ${pos}. También dice que era el novio.`,
+ (s,t,p,pos)=>`En ${t}, ${p} le metió tres goles a ${s} en un partido de solteros contra casados. ${s} jugaba de portero. Lo ficha por despecho.`,
+ (s,t,p,pos)=>`${s} vio a ${p} desde el autobús en ${t}. Iba corriendo detrás de una gallina. Si corre así en el campo, es ${pos} seguro.`,
+ (s,t,p,pos)=>`${p} le ha firmado el precontrato a ${s} en una servilleta en ${t}. La servilleta tiene manchas de aceite y pone «${pos}» con faltas de ortografía.`,
+ (s,t,p,pos)=>`${s} asegura que en ${t} a ${p} le llaman «el Messi del barrio». El barrio tiene cuatro casas.`,
+ (s,t,p,pos)=>`A ${p} lo encontró ${s} en ${t} vendiendo pañuelos en un semáforo. Le regateó tres veces sin soltar los pañuelos. ${pos.charAt(0).toUpperCase()+pos.slice(1)}, dice.`,
+ (s,t,p,pos)=>`${s} no sabe muy bien cómo ha llegado a ${t}. Volvió con ${p}, una cabra y un acento nuevo. La cabra no viene.`,
+ (s,t,p,pos)=>`${p} juega de ${pos} según ${s}. Según el traductor de Google, «su tío tiene un tractor azul». En ${t} todo es posible.`,
+ (s,t,p,pos)=>`${s} pagó la cuenta de ${p} en un bar de ${t} y ahora le debe un favor. El favor es fichar por vosotros.`];
+function scoutJoke(sc,T,p){const pos=POSN[p.pos]||"lo que haga falta";const place=T.id==="argentina"?pick(["un potrero de Rosario","Buenos Aires","la Patagonia"]):T.id==="marruecos"?pick(["Tánger","un mercado de Marrakech","Casablanca"]):T.id==="rumania"?pick(["un pueblo de Transilvania","Bucarest","una mina de sal"]):T.n;
+  return pick(SCOUT_JOKES)(sc.n,place,fullName(p),pos)}
 function tripReturn(t){const sc=SCOUTS.find(x=>x.id===t.sid),T=TRIPS.find(x=>x.id===t.dest);if(!sc||!T)return;const tier=S.comp&&S.comp.type!=="online"?S.comp.tier:(S.tierNext||0);const out=[];
   for(let k=0;k<2;k++){const kind=pick(T.kinds);let p;
     if(kind==="promesa"){p=genPlayer("academia",sc.ojo,Math.max(0,tier-1+T.lv*.3));p.age=rnd(17,20);p.pot=Math.min(95,ovr(p)+rnd(18,30));p.wage=Math.max(1,Math.round(p.wage*.6));p.ct=4;p.cost=Math.round(p.cost*.7)}
@@ -3112,7 +3128,7 @@ function tripReturn(t){const sc=SCOUTS.find(x=>x.id===t.sid),T=TRIPS.find(x=>x.i
     else if(kind==="cedido"){p=genPlayer("club",sc.ojo,tier+T.lv*.5+.5);p.wage=0;p.cost=Math.round(40+tier*30);p.ct=1;p.loan=1}
     else{p=genPlayer("club",sc.ojo,tier+T.lv*.5);p.age=rnd(35,39);p.fis=Math.max(1,p.fis-8);p.wage=1;p.cost=Math.round(20+tier*10);p.ct=1;p.pot=ovr(p)}
     p.known=true;p.scout=`${sc.n} (${T.n})`;p.special=kind;p.rel=+(.8+Math.random()*.1).toFixed(2);p.origen=`Lo trae ${sc.n} de ${T.n}`;S.reports.unshift(p);out.push(p)}
-  S.reports=S.reports.slice(0,10);const msg=`${sc.n} vuelve de ${T.n} con ${out.map(p=>`${fullName(p)} (${SPECIAL[p.special].split(":")[0].toLowerCase()}, media ${ovr(p)})`).join(" y ")}. Están en Equipo › Fichar, arriba.`;addNews(msg);S.scoutMsg=(S.scoutMsg?S.scoutMsg+" ":"")+msg}
+  S.reports=S.reports.slice(0,10);const p0=out[0];const msg=`${scoutJoke(sc,T,p0)} ${sc.n} vuelve con ${out.map(p=>`${fullName(p)} (${SPECIAL[p.special].split(":")[0].toLowerCase()}, media ${ovr(p)})`).join(" y ")}. Están en Equipo › Fichar, arriba.`;addNews(msg);S.scoutMsg=(S.scoutMsg?S.scoutMsg+" ":"")+msg}
 function scoutWeek(){
   S.trips=(S.trips||[]).filter(t=>{if(S.week>=t.back){tripReturn(t);return false}return true});
   S.reports=S.reports||[];const open=PLACES.filter(placeOpen);
@@ -3247,13 +3263,28 @@ function tick(){
   if(hole&&M.slots.includes(null)){if(canFill()){autoFill();addLog(m,`Hueco tapado con el más apto del banquillo. Si quieres otro, toca el puesto y cámbialo.`,"ev")}else if(benchList().length&&M.subs>=5)addLog(m,`Sin cambios disponibles: jugáis con ${M.slots.filter(Boolean).length}.`,"bad")}
   renderSquad();
 }
+function shootout(){
+  const ours=onList().map(x=>x.p).filter(p=>p).sort((a,b)=>b.atk-a.atk);const theirs=(M.vis?M.vis.them.map(x=>x.full):[]).filter(Boolean);
+  const gkU=(onList().find(x=>x.role==="POR")||{}).p;let us=0,them=0,k=0;const lines=[];
+  addLog(M.min,"¡PENALTIS! Todo se decide desde los once metros.","goal");vo("penUs",null,true);
+  const kick=(side,i)=>{if(side==="us"){const p=ours[i%Math.max(1,ours.length)];if(!p)return false;const pr=clamp(.72+(p.atk-TIER_Q[curTier()])/150+(specs(p).includes("Lanzador de faltas")?.08:0)-(p.mE<30?.08:0),.45,.92);const ok=Math.random()<pr;
+      addLog(M.min,ok?`✔ ${short(p)} marca. ${pick(["Al palo largo.","Por el centro, con dos narices.","A lo Panenka. Casi se le para el corazón al míster."])}`:`✘ ${short(p)} falla. ${pick(["Al tejado de la nave.","Se lo para el portero.","Resbala y la manda a Écija."])}`,ok?"goal":"bad");return ok}
+    const n=theirs.length?theirs[i%theirs.length]:"un rival";const pr=clamp(.74-(gkU?(gkU.def-TIER_Q[curTier()])/160:0),.45,.9);const ok=Math.random()<pr;addLog(M.min,ok?`${n} marca para ellos.`:`¡${gkU?short(gkU):"Tu portero"} PARA el penalti de ${n}!`,ok?"bad":"goal");return ok};
+  for(;k<5;k++){if(kick("us",k))us++;if(us>them+(5-k-1)+1||them>us+(5-k))break;if(kick("them",k))them++;if(us>them+(5-k-1)||them>us+(5-k-1))break}
+  let g=0;while(us===them&&g++<20){const a=kick("us",5+g),b=kick("them",5+g);if(a)us++;if(b)them++}
+  addLog(M.min,`Penaltis: ${us}-${them}. ${us>them?"¡PASÁIS! El pueblo entero invade el campo.":"Fuera de la copa. Nadie dice nada en el coche de vuelta."}`,us>them?"goal":"bad");SFX.whistle(3,true);
+  return{us,them}}
 function clockEnd(m){
   if(M.ended)return true;
   if(m===45&&!M.ht&&M.addLeft===0){
     if(!M.a1){M.a1=olA(1)||(rnd(1,3)+Math.min(3,Math.ceil(M.lost/2)));M.lost=0;M.addLeft=M.a1;addLog(45,`El árbitro levanta ${M.a1} dedo${M.a1>1?"s":""}: ${M.a1} minuto${M.a1>1?"s":""} de descuento.`,"ev");updScore();return false}
     M.ht=true;M.addN=0;addLog(45,"Descanso. Bocadillos de mortadela del maletero."+(onList().some(x=>x.p.trait==="fumador")?" Alguien se enciende un Ducados.":""),"ev");M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+8,0,100)});updScore();M.htUs=M.us;M.htThem=M.them;SFX.whistle(2);vo("halftime",null,true);if(unl("tac")&&!M.skipping){M.paused=true;clearTimeout(M.timer);htTalk()}return false}
-  if(m===90&&M.addLeft===0){
+  if(m===90&&M.addLeft===0&&!M.et){
     if(!M.a2){M.a2=olA(2)||(rnd(2,4)+Math.min(5,Math.ceil(M.lost/2)));M.addLeft=M.a2;addLog(90,`${M.a2} minutos de descuento. ${M.a2>5?"El árbitro ha apuntado lo del perro, lo del tabaco y todo.":"Nadie sabe de dónde los saca."}`,"ev");updScore();return false}
+    if(isKO(S.comp)&&M.us===M.them&&!M.et&&!M.online){M.et=1;SFX.whistle(2);addLog(90,`¡Empate! Nos vamos a la PRÓRROGA: dos partes de 15 minutos. ${pick(["Los jugadores se tiran al suelo con calambres.","El del bar baja otra caja de cervezas.","Alguien pregunta si se puede ir ya a casa."])}`,"goal");vo("halftime",null,true);M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+4,0,100)});updScore();return false}
+    endMatch(true);return true}
+  if(M.et&&m===105&&M.addLeft===0&&M.et===1){M.et=2;addLog(105,"Cambio de campo en la prórroga. Agua y a seguir.","ev");return false}
+  if(M.et&&m===120&&M.addLeft===0){if(!M.a3){M.a3=rnd(1,2);M.addLeft=M.a3;addLog(120,`${M.a3} minuto${M.a3>1?"s":""} de descuento en la prórroga.`,"ev");updScore();return false}
     endMatch(true);return true}
   return false;
 }
@@ -3393,6 +3424,7 @@ function endMatch(normal){
   updScore();
   if(S.comp&&S.comp.type==="online")return olEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   const c=S.comp,m=M.m,ko=isKO(c);
+  if(ko&&M.us===M.them&&!M.early&&normal){const sh=shootout();c.pensRes=m.a===0?[sh.us,sh.them]:[sh.them,sh.us]}
   const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
   const r=record(c,m.a,m.b,ga,gb,ko);m.win=r.win;m.ga=ga;m.gb=gb;m.pens=r.pens;{const ot=c.teams[M.opp];ot.gl=ot.gl||{};M.rivScorers.forEach(n=>{ot.gl[n]=(ot.gl[n]||0)+1})}
   if(r.pens){const our=m.a===0?r.pens[0]:r.pens[1],their=m.a===0?r.pens[1]:r.pens[0];addLog(M.min,`Penaltis: ${our}-${their}. ${r.win===0?"¡Pasáis!":"Fuera."}`,r.win===0?"goal":"bad")}
@@ -3528,9 +3560,48 @@ function compEnd(){
    ${wl.length?`<div class="sec"><h4>EL RESTO DE CLUBES</h4><ul>${wl.slice(0,12).map(e=>`<li>${esc(e)}</li>`).join("")}</ul></div>`:""}
    <div class="sec"><h4>EL VERANO</h4><ul>${ev.length?ev.map(e=>`<li>${esc(e)}</li>`).join(""):"<li>Nadie se ha jubilado, muerto ni ido a la cárcel. Raro.</li>"}</ul></div>
    ${nextTier>c.tier&&PLACES.some(pl=>pl.t===nextTier)?`<p class="hint">Nuevos sitios para buscar jugadores en el pueblo.</p>`:""}${boardTxt}${newU.length?`<div class="sec"><h4>DESBLOQUEADO</h4><ul>${newU.map(k=>`<li>${{board:"Junta directiva y objetivos (Club › Directiva)",tac:"Instrucciones tácticas y charla del descanso",derbi:"Derbis contra tu rival histórico",staff:"Cuerpo técnico (Club › Staff)",chem:"Química del vestuario",pretemp:"Pretemporadas especiales",report:"Informes del rival",cantera:"Cantera de cadetes y juveniles (Equipo › Cantera)",merch:"Tienda del club (Club › Tienda)",wage:"Límite salarial",stars:"Fichajes de estrellas (Equipo › Estrellas)"}[k]}</li>`).join("")}</ul></div>`:""}`;
-  if(up||pos===1){S.pendingSeason=html;offersModal(c);return}
-  modal(`Fin de la temporada ${S.season-1}`,html+`<button class="btn play" data-act="close">A la pretemporada</button>`);
+  const next=()=>{if(up||pos===1){S.pendingSeason=html;offersModal(c);return}
+    modal(`Fin de la temporada ${S.season-1}`,html+`<button class="btn play" data-act="close">A la pretemporada</button>`)};
+  try{showGala(c,order,next)}catch(e){window.__galaErr=String(e&&e.stack||e);next()}
 }
+let GALA_NEXT=null;
+function galaData(c,order){
+  const tier=c.tier;const all=[];
+  c.teams.forEach((t,i)=>{if(t.us){S.players.forEach(p=>all.push({n:fullName(p),short:short(p),pos:p.known?p.pos:p.pos,q:ovr(p),g:(p.goals||0),team:t.n,us:1,id:p.id}));return}
+    const cl=S.world&&S.world.clubs[t.n];const gl=t.gl||{};
+    if(cl)cl.ps.forEach(p=>all.push({n:p.n,short:p.n.split(" ")[0],pos:p.pos,q:p.q,g:gl[p.n]||0,team:t.n}));
+    else(t.roster||[]).forEach(r=>all.push({n:r.n,short:r.n.split(" ")[0],pos:r.pos,q:Math.round(TIER_Q[tier]+(hashStr(r.n)%12)-4),g:gl[r.n]||0,team:t.n}))});
+  const score=x=>x.q+x.g*(x.pos==="DEL"?1.6:x.pos==="MED"?1.2:.8);
+  const pickPos=(pos,n)=>all.filter(x=>x.pos===pos).sort((a,b)=>score(b)-score(a)).slice(0,n);
+  const xi={POR:pickPos("POR",1),DEF:pickPos("DEF",4),MED:pickPos("MED",4),DEL:pickPos("DEL",2)};
+  const podium=all.slice().sort((a,b)=>score(b)-score(a)).slice(0,3);
+  const pich=all.slice().sort((a,b)=>b.g-a.g)[0];
+  return{xi,podium,pich,champ:c.teams[order[0]],second:c.teams[order[1]]}}
+function showGala(c,order,next){
+  const G=galaData(c,order);GALA_NEXT=next;const tier=c.tier;let prize=0;const lines=[];
+  const ours=[].concat(...Object.values(G.xi)).concat(G.podium).filter(x=>x.us);const seen=new Set();
+  ours.forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);const p=pById(x.id);if(!p)return;const pi=G.podium.findIndex(y=>y.us&&y.id===x.id);const bonus=Math.round((25+tier*20)*(pi===0?3:pi===1?2:pi===2?1.5:1));prize+=bonus;p.conf=clamp((p.conf||0)+15,0,100);p.energy=clamp(p.energy+10,20,100);lines.push(`${fullName(p)}${pi>=0?` (${pi+1}º del podio)`:" (once ideal)"}: +${bonus} €`)});
+  if(prize){ledSync();S.money+=prize;led(`Gala de ${c.name}: premios a tus jugadores`,prize);S.coach.moral=clamp(S.coach.moral+8,0,100)}save();
+  const xiRow=(pos,l)=>`<div class="gxi"><b>${pos}</b>${l.map(x=>`<span class="${x.us?"us":""}">${esc(x.n)}<small>${esc(x.team)} · ${x.q}${x.g?` · ${x.g} gol${x.g>1?"es":""}`:""}</small></span>`).join("")}</div>`;
+  modal(`Gala de ${c.name}`,`<canvas class="cinecv" id="galacv" width="640" height="400"></canvas>
+   <p><b>Campeón:</b> ${esc(G.champ.n)} · <b>Subcampeón:</b> ${esc(G.second?G.second.n:"—")}${G.pich&&G.pich.g?` · <b>Pichichi:</b> ${esc(G.pich.n)} (${G.pich.g})`:""}</p>
+   <div class="sec"><h4>ONCE IDEAL DE LA TEMPORADA</h4>${xiRow("POR",G.xi.POR)}${xiRow("DEF",G.xi.DEF)}${xiRow("MED",G.xi.MED)}${xiRow("DEL",G.xi.DEL)}</div>
+   ${lines.length?`<div class="sec"><h4>TUS PREMIADOS</h4><ul>${lines.map(l=>`<li>${esc(l)}</li>`).join("")}</ul><p class="hint">Suben de moral y confianza. Prima total: <b>${prize} €</b>.</p></div>`:`<p class="hint">Ninguno de los tuyos sale en la gala. El año que viene.</p>`}
+   <button class="btn play" data-act="galanext">Seguir</button>`);
+  const cv=$("#galacv");if(!cv)return;const g=cv.getContext("2d"),W=640,H=400,t0=performance.now();const conf=Array.from({length:110},()=>({x:Math.random()*W,y:-Math.random()*H,v:50+Math.random()*110,c:["#ffd23f","#c8233a","#2a5bd7","#fff","#1f8f4e"][Math.floor(Math.random()*5)],r:Math.random()*6}));
+  try{SFX.init();SFX.start();SFX.swell(.25,3)}catch(e){}
+  const cup=(x,y,s,col)=>{g.save();g.translate(x,y);g.scale(s,s);g.fillStyle=col;g.strokeStyle="#3a2d00";g.lineWidth=3;g.beginPath();g.moveTo(-40,-70);g.lineTo(40,-70);g.quadraticCurveTo(40,-15,0,0);g.quadraticCurveTo(-40,-15,-40,-70);g.fill();g.stroke();g.beginPath();g.arc(-45,-48,15,Math.PI*.5,Math.PI*1.5);g.stroke();g.beginPath();g.arc(45,-48,15,-Math.PI*.5,Math.PI*.5);g.stroke();g.fillRect(-7,0,14,22);g.fillRect(-28,22,56,14);g.strokeRect(-28,22,56,14);g.restore()};
+  const draw=now=>{if(!$("#galacv"))return;const t=(now-t0)/1000;g.fillStyle="#10163a";g.fillRect(0,0,W,H);
+    const gr=g.createRadialGradient(W/2,H*.5,10,W/2,H*.5,320);gr.addColorStop(0,"rgba(255,210,63,.35)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,W,H);
+    g.textAlign="center";g.fillStyle="#fff";g.font="22px Bungee, Impact, sans-serif";g.fillText(`GALA · ${c.name.toUpperCase()}`,W/2,34);
+    if(t<4.5){const s=Math.min(1,t/.7);cup(W*.33,210+Math.sin(t*3)*4,1.3*s,"#ffd23f");cup(W*.7,230,1*s,"#c9ced6");g.font="18px Bungee, Impact, sans-serif";g.fillStyle="#ffd23f";g.fillText("CAMPEÓN",W*.33,300);g.fillStyle="#c9ced6";g.fillText("SUBCAMPEÓN",W*.7,300);
+      g.font="20px Archivo Narrow, sans-serif";g.fillStyle="#fff";g.fillText(G.champ.n,W*.33,328);if(G.second)g.fillText(G.second.n,W*.7,328)}
+    else{const s=Math.min(1,(t-4.5)/.6);const P=[[W/2,170,"#ffd23f","1"],[W/2-170,215,"#c9ced6","2"],[W/2+170,240,"#cd7f32","3"]];
+      P.forEach(([x,y,col,n],i)=>{const h=(H-60-y)*s;g.fillStyle=col;g.fillRect(x-75,H-40-h,150,h);g.strokeStyle="#000";g.lineWidth=3;g.strokeRect(x-75,H-40-h,150,h);g.fillStyle="#111";g.font="34px Bungee, Impact, sans-serif";g.fillText(n,x,H-40-h+40);
+        const pl=G.podium[i];if(pl&&s>=1){g.fillStyle=pl.us?"#7dff7a":"#fff";g.font="17px Archivo Narrow, sans-serif";g.fillText(pl.n,x,H-55-h);g.fillStyle="#aab";g.font="13px Archivo Narrow, sans-serif";g.fillText(`${pl.team} · ${pl.pos}`,x,H-38-h-34)}});
+      g.fillStyle="#ffd23f";g.font="18px Bungee, Impact, sans-serif";g.fillText("LOS MEJORES DE LA TEMPORADA",W/2,70)}
+    conf.forEach(q=>{q.y+=q.v/60;q.x+=Math.sin(t*2+q.r);if(q.y>H)q.y=-10;g.fillStyle=q.c;g.save();g.translate(q.x,q.y);g.rotate(t*3+q.r);g.fillRect(-3,-5,6,10);g.restore()});
+    requestAnimationFrame(draw)};requestAnimationFrame(draw)}
 function offersModal(c){
   const avail=BRANDS.filter(b=>!S.sponsors.includes(b.n)).sort(()=>Math.random()-.5).slice(0,4);
   S.offers=avail.map(b=>({n:b.n,pay:b.pay,v:b.pay==="dinero"?rnd(8,25)+c.tier*8:0}));
@@ -3565,6 +3636,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  galanext:()=>{closeModal();const f=GALA_NEXT;GALA_NEXT=null;if(f)f()},
   tripui:v=>{const sc=SCOUTS.find(x=>x.id===v);if(!sc)return;modal(`Mandar a ${sc.n} de viaje`,`<p class="hint">Mientras está fuera no te trae a nadie del pueblo. A la vuelta trae dos jugadores con contrato especial. Lo pagas al salir.</p><div class="list">${TRIPS.map(T=>{const lk=(T.req||0)>(S.reach||0);return `<div class="offer"><div><b>${esc(T.n)}</b><small>${esc(T.d)} ${T.w} semana${T.w>1?"s":""}. Puede traer: ${T.kinds.map(k=>SPECIAL[k].split(":")[0].toLowerCase()).join(", ")}.${lk?` Hace falta llegar a ${esc(TIERS[T.req].n)}.`:""}</small></div><button class="btn mini primary" data-act="tripgo" data-v="${sc.id}|${T.id}" ${lk?"disabled":""}>${T.c} €</button></div>`}).join("")}</div><button class="btn" data-act="close">Cancelar</button>`)},
   tripgo:v=>{const[sid,did]=v.split("|");const T=TRIPS.find(x=>x.id===did),sc=SCOUTS.find(x=>x.id===sid);if(!T||!sc)return;if(S.money<T.c){toast(`El viaje cuesta ${T.c} €. No te llega.`);return}ledSync();S.money-=T.c;led(`Viaje del ojeador a ${T.n}`,-T.c);S.trips=(S.trips||[]).concat([{sid,dest:did,back:S.week+T.w}]);addNews(`${sc.n} se va ${T.w} semana${T.w>1?"s":""} a ${T.n} a buscar talentos.`);closeModal();save();render();toast(`${sc.n} se va a ${T.n}.`)},
   stand:()=>{const n=STANDS[(S.stand||0)+1];if(!n||n.req>(S.reach||0))return;if(S.money<n.c){toast(`Cuesta ${n.c} €. No te llega.`);return}ledSync();S.money-=n.c;led(`Obra: ${n.n}`,-n.c);S.stand=(S.stand||0)+1;addNews(`Inaugurada la ${n.n.toLowerCase()}. Caben ${fieldCap()} personas.`);save();render();toast(`${n.n} construida.`)},
@@ -3702,7 +3774,7 @@ const A={
   bet:v=>{const P=S.prep;if(v==="L"&&fewArrived()){toast("Con menos de 11 no te dejan apostar contra tu equipo. Sería demasiado fácil.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}const lbl={W:"que ganan los Papas",D:"empate",L:"que gana el rival"}[v];
     ledSync();S.money-=P.amt;P.bets.push({type:"res",pick:v,amt:P.amt,odds:P.odds[v],label:lbl});led(`Apuesta: ${lbl}`,-P.amt);save();render();toast(`✔ Apostados ${P.amt} € a ${lbl}. Si aciertas cobras ${Math.round(P.amt*P.odds[v])} €.`)},
   unbet:i=>{const P=S.prep,b=P.bets[+i];if(!b)return;ledSync();P.bets.splice(+i,1);S.money+=b.amt;led(`Apuesta anulada: ${b.label}`,b.amt);save();render();toast(`Apuesta anulada. Te devuelven ${b.amt} €.`)},
-  betsc:()=>{const P=S.prep;const val=$("#sc-pick")&&$("#sc-pick").value;if(!val)return;if(val[0]==="r"&&fewArrived()){toast("Con menos de 11 no puedes apostar por los goleadores rivales.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}
+  betsc:()=>{const P=S.prep;const val=$("#sc-pick")&&$("#sc-pick").value;if(!val)return;P.scPick=val;S.lastScPick=val;if(val[0]==="r"&&fewArrived()){toast("Con menos de 11 no puedes apostar por los goleadores rivales.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}
     const m=ourFixture();const opp=S.comp.teams[m.a===0?m.b:m.a];let b;
     if(val[0]==="u"){const p=pById(+val.slice(1));b={type:"sc",side:"u",id:p.id,odds:scOdds(p),label:`que marca ${short(p)}`}}
     else{const r=opp.roster[+val.slice(1)];b={type:"sc",side:"r",name:r.n,odds:rivOdds(r),label:`que marca ${r.n}`}}
@@ -3756,6 +3828,7 @@ const A={
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const f=A[el.dataset.act];if(!f)return;if(el.tagName!=="LABEL")e.preventDefault();f(el.dataset.v,el)});
 document.addEventListener("change",e=>{
   const t=e.target;
+  if(t.id==="sc-pick"){if(S.prep)S.prep.scPick=t.value;S.lastScPick=t.value;save();return}
   if(t.id==="m-form"){if(M&&!M.ended)setFormation(t.value,true);return}
   if(t.matches&&t.matches("select[data-slot]")&&S){const i=+t.dataset.slot;const id=t.value?+t.value:null;const j=id?S.lineup.indexOf(id):-1;if(j>=0&&j!==i)S.lineup[j]=S.lineup[i];S.lineup[i]=id;save();render();return}
   if(!(t.matches&&t.matches("select[data-pid]"))||!S||!S.prep)return;
@@ -4146,6 +4219,6 @@ if(S&&!S.mafiaFix){S.mafiaFix=1;if(S.debt>0||S.embargo||S.mafiaStrikes){S.debt=0
 render();requestAnimationFrame(loop);
 setTimeout(()=>{try{olStart()}catch(e){}},1500);
 document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olOn())olPublish(true)}catch(e){}});
-window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf});
+window.PCDBG=()=>({S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto});
 })();
 </script>
