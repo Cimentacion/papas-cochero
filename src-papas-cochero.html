@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="12.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="13.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1632,6 +1632,7 @@ function viewCampo(){
    ${S.sponsors.length?`<p>${S.sponsors.map(esc).join(" · ")}</p>`:`<p class="hint">Nadie se anuncia aquí todavía. Cuando ganéis algo, vendrán.</p>`}
   </div></section>
   ${rows?`<section class="win"><div class="bar">Obras</div><div class="body">${rows}</div></section>`:""}
+  <section class="win"><div class="bar">Apuestas Paco 3000 <small>${S.bookie?"cuenta abierta":"casa de apuestas"}</small></div><div class="body">${S.bookie?`<p>Tienes cuenta. En la pantalla de apuestas antes de cada partido sale el menú completo. Balance total: <b class="${(S.betNet||0)>=0?"pos":"negv"}">${eur(S.betNet||0)}</b>.</p>`:`<div class="offer"><div><b>Abrir cuenta en «Apuestas Paco 3000»</b><small>Más de 40 tipos de apuesta, combinadas, estadísticas, importes de hasta 1.000 € y ticket al acabar el partido.</small></div><button class="btn mini primary" data-act="buybookie">${BOOKIE_COST} €</button></div>`}</div></section>
   <section class="win"><div class="bar">Precio de las entradas</div><div class="body">
    <div class="forms">${TICKETS.map((t,i)=>`<button class="btn ${(S.tprice!=null?S.tprice:2)===i?"sel":""}" data-act="tprice" data-v="${i}">${t.n}</button>`).join("")}</div>
    <p class="hint">${esc(TICKETS[S.tprice!=null?S.tprice:2].d)} Entrada a ${Math.round(TICKET[curTier()]*TICKETS[S.tprice!=null?S.tprice:2].pm*100)/100} € por persona (en tu división); viene el ${Math.round(TICKETS[S.tprice!=null?S.tprice:2].att*100)} % de la afición que cabe.</p></div></section>
