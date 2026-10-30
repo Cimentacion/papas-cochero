@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="14.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="14.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -207,6 +207,7 @@ body.fm .subcmp{background:#262b72;border-color:#c13cf0}
 
 .nathero,.natgroups,.natres,.bracket,.natfxl,.natsw,.natvs{flex-shrink:0}
 .euhero{color:#fff;text-align:center;padding:14px 10px;border-radius:8px;margin-bottom:8px;text-shadow:0 2px 4px #0008}.euhero h2{font-family:var(--f-display);letter-spacing:.08em;margin:4px 0}.eustars{color:#ffd23f;letter-spacing:.3em;font-size:13px;animation:trophy 3s infinite}.euhero small{opacity:.85}
+.rkr{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid #0002}.rkr small{display:block;font-size:11px;opacity:.75}.rkr.me{background:#ffd23f55;font-weight:700}.rkr.fr{background:#2fbf6a33}.rkn{font-family:var(--f-mono);font-size:20px;text-align:center}.rkv{text-align:right;font-weight:700}
 .flag{display:inline-block;vertical-align:middle;border-radius:2px;box-shadow:0 1px 2px #0005;flex:none}
 .flag.wave{animation:flagwave 2.6s ease-in-out infinite;transform-origin:left center;border-radius:4px;box-shadow:0 4px 12px #0007}
 @keyframes flagwave{0%,100%{transform:perspective(200px) rotateY(0) skewY(0)}25%{transform:perspective(200px) rotateY(-12deg) skewY(-2deg)}75%{transform:perspective(200px) rotateY(8deg) skewY(2deg)}}
@@ -1583,7 +1584,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["europa","Europa"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["redes","Redes"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
+const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["mercado","Mercado"],["ranking","Ranking"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["europa","Europa"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["redes","Redes"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}${k==="plantilla"?` (${S.players.length})`:""}</button>`).join("")}</div>`}
 function renewBox(){const L=(S.renew||[]).map(r=>({r,p:pById(r.id)})).filter(x=>x.p);if(!L.length){S.renew=[];return ""}
@@ -1773,7 +1774,7 @@ function cardHTML(p){
   const t=tr(p.trait),o=ovr(p),rel=Math.round(relProb(p)*100),of=sellOffer(p);
   const tierc=o>=65?"gold":o>=40?"silver":"bronze";
   const probs=[];
-  if(p.injured)probs.push(`Lesionado ${p.injured} semana${p.injured>1?"s":""}.`);if(p.knock>0)probs.push("Tocado: si juega puede romperse para meses.");if(p.dem&&p.dem.includes("tit"))probs.push(`Exige ser titular (${p.bench||0}/3 partidos sin jugar).`);
+  if(p.forSale)probs.push("Ofrecido a un amigo: si lo compra, se va.");if(p.injured)probs.push(`Lesionado ${p.injured} semana${p.injured>1?"s":""}.`);if(p.knock>0)probs.push("Tocado: si juega puede romperse para meses.");if(p.dem&&p.dem.includes("tit"))probs.push(`Exige ser titular (${p.bench||0}/3 partidos sin jugar).`);
   if(p.hang>0)probs.push("Con resaca.");if(p.mono)probs.push("Con el mono: sin latas no viene.");
   if((p.dep||0)>=60)probs.push(`Dependencia de las latas muy alta (${p.dep}).`);else if((p.dep||0)>=40)probs.push(`Empieza a engancharse a las latas (${p.dep}).`);
   if(p.energy<40)probs.push(`Va sin energía (${p.energy}).`);
@@ -3496,7 +3497,7 @@ function olSnap(){
     ro:pool.slice(0,18).map(p=>({n:fullName(p),pos:p.pos,age:p.age,q:ovr(p),g:p.allGoals||p.goals||0,tit:S.lineup.includes(p.id)?1:0})),
     pl:pool.slice(0,22).map(p=>{const o=Object.assign({},p);delete o.veh;o.prog=(p.prog||[]).slice(-12);o.exc=(p.exc||[]).slice(0,2);o.tit=S.lineup.includes(p.id)?1:0;return o}),
     ch:S.coach?{n:S.coach.name,m:S.coach.nick||"",age:S.coach.age,w:S.coach.w,d:S.coach.d,l:S.coach.l,gf:S.coach.gf,ga:S.coach.ga,look:S.coach.look||null,photo:S.coach.photo||null,moral:S.coach.moral}:null,div:TIERS[curTier()].n,season:S.season,tro:(S.trophies||[]).slice(-6),fans:S.fans||3,t:TS}}
-async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<300000)return;OL.pubT=Date.now();try{const d=JSON.parse(JSON.stringify(olSnap()));await fb(`u/${olMe()}/p`,"PUT",d);OL.pubOk=Date.now();OL.pubErr=""}catch(e){OL.pubErr=String(e.message||e)}}
+async function olPublish(force){if(!olOn()||!S||!S.players)return;if(!force&&Date.now()-OL.pubT<300000)return;OL.pubT=Date.now();try{const d=JSON.parse(JSON.stringify(olSnap()));await fb(`u/${olMe()}/p`,"PUT",d);rkPublish();OL.pubOk=Date.now();OL.pubErr=""}catch(e){OL.pubErr=String(e.message||e)}}
 function olStart(){
   if(!olOn()){Object.keys(OL.es).forEach(fbUnlisten);return}
   olClock();olPublish(true);
@@ -3574,6 +3575,43 @@ function redesBox(){const F=S.feed||[];const r=S.redes||0;return `<section class
   <div class="meter"><span>Ambiente</span><div class="cmpbar"><i style="width:${Math.round((r+100)/2)}%"></i></div><em>${r}</em></div>
   <p class="hint">Si el ambiente pasa de 50, la afición crece sola cada semana. Si baja de −50, la directiva pierde confianza en ti.</p>
   <div class="feed">${F.length?F.map(x=>`<div class="post ${x.k==="L"||x.k==="derbiL"?"bad":x.k==="W"||x.k==="derbiW"||x.k==="up"?"good":""}"><b>${esc(x.h)}</b><p>${esc(x.t)}</p><small>❤ ${x.lk} · semana ${x.w}</small></div>`).join(""):`<p class="hint">Aún nadie ha escrito nada. Juega un partido.</p>`}</div></div></section>`}
+/* ---------- clasificación global ---------- */
+function rkSnap(){const goal=(S.history||[]).length;const tro=(S.trophies||[]).filter(t=>!/^Ascenso/.test(t));return{n:clubName(),coach:S.coach?S.coach.name:"",tier:S.reach||0,div:TIERS[curTier()].n,tro:tro.length,big:tro.filter(t=>/Primera División|Copa del Rey|Campeones|Mundial|Eurocopa|Europa League/.test(t)).length,fans:S.fans||3,xp:(S.coach&&S.coach.xp)||0,bw:(S.seasonRec&&S.seasonRec.bwd)||S.bestW||0,season:seasonLbl(),t:TS}}
+async function rkPublish(){if(!olOn()||!S)return;try{await fb(`rk/${olMe()}`,"PUT",rkSnap())}catch(e){}}
+async function rkLoad(){const d=await fbq("rk");OL.rk=d||{};OL.rkT=Date.now();if(S&&S.tab==="online")olRefresh()}
+const RKC=[["pres","Prestigio",x=>x.tier*1000+x.big*100+x.tro*10+x.xp/100],["tro","Trofeos",x=>x.big*100+x.tro],["fans","Afición",x=>x.fans],["xp","Nivel del míster",x=>x.xp]];
+function rkHTML(){if(!OL.rk||Date.now()-(OL.rkT||0)>60000)rkLoad();const cat=OL.rkCat||"pres";const C=RKC.find(c=>c[0]===cat);const F=(OL.me&&OL.me.f)||{};
+  const L=Object.entries(OL.rk||{}).map(([u,x])=>Object.assign({u},x)).filter(x=>x&&x.n).sort((a,b)=>C[2](b)-C[2](a)).slice(0,60);
+  return `<section class="win"><div class="bar">Clasificación mundial <small>${Object.keys(OL.rk||{}).length} jugadores</small></div><div class="body"><div class="forms">${RKC.map(c=>`<button class="btn ${c[0]===cat?"sel":""}" data-act="rkcat" data-v="${c[0]}">${c[1]}</button>`).join("")}</div>
+   ${L.length?`<div class="rkl">${L.map((x,i)=>`<div class="rkr ${x.u===olMe()?"me":F[x.u]?"fr":""}"><span class="rkn">${i+1}</span><div><b>${esc(x.n)}</b><small>${esc(x.coach||"")}${F[x.u]?" · amigo":""} · ${esc(x.div||"")}</small></div><span class="rkv">🏆 ${x.tro||0}<small>${(x.fans||0).toLocaleString("es-ES")} fans</small></span></div>`).join("")}</div>`:`<p class="hint">Cargando… (sale todo el que tenga los modos online activados)</p>`}
+   <p class="hint">Tu club se sube solo cada pocos minutos. En verde, tus amigos.</p></div></section>`}
+/* ---------- mercado entre amigos ---------- */
+function mkClean(p){const o=JSON.parse(JSON.stringify(p));["veh","loan","dem","prom","agent","exc","prog","bench","forSale"].forEach(k=>delete o[k]);return o}
+async function mkSend(){const pid=+($("#mk-p")||{}).value,fu=($("#mk-f")||{}).value,price=Math.max(0,Math.round(+($("#mk-v")||{}).value||0));const p=pById(pid);if(!p||!fu){toast("Elige jugador y amigo.");return}
+  if(p.forSale){toast("Ese ya está en venta.");return}if(S.players.length<=11){toast("Te quedarías con menos de 12.");return}
+  const r=await fbq(`u/${fu}/mk`,"POST",{from:olMe(),fromN:clubName(),coach:S.coach?S.coach.name:"",p:mkClean(p),price,ts:TS});if(!r||!r.name){toast("No se ha podido mandar.");return}
+  p.forSale=r.name;S.mkSent=(S.mkSent||[]).concat([{k:r.name,to:fu,toN:((OL.me&&OL.me.f)||{})[fu]||fu,pid,pn:fullName(p),price}]);save();render();toast(`Oferta mandada: ${short(p)} por ${price.toLocaleString("es-ES")} €.`)}
+async function mkCancel(k){const o=(S.mkSent||[]).find(x=>x.k===k);if(!o)return;await fbq(`u/${o.to}/mk/${k}`,"DELETE");const p=pById(o.pid);if(p)delete p.forSale;S.mkSent=S.mkSent.filter(x=>x.k!==k);save();render()}
+async function mkBuy(k){const o=((OL.me&&OL.me.mk)||{})[k];if(!o)return;if(S.money<o.price){toast(`Necesitas ${o.price.toLocaleString("es-ES")} €.`);return}if(S.players.length>=22){toast("Plantilla llena: 22.");return}
+  await fbq(`u/${olMe()}/mk/${k}`,"DELETE");const ok=await fbq(`u/${o.from}/pay`,"POST",{k,amt:o.price,by:olMe(),byN:clubName(),pn:o.p&&fullName(o.p),ts:TS});if(!ok){toast("No se ha podido pagar. Prueba luego.");return}
+  const p=Object.assign(o.p,{id:S.nextId++,energy:100,injured:0,known:true,origen:`Comprado a ${o.fromN} (amigo)`,ct:2,goals:0});ledSync();S.money-=o.price;led(`Fichaje de ${fullName(p)} a ${o.fromN}`,-o.price);S.players.push(p);
+  addNews(`${clubName()} ficha a ${fullName(p)} de ${o.fromN} por ${o.price.toLocaleString("es-ES")} €. Trato entre amigos.`);feedPost("sign",{p:short(p)});delete OL.me.mk[k];save();render();toast(`${short(p)} es tuyo.`)}
+async function mkReject(k){const o=((OL.me&&OL.me.mk)||{})[k];if(!o)return;await fbq(`u/${olMe()}/mk/${k}`,"DELETE");fbq(`u/${o.from}/pay`,"POST",{k,amt:0,no:1,byN:clubName(),pn:o.p&&fullName(o.p),ts:TS});delete OL.me.mk[k];render()}
+function mkInbox(){const P=(OL.me&&OL.me.pay)||{};const seen=olCfg().pseen||{};const ks=Object.keys(P).filter(k=>!seen[k]);if(!ks.length)return;const ns=Object.assign({},seen);
+  ks.forEach(k=>{ns[k]=1;const x=P[k];fbq(`u/${olMe()}/pay/${k}`,"DELETE");if(!x)return;const o=(S.mkSent||[]).find(y=>y.k===x.k);S.mkSent=(S.mkSent||[]).filter(y=>y.k!==x.k);const p=o&&pById(o.pid);
+    if(x.no){if(p)delete p.forSale;presBanner({f:x.byN,t:`No le interesa ${x.pn||"tu jugador"}.`});return}
+    if(p){S.players=S.players.filter(y=>y!==p);S.lineup=S.lineup.map(y=>y===p.id?null:y);ledSync();S.money+=x.amt;led(`Venta de ${fullName(p)} a ${x.byN} (amigo)`,x.amt);addNews(`${fullName(p)} se va a ${x.byN} por ${x.amt.toLocaleString("es-ES")} €.`);presBanner({f:x.byN,t:`Te ha comprado a ${fullName(p)} por ${x.amt.toLocaleString("es-ES")} €.`})}
+    else if(x.by){fbq(`u/${x.by}/pay`,"POST",{k:"refund"+x.k,amt:x.amt,refund:1,byN:clubName(),pn:x.pn,ts:TS})}
+    if(x.refund){ledSync();S.money+=x.amt;led(`Devolución de ${x.byN}: ${x.pn} ya no estaba`,x.amt)}});
+  olSetCfg({pseen:ns});save();if(S.tab!=="prep"&&!M)render()}
+function mkHTML(){const F=(OL.me&&OL.me.f)||{};const fl=Object.entries(F);const IN=Object.entries((OL.me&&OL.me.mk)||{});const sent=S.mkSent||[];
+  IN.forEach(([k,o])=>{if(o&&o.p){o.p.id=-(900000+hashStr(k)%90000);NATTMP["p"+o.p.id]=o.p}});
+  return `<section class="win"><div class="bar">Ofertas que te llegan <small>${IN.length}</small></div><div class="body">${IN.length?`<div class="list">${IN.map(([k,o])=>`<div class="offer fr"><div><b><a class="plink" data-act="card" data-id="${o.p.id}">${esc(fullName(o.p))}</a> · ${o.p.pos} · media ${ovr(o.p)} · ${o.p.age} años</b><small>Te lo vende ${esc(o.fromN)}${o.coach?` (${esc(o.coach)})`:""} por <b>${(o.price||0).toLocaleString("es-ES")} €</b>. Sueldo ${o.p.wage} €/sem.</small></div><div class="row"><button class="btn mini primary" data-act="mkbuy" data-v="${k}">Comprar</button><button class="btn mini" data-act="mkno" data-v="${k}">No me interesa</button></div></div>`).join("")}</div>`:`<p class="hint">Nadie te ha ofrecido nada todavía.</p>`}</div></section>
+   <section class="win"><div class="bar">Vender a un amigo</div><div class="body">${fl.length?`<p class="pc-h">Jugador</p><select class="inp" id="mk-p" style="width:100%">${S.players.filter(p=>!p.forSale&&!p.loan).sort((a,b)=>ovr(b)-ovr(a)).map(p=>`<option value="${p.id}">${esc(fullName(p))} · ${p.pos} · ${ovr(p)}</option>`).join("")}</select>
+    <p class="pc-h">Amigo</p><select class="inp" id="mk-f" style="width:100%">${fl.map(([u,n])=>`<option value="${u}">${esc(n)}</option>`).join("")}</select>
+    <p class="pc-h">Precio (€)</p><input class="inp" id="mk-v" type="number" min="0" step="10" style="width:100%" value="${nice(Math.max(10,sellValue(S.players[0]||{atk:1,def:1,fis:1,cab:1,pos:"MED",age:25})))}">
+    <div class="pc-act"><button class="btn primary" data-act="mksend">Mandar oferta</button></div><p class="hint">Le llega a tu amigo. Si acepta, se te paga y el jugador se va con él.</p>`:`<p class="hint">Añade amigos primero (Online › Amigos).</p>`}</div></section>
+   ${sent.length?`<section class="win"><div class="bar">Tus ofertas enviadas</div><div class="body"><div class="list">${sent.map(o=>`<div class="offer"><div><b>${esc(o.pn)}</b><small>A ${esc(o.toN)} por ${o.price.toLocaleString("es-ES")} €. Esperando respuesta.</small></div><button class="btn mini" data-act="mkcancel" data-v="${o.k}">Retirar</button></div>`).join("")}</div></div></section>`:""}`}
 /* ---------- avisos ---------- */
 function olNotify(title,text,tag){
   const seen=olCfg().seen||{};if(tag&&seen[tag])return;if(tag){seen[tag]=Date.now();const k=Object.keys(seen);if(k.length>200)k.sort((a,b)=>seen[a]-seen[b]).slice(0,100).forEach(x=>delete seen[x]);olSetCfg({seen})}
@@ -3627,7 +3665,7 @@ function olMyMatch(lid,L){
   return{lid,L,r,i,k,a,b,home:a===me,oi,opp,human:!!opp.u,me}}
 function olPending(){for(const lid of Object.keys(OL.lg)){const m=olMyMatch(lid,OL.lg[lid]);if(m)return m}return null}
 async function olTick(){
-  if(!olOn())return;olPublish();presTick();presInbox();if(S&&S.tab==="online"&&sub("online")==="amigos")presPoll();
+  if(!olOn())return;olPublish();presTick();presInbox();mkInbox();if(S&&S.tab==="online"&&sub("online")==="amigos")presPoll();
   await olPollLeagues();
   for(const lid of Object.keys(OL.lg)){const L=OL.lg[lid];try{await olAdvance(lid,L)}catch(e){}
     const m=olMyMatch(lid,L);if(m&&!S.olSwap)olNotify(`«${L.n}»: ¡te toca!`,`Jornada ${m.r+1} contra ${m.opp.n}. ${m.human?"Es un jugador de verdad: prepara el viaje.":"Juega cuando quieras antes de que se cierre."}`,`m_${lid}_${m.k}`);
@@ -3725,6 +3763,7 @@ function viewOnline(){
   const k=sub("online");const err=OL.err?`<p class="hint" style="color:#c8233a">Sin conexión con el servidor ahora mismo (${esc(OL.err)}). Se reintenta solo.</p>`:"";
   if(!olDB())return `<section class="win"><div class="bar">Servidor de la liga online</div><div class="body"><p>Falta la dirección de la base de datos (Firebase) que guarda las ligas.</p>
     <input class="inp" id="ol-db" placeholder="https://….firebasedatabase.app/" style="width:100%"><div class="pc-act"><button class="btn primary" data-act="oldb">Guardar</button></div></div></section>`;
+  if(k==="ranking")return rkHTML()+err;if(k==="mercado")return mkHTML()+err;
   if(k==="amigos"){const F=(OL.me&&OL.me.f)||{};
     return `<section class="win"><div class="bar">Tu código de jugador</div><div class="body"><p class="olcode">${olMe()}</p><p class="hint">Pásaselo a tus amigos para que te añadan. Te ven como <b>${esc(clubName())}</b>.</p><p class="hint">${OL.pubErr?`<span style="color:#c8233a">No se ha podido subir tu equipo: ${esc(OL.pubErr)}</span>`:OL.pubOk?`✔ Tu equipo se subió al servidor hace ${olFmtLeft(Date.now()-OL.pubOk)}.`:"Subiendo tu equipo al servidor…"} <button class="btn mini" data-act="olpub">Subir ahora</button></p><div class="pc-act"><button class="btn mini" data-act="olteam" data-v="${olMe()}">Así ven tu equipo</button></div><div class="pc-act"><button class="btn" data-act="olsharecode">Compartir código</button></div></div></section>
      <section class="win"><div class="bar">Añadir amigo</div><div class="body"><div class="row"><input class="inp" id="ol-fc" placeholder="Código (6 letras)" maxlength="6" style="text-transform:uppercase"><button class="btn primary" data-act="oladdf">Añadir</button></div></div></section>
@@ -4579,6 +4618,7 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  rkcat:v=>{OL.rkCat=v;render()},mksend:()=>mkSend(),mkcancel:v=>mkCancel(v),mkbuy:v=>mkBuy(v),mkno:v=>mkReject(v),
   euplay:()=>euPlay(),eupost:()=>euPost(),euafter:()=>euAfter(),eucancel:()=>euCancel(),eugo:()=>{S.tab="comp";S.sub=S.sub||{};S.sub.comp="europa";save();render();window.scrollTo(0,0)},
   prepress:v=>{const P=S.prep;if(!P||P.prePress)return;P.prePress=v;const opp=reportOpp();if(v==="prov"&&opp){S.fans=Math.round((S.fans||3)*1.02+1);addHeat(opp.n,1,"les provocaste antes del partido");feedPost("hate",{opp:opp.n})}save();render()},
   olwatch:v=>presWatch(v),olwatchoff:()=>{OL.watch=null;closeModal()},olmsgto:v=>{OL.watch=null;presMsgBox(v)},
