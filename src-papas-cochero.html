@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -4881,7 +4881,7 @@ const A={
   "conv-ok":()=>{const P=S.prep;const ids=Object.keys(P.conv).map(Number);if(!ids.length){toast("No has avisado a nadie.");return}
     P.absent={};ids.forEach(id=>{const p=pById(id);if(!p)return;p.nconv=(p.nconv||0)+1;const hk=HOUSES[S.house||0].abs*(has("residencia")?.6:1)*relNow()*(1-(p.conf||0)/100*.65)*(p.mono?1.6:1)*(p.rel||1);for(const[w,t]of ABS){if(Math.random()<w(p)*hk){P.absent[id]=t(p);break}}});
     Object.keys(P.absent).forEach(id=>{const p=pById(+id);if(p){p.nfalta=(p.nfalta||0)+1;p.exc=[P.absent[id]].concat(p.exc||[]).slice(0,3)}});P.step="bajas";save();render();window.scrollTo(0,0)},
-  "to-trip":()=>{const P=S.prep;P.gas={};autoAssign();if(clubBus()){busAssign();P.busMode=true}P.step="viaje";save();render();window.scrollTo(0,0)},
+  "to-trip":()=>{const P=S.prep;P.gas={};autoAssign();if(clubBus()){busAssign();P.busMode=true;P.step="viaje";vehicles().forEach(v=>{if(!v.own&&vehInUse(v))P.gas[v.id]=true});return A.trip()}P.step="viaje";save();render();window.scrollTo(0,0)},
   busmode:v=>{const P=S.prep;if(!P)return;P.busMode=v==="1";if(P.busMode)busAssign();else autoAssign();save();render()},
   gas:v=>{const P=S.prep;P.gas[v]=!P.gas[v];save();render()},
   autoassign:()=>{autoAssign();save();render();toast("Repartidos. Que nadie se maree.")},
