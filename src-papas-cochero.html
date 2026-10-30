@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -4089,7 +4089,7 @@ function olPlay(lid){
   const b=$("#olban");if(b)b.remove();
   startPrep();if(mm.human){S.prep.ol={side:mm.home?"h":"g"};olLobbyHere();}save();render();window.scrollTo(0,0)}
 function olResumeLobby(){if(S&&S.olSwap&&S.prep&&S.prep.ol&&!OL.lobbyT)olLobbyHere()}
-function olRestore(){if(S.olFld){S.field=S.olFld.field;S.upg=S.olFld.upg;S.embargo=S.olFld.embargo;S.olFld=null}const w=S.olSwap;if(!w)return;S.comp=w.comp;S.league=w.league;S.prep=w.prep;S.lineup=w.lineup||S.lineup;S.formation=w.formation||S.formation;S.phase=w.phase||S.phase;S.olSwap=null;S.tab="online";S.sub=S.sub||{};S.sub.online="ligas";clearInterval(OL.lobbyT);OL.lobbyT=0;save()}
+function olRestore(){if(S.olFld){S.field=S.olFld.field;S.upg=S.olFld.upg;S.embargo=S.olFld.embargo;if(S.olFld.sponsors)S.sponsors=S.olFld.sponsors;if(S.olFld.fans!=null)S.fans=S.olFld.fans;S.olFld=null}const w=S.olSwap;if(!w)return;S.comp=w.comp;S.league=w.league;S.prep=w.prep;S.lineup=w.lineup||S.lineup;S.formation=w.formation||S.formation;S.phase=w.phase||S.phase;S.olSwap=null;S.tab="online";S.sub=S.sub||{};S.sub.online="ligas";clearInterval(OL.lobbyT);OL.lobbyT=0;save()}
 function olCancel(){const ol=S.comp&&S.comp.ol;if(ol&&S.prep&&S.prep.bets&&S.prep.bets.length){ledSync();S.prep.bets.forEach(b=>{S.money+=b.amt;led(`Apuesta anulada: ${b.label}`,b.amt)})}olRestore();render();window.scrollTo(0,0)}
 /* lobby humano contra humano */
 function olLiveKey(){const ol=S.comp.ol;return `${ol.lid}_${ol.k}`}
@@ -4099,8 +4099,9 @@ function olPrepTick(){
   const ol=S.comp&&S.comp.ol,P=S.prep;if(!ol||!P||!P.ol||M)return;
   const lv=olLobbyState(),now=olNow();
   const fresh=t=>typeof t==="number"&&now-t<20000;
-  if(!lv.go&&ol.home&&fresh(lv.h)&&fresh(lv.g)){lv.go=1;fbq(`l/${ol.lid}/live/${ol.k}`,"PATCH",{go:TS})}
-  if(lv.go>1&&!P.ol.go){P.ol.go=lv.go+4000;save();render()}
+  const goOk=typeof lv.go==="number"&&now-lv.go<120000;
+  if(!goOk&&lv.go!==1&&ol.home&&fresh(lv.h)&&fresh(lv.g)){lv.go=1;fbq(`l/${ol.lid}/live/${ol.k}`,"PATCH",{go:TS})}
+  if(goOk&&lv.go>1&&!P.ol.go){P.ol.go=lv.go+4000;save();render()}
   if(P.ol.go){const t1=P.ol.go+30000,t2=P.ol.go+60000;
     if(now>=t1&&P.step!=="apuestas"&&!P.ol.auto1){P.ol.auto1=1;olAutoTrip()}
     if(now>=t2&&!P.ol.kicked)olKick();
@@ -4116,21 +4117,23 @@ async function olKick(){
   const arrived=goers().filter(p=>P.arrive&&P.arrive[p.id]&&P.arrive[p.id].min<90);
   const L=S.lineup.map((id,i)=>id&&arrived.some(p=>p.id===id)?{p:{...pById(id),mE:pById(id).energy},role:FORMS[S.formation][i]}:null).filter(Boolean);
   const pw=L.length?power(L,S.formation,{home:ol.home}):{a:5,d:5};
-  await fbq(`lv/${key}/${side}q`,"PUT",{fld:{field:S.field||0,upg:S.upg||[],embargo:!!S.embargo},n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
+  await fbq(`lv/${key}/${side}s`,"DELETE");if(ol.home)await fbq(`lv/${key}/hm`,"DELETE");
+  await fbq(`lv/${key}/${side}q`,"PUT",{go:P.ol.go||0,fld:{field:S.field||0,upg:S.upg||[],embargo:!!S.embargo,sp:S.sponsors||[],fans:S.fans||3},n:clubName(),col:ourKit().c1,kit:ourKit(),form:S.formation,str:+((pw.a+pw.d)/2).toFixed(1),ro:arrived.map(p=>({n:fullName(p),pos:p.pos})),t:TS});
   OL.kickBot=false;const t0=Date.now(),LIM=90000;let q=null;
   const show=()=>modal("Saltando al campo",`<p>Esperando a que <b>${esc(ol.oppN)}</b> salga del vestuario para jugar el partido en directo…</p><p class="hint">Quedan <b id="olkw">${Math.ceil((LIM-(Date.now()-t0))/1000)}</b> s. Si no aparece, jugarás contra su equipo manejado por la máquina.</p>`);
-  show();while(Date.now()-t0<LIM&&!OL.kickBot){q=await fbq(`lv/${key}/${oside}q`);if(q)break;const e=$("#olkw");if(e)e.textContent=Math.ceil((LIM-(Date.now()-t0))/1000);else if(!OL.kickBot)show();await new Promise(r=>setTimeout(r,1000))}
+  show();while(Date.now()-t0<LIM&&!OL.kickBot){q=await fbq(`lv/${key}/${oside}q`);if(q&&(q.go||0)!==(P.ol.go||0))q=null;if(q)break;const e=$("#olkw");if(e)e.textContent=Math.ceil((LIM-(Date.now()-t0))/1000);else if(!OL.kickBot)show();await new Promise(r=>setTimeout(r,1000))}
   closeModal();const T=S.comp.teams[1];
-  if(q&&!ol.home&&q.fld){S.olFld={field:S.field,upg:S.upg,embargo:S.embargo};S.field=q.fld.field||0;S.upg=arr(q.fld.upg);S.embargo=!!q.fld.embargo}
+  if(q&&!ol.home&&q.fld){S.olFld={field:S.field,upg:S.upg,embargo:S.embargo,sponsors:S.sponsors,fans:S.fans};S.field=q.fld.field||0;S.upg=arr(q.fld.upg);S.embargo=!!q.fld.embargo;S.sponsors=arr(q.fld.sp).filter(n=>BRANDS.some(b=>b.n===n));S.fans=q.fld.fans||S.fans}
   if(q){T.roster=arr(q.ro).length?arr(q.ro):T.roster;T.form=q.form||T.form;T.str=q.str||T.str;if(q.col&&q.col!==ourKit().c1)T.col=q.col}
   const online=q?{role:side,key,peerOk:true}:null;if(!q)toast(`${ol.oppN} no aparece. Su equipo lo maneja la máquina.`);
   S.prep.ol.kicked=2;startMatch(online)}
 /* ---------- partido en directo (el local manda, el visitante sigue) ---------- */
 function olLiveInit(o){
-  M.online={role:o.role,key:o.key,seq:0,q:{},peer:{pw:null,on:[],paused:false,seen:Date.now()},evs:[],emit:[],eid:0,peerEid:0,lastPub:0};
+  M.online={role:o.role,key:o.key,seq:0,q:{},peer:{pw:null,on:[],paused:false,seen:Date.now()},evs:[],emit:[],eid:0,peerEid:0,lastPub:0,lastMsg:Date.now()};
+  {const O=M.online;clearInterval(OL.hbT);OL.hbT=setInterval(()=>{if(!M||M.online!==O||M.ended||O.solo){clearInterval(OL.hbT);return}try{olLivePub(true)}catch(e){}},5000)}
   const peer=o.role==="h"?"g":"h";
   fbListen("live",`lv/${o.key}`,d=>{if(!M||!M.online||!d)return;const O=M.online;
-    const st=d[peer+"s"];if(st){O.peer=Object.assign(O.peer,st,{seen:Date.now()});(arr(st.ev)).forEach(e=>{if(e.i>O.peerEid){O.peerEid=e.i;addLog(e.m,`${S.comp.teams[1].n}: ${e.t}`,e.c||"ev")}})}
+    const st=d[peer+"s"];if(st&&st.t!==O.peerT){O.peerT=st.t;O.peer=Object.assign(O.peer,st,{seen:Date.now()});(arr(st.ev)).forEach(e=>{if(e.i>O.peerEid){O.peerEid=e.i;addLog(e.m,`${S.comp.teams[1].n}: ${e.t}`,e.c||"ev")}})}
     if(O.role==="g"&&d.hm){Object.entries(d.hm).forEach(([k,v])=>{O.q[+k]=v})}});
   const ol=S.comp.ol;fbq(`l/${ol.lid}/live/${ol.k}/on`,"PUT",TS);
   olLivePub(true)}
