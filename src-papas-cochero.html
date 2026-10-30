@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="14.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="14.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -970,8 +970,10 @@ function wSeason(c,ourPos){
       const retire=pro?(p.age>=38||(p.age>=34&&R()<.3)):(p.age>=62||(p.age>=50&&R()<.15)||R()<.06);
       if(retire&&nt>=0&&Math.abs(t-nt)<=0&&R()<.3)lines.push(`${p.n} (${p.age}) se retira en el ${cl.n}.`);
       if(retire&&(p.pt||t)>=3&&(p.pk||p.q)>=TIER_Q[p.pt||t]-1){W.glories=W.glories||[];W.glories.push({n:p.n,pos:p.pos,age:p.age,pk:p.pk||p.q,t:p.pt||t,club:cl.n,foot:p.foot,alt:p.alt,spd:p.spd,build:p.build,s:S.season,real:p.real?1:0});if((p.pt||t)>=6&&lines.length<14)lines.push(`Se retira ${p.n} (${p.age}), mito del ${cl.n}. Ya es una vieja gloria: se le puede fichar… pagando.`)}
+      if(retire&&(p.real||(t>=7&&(p.pk||p.q)>=TIER_Q[t]+5&&R()<.3))){const nm=/ Jr\.$/.test(p.n)?p.n.replace(/ Jr\.$/," III"):/ III$/.test(p.n)?p.n.replace(/ III$/," IV"):p.n+" Jr.";const jr={n:nm,pos:R()<.6?p.pos:pick(["DEF","MED","DEL"]),age:17+Math.floor(R()*2),q:Math.max(10,TIER_Q[t]-14+Math.floor(R()*5)),pot:Math.min(95,(p.pk||p.q)+Math.floor(R()*8)-3),foot:p.foot,alt:Math.round((p.alt||178)+R()*8-4),build:"normal",spd:clamp(Math.round((p.spd||50)+R()*14),1,99),real:p.real?1:0,jr:1};cl.jrs=(cl.jrs||[]).concat([jr]);if(lines.length<16)lines.push(`${p.n} se retira y su hijo, ${nm}, debuta con 17 años en el ${cl.n}. Dicen que tiene el toque del padre.`)}
       if(!retire&&!p.real&&R()<(p.age>55?.03:p.age>35?.004:.0008)){if(Math.abs(t-nt)<=1&&lines.length<14)lines.push(`Fallece ${p.n} (${p.age}), jugador del ${cl.n}. Minuto de silencio en toda la categoría.`);return false}
       return !retire});
+    if(cl.jrs){cl.ps=cl.ps.concat(cl.jrs);delete cl.jrs}
     // fichajes según el dinero
     let buys=0;const price=q=>Math.round(Math.pow(Math.max(1,q),2.2)*(pro?.9:.05));
     while(cl.ps.length<16||(buys<2&&cl.money>price(TIER_Q[t]+4)*1.5)){
