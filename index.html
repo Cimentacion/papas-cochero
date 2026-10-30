@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="16.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -390,6 +390,7 @@ nav.tabs button.sel{background:var(--desk2);color:var(--gold);border-color:#000 
 .chday{align-self:center;font-size:11px;background:#0000001f;color:#333;padding:2px 10px;border-radius:10px;margin:4px 0;text-transform:capitalize}
 .chatin{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:8px}.chatin .inp{width:100%;min-width:0}
 body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frlast{background:#262b62;color:#e9eaf7}body.fm .chat{background:#141838}body.fm .msg.them .cb{background:#2c3170;color:#fff}body.fm .chday{color:#ccd;background:#ffffff1a}body.fm .chathead{border-color:#fff2}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.pchip{font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:12px}.pchip.up{background:#d6f5df;color:#14612f}.pchip.dn{background:#fbdada;color:#8a1f2a}
 .offer.fr{flex-wrap:wrap}.offer.fr>div:first-child{flex:1 1 100%}.offer.fr>.row{width:100%;flex-wrap:wrap;gap:6px;margin-top:6px}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#888;vertical-align:middle}.pdot.on{background:#2fbf6a}.pdot.live{background:#ff4d4d;box-shadow:0 0 6px #ff4d4d;animation:trophy 1s infinite}
 .wsb{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;background:#0b1f3a;color:#fff;border-radius:8px;padding:10px}.wsb span{font-family:var(--f-mono);font-size:30px;color:#ffd23f}.wlog{font-family:var(--f-mono);font-size:14px;background:#000;color:#ffd23f;padding:6px;border-radius:6px;margin-top:6px}.wlog div{padding:2px 0;border-bottom:1px solid #ffffff14}.olquick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
@@ -728,20 +729,28 @@ const LOCAL_TEAMS=["Panaderos Asociados CCOO","Bar Manolo","Cerveza Cruzcampo","
 const COMARCA_TEAMS=["Bar El Paso","Peña Flamenca La Soleá","Cooperativa Olivarera San José","Taller de Chapa El Rubio","Funeraria La Paz","Talleres Hermanos Rueda","Autoescuela La Sevillana","Construcciones Paco e Hijos","Gestoría Rocío","Electrodomésticos Romero","Seguros La Previsora","Peña Cultural El Botijo","Agrícola Hermanos Gil"];
 const TOP_TEAMS=[["Sevilla Atlético","Sevilla"],["Betis Deportivo","Sevilla"],["Écija Balompié","Écija"],["Antequera CF","Antequera"],["Xerez CD","Jerez de la Frontera"],["San Fernando CD","San Fernando"],["Ciudad de Lucena","Lucena"],["Recreativo de Huelva B","Huelva"]];
 const BRANDS=[
- {n:"Neumáticos El Concho",c:"#111111",b:"#ffd23f",pay:"dinero"},
- {n:"Funeraria La Última Parada",c:"#ffffff",b:"#222222",pay:"dinero"},
- {n:"Desatascos Paco 24h",c:"#ffffff",b:"#2a5bd7",pay:"material"},
- {n:"Crecepelo Milagro",c:"#2a1b12",b:"#9fe0a0",pay:"dinero"},
- {n:"Churrería La Grasa",c:"#5a3415",b:"#ffe9a8",pay:"comida"},
- {n:"Préstamos Sin Preguntas",c:"#ffffff",b:"#c8233a",pay:"dinero"},
- {n:"Dentista Low Cost Sonrisa",c:"#1f5fa8",b:"#e8f4ff",pay:"dinero"},
- {n:"Abonos Hermanos Gómez",c:"#ffffff",b:"#5a6b2a",pay:"dinero"},
- {n:"Pollos Asados Antonio",c:"#ffffff",b:"#e06a1b",pay:"comida"},
- {n:"Autoescuela El Suspenso",c:"#111111",b:"#f2f2f2",pay:"dinero"},
- {n:"Chapa y Pintura El Bollo",c:"#ffffff",b:"#6b2fa0",pay:"obra"},
- {n:"Pañales Adulto SecoSeco",c:"#1f3a7a",b:"#d8ecff",pay:"dinero"},
- {n:"Construcciones Paco e Hijos",c:"#ffffff",b:"#d9772b",pay:"obra"},
- {n:"Tanatorio y Bar El Reposo",c:"#ffd23f",b:"#2b2b2b",pay:"dinero"}
+ {n:"Neumáticos El Concho",c:"#111111",b:"#ffd23f",pay:"dinero",prod:"agua"},
+ {n:"Funeraria La Última Parada",c:"#ffffff",b:"#222222",pay:"dinero",prod:"agua"},
+ {n:"Desatascos Paco 24h",c:"#ffffff",b:"#2a5bd7",pay:"material",prod:"veneno"},
+ {n:"Crecepelo Milagro",c:"#2a1b12",b:"#9fe0a0",pay:"dinero",prod:"bote"},
+ {n:"Churrería La Grasa",c:"#5a3415",b:"#ffe9a8",pay:"comida",prod:"churros"},
+ {n:"Préstamos Sin Preguntas",c:"#ffffff",b:"#c8233a",pay:"dinero",prod:"agua"},
+ {n:"Dentista Low Cost Sonrisa",c:"#1f5fa8",b:"#e8f4ff",pay:"dinero",prod:"agua"},
+ {n:"Abonos Hermanos Gómez",c:"#ffffff",b:"#5a6b2a",pay:"dinero",prod:"saco"},
+ {n:"Pollos Asados Antonio",c:"#ffffff",b:"#e06a1b",pay:"comida",prod:"pollo"},
+ {n:"Autoescuela El Suspenso",c:"#111111",b:"#f2f2f2",pay:"dinero",prod:"agua"},
+ {n:"Chapa y Pintura El Bollo",c:"#ffffff",b:"#6b2fa0",pay:"obra",prod:"lata"},
+ {n:"Pañales Adulto SecoSeco",c:"#1f3a7a",b:"#d8ecff",pay:"dinero",prod:"saco"},
+ {n:"Construcciones Paco e Hijos",c:"#ffffff",b:"#d9772b",pay:"obra",prod:"cerveza"},
+ {n:"Tanatorio y Bar El Reposo",c:"#ffd23f",b:"#2b2b2b",pay:"dinero",prod:"cerveza"},
+ {n:"Cerveza La Campiña",c:"#c8233a",b:"#f2e3b3",pay:"dinero",prod:"cerveza"},
+ {n:"Bar Manolo",c:"#ffffff",b:"#2a5bd7",pay:"comida",prod:"cerveza"},
+ {n:"Tabacos El Pulmón Negro",c:"#f2f2f2",b:"#3a2a1a",pay:"dinero",prod:"tabaco"},
+ {n:"Sex Shop El Consolador Alegre",c:"#ffffff",b:"#e0389a",pay:"dinero",prod:"caja"},
+ {n:"Órganos de Segunda Mano S.L.",c:"#ffffff",b:"#8a1f2a",pay:"dinero",prod:"nevera"},
+ {n:"Pienso Guau Barato",c:"#5a3415",b:"#ffd27a",pay:"comida",prod:"saco"},
+ {n:"Habichuelas La Abuela",c:"#ffffff",b:"#2f7d32",pay:"comida",prod:"lata"},
+ {n:"Mataratas El Fulminante",c:"#ffd23f",b:"#111111",pay:"dinero",prod:"veneno"}
 ];
 const HAIRN=["Bola de billar","Cortinilla","Coronilla","Entradas","Melena"];
 const SKINS=["#f1c9a5","#e0ac7e","#c68a5a","#8d5a3b"];
@@ -1067,7 +1076,7 @@ function wSeason(c,ourPos){
   const mv=[];if(nt>=0){W.tiers[nt].forEach(n=>{const cl=W.clubs[n];if(cl&&cl.tag)mv.push(`${cl.n} ${cl.tag==="↑"?"sube":"baja"} a ${TIERS[nt].n}.`)})}
   {W.glories=(W.glories||[]).filter(g=>{g.age++;if(g.real)return g.age<60;const pd=g.age>=100?1:g.age>=60?(g.age-58)*.012:.002;if(Math.random()<pd){if(g.t>=5&&lines.length<16)lines.push(`Muere ${g.n} a los ${g.age} años, leyenda del ${g.club}. Los fans le lloran en la puerta del estadio.`);return false}return true}).sort((a,b)=>b.pk+b.t*4-a.pk-a.t*4).slice(0,30)}
   return mv.concat(lines)}
-const mktVal=(q,tier,age)=>nice(Math.max(15,(q-TIER_Q[tier]+12)*(6+tier*7))*Math.pow(1.12,Math.max(0,q-TIER_Q[tier]))*(age<24?1.3:age>31?.7:1)*diffK(1.25,.8)*EK[tier]);
+const mktVal=(q,tier,age)=>nice(Math.max(15,(q-TIER_Q[tier]+12)*(6+tier*7))*Math.pow(1.12,Math.max(0,q-TIER_Q[tier]))*(age<24?1.3:age>31?.7:1)*diffK(1.25,.8)*EK[tier]*(tier>=5?.6:1));
 function huntMult(wp){return 5+(hashStr(wp.n+S.season)%51)/10}
 /* ¿quiere venir un jugador de un club de más categoría? por mucho dinero que haya, bajar de división no gusta */
 function willCome(wp,from){const gap=from-curTier();if(gap<=0)return 1;let p=[1,.3,.05,.012,.004,.0015][Math.min(5,gap)]||.001;if(wp.age>=33)p*=3;if(wp.age>=36)p*=2;if((S.fans||3)>FANS_CAP[curTier()])p*=1.5;return Math.min(.95,p)}
@@ -2316,7 +2325,7 @@ const curTier=()=>S.comp?S.comp.tier:(S.tierNext||0);
 /* escala económica por categoría: del pueblo (casi nada) a Primera (millones) */
 const EK=[1,1.5,2.5,5,12,35,100,300,1200,5000];const ek=(t,pw)=>Math.pow(EK[t!=null?t:tierNow()]||1,pw==null?1:pw);
 const nice=v=>{if(v<100)return Math.round(v);const m=Math.pow(10,Math.floor(Math.log10(v))-1);return Math.round(v/m)*m};
-const TVW=[0,0,0,0,0,300,2500,20000,150000,1000000];
+const TVW=[0,0,0,0,1300,5400,19000,59000,290000,1270000];
 const FANS_CAP=[40,150,400,900,2000,4000,8000,15000,35000,70000];
 const TICKET=[.5,1,1.5,2.5,4,7,10,15,25,45];
 const WAGE_CAP=[0,0,0,0,300,500,800,1200,1800,3000].map((v,i)=>v*EK[i]);
@@ -2803,7 +2812,78 @@ function pressQuestions(R){
   qs.push({q:`¿Qué opina de ${R.opN}?`,a:[["«Un rival muy digno.»",()=>"Elegante. Aburrido, pero elegante."],["«Son unos paquetes.»",()=>{S.fans=Math.round((S.fans||3)*1.03+1);S.coach.moral=clamp(S.coach.moral+3,0,100);S.grudge=R.opN;addHeat(R.opN,1,"les llamaste paquetes en la prensa");return `En ${R.opN} lo han puesto en el tablón del vestuario. La vuelta va a estar caliente.`}],["«Ni sé de dónde son.»",()=>"Se ríen hasta los de su pueblo."]]});
   return qs.sort(()=>Math.random()-.5).slice(0,2);
 }
+/* ---------- rueda de prensa del mes ---------- */
+const PRESS_MEDIA=t=>t>=8?["Canal Plus","El Chiringuito de Medianoche","Marca TV","Radio Nacional"]:t>=5?["Canal Sur","Estadio Deportivo","Radio Sevilla","El Desmarque"]:["Radio Fuentes","El Correo de la Campiña","El TikTok de un chaval del pueblo","La hoja parroquial"];
+const pFans=k=>{S.fans=Math.max(3,Math.round((S.fans||3)*k+(k>1?1:0)))};
+const pMoral=d=>{S.coach.moral=clamp(S.coach.moral+d,0,100)};
+const pTrust=d=>{if(S.board)S.board.trust=clamp(S.board.trust+d,0,100)};
+const pTeam=d=>S.players.forEach(p=>p.conf=clamp((p.conf||0)+d,0,100));
+function bigPressQs(R){
+  const qs=[];const sp=S.sponsors[0];const best=S.players.slice().sort((a,b)=>ovr(b)-ovr(a))[0];const worst=S.players.slice().sort((a,b)=>ovr(a)-ovr(b))[0];
+  const nf=(()=>{try{const m=ourFixture();return m?S.comp.teams[m.a===0?m.b:m.a].n:null}catch(e){return null}})();
+  if(sp)qs.push({q:`En la mesa tiene un producto de ${sp}, su patrocinador. ¿Qué tal está?`,a:[["«Lo tomo todos los días. Mírenme qué bien estoy.»",()=>{const v=nice(40*ek(curTier(),.8));S.money+=v;pFans(.98);return `${sp} te manda una prima de ${v} €. En el bar se ríen de ti.`}],["«Lo que paga, paga. Sin más.»",()=>"Respuesta de profesional. Nadie se ofende."],["«Yo esto no lo pruebo ni muerto.»",()=>{pFans(1.05);pMoral(4);if(Math.random()<.35){S.sponsors=S.sponsors.filter(x=>x!==sp);if(S.sponsorPay)delete S.sponsorPay[sp];return `La afición te adora. ${sp} rompe el contrato esa misma tarde.`}return `La afición te adora. ${sp} se hace el sordo… de momento.`}]]});
+  else qs.push({q:"¿Por qué no tiene patrocinadores? Su mesa da pena.",a:[["«Estamos escuchando ofertas.»",()=>"Nadie se lo cree."],["«El que quiera anunciarse, que me llame. Pago yo el café.»",()=>{pFans(1.02);return "Te llama el del bar de la esquina. Ya veremos."}]]});
+  qs.push({q:"¿Qué le diría a la afición?",a:[["«Que vengan al campo, que los necesitamos.»",()=>{pFans(1.06);return "Se nota en el bar: el domingo viene más gente."}],["«Que paguen el carné, que esto no se mantiene solo.»",()=>{const v=nice(25*ek(curTier(),.8));S.money+=v;pFans(.97);return `Se venden unos cuantos carnés: +${v} €. Algunos se ofenden.`}],["«Que se callen y animen.»",()=>{pFans(.96);pMoral(5);return "Pitada histórica en la próxima jornada. Tú te quedas a gusto."}]]});
+  qs.push({q:"¿Cómo es su relación con la directiva?",a:[["«Excelente. Son mi familia.»",()=>{pTrust(5);pMoral(-2);return "La directiva te invita a un montadito. Tú tragas sapos."}],["«Que me dejen trabajar.»",()=>{pTrust(-6);pMoral(5);return "El presidente lo lee en el periódico. No le gusta."}]]});
+  if(best&&worst&&best!==worst)qs.push({q:`¿Qué opina de ${short(worst)}? Dicen que es el peor de la plantilla.`,a:[["«Es un jugador clave para nosotros.»",()=>{worst.conf=clamp((worst.conf||0)+20,0,100);return `${short(worst)} llora en el vestuario. De alegría.`}],["«Tiene razón, es malísimo.»",()=>{worst.conf=clamp((worst.conf||0)-25,0,100);pFans(1.03);pTeam(-4);return `La afición se ríe. El vestuario no tanto.`}],[`«${short(best)} sí que es bueno.»`,()=>{best.conf=clamp((best.conf||0)+12,0,100);worst.conf=clamp((worst.conf||0)-8,0,100);return `${short(best)} se viene arriba. ${short(worst)} pone mala cara.`}]]});
+  qs.push({q:"Se le vio en el bar hasta las cuatro de la mañana. ¿Algo que decir?",a:[["«Estaba haciendo trabajo de ojeador.»",()=>{pMoral(3);return "Nadie se lo cree, pero hace gracia."}],["«Sin comentarios.»",()=>{pTrust(-3);return "La directiva pide explicaciones."}],["«La próxima ronda la pago yo.»",()=>{const v=nice(20*ek(curTier(),.7));S.money-=v;pFans(1.05);return `El bar se llena el sábado. Pagas ${v} € en cañas.`}]]});
+  qs.push({q:"Hay rumores de que otro club le quiere fichar.",a:[["«Yo me muero en este banquillo.»",()=>{pFans(1.04);pTrust(4);return "Ovación. Te van a hacer una pancarta."}],["«Escucharé ofertas.»",()=>{pTrust(-8);pMoral(6);return "La directiva se pone nerviosa. Te sube un poco el ego."}]]});
+  qs.push({q:"¿Qué le pide a los Reyes Magos?",a:[["«Un delantero que meta goles.»",()=>{pTeam(-3);return "Los delanteros se dan por aludidos."}],["«Césped. O por lo menos menos piedras.»",()=>{pFans(1.02);return "El alcalde dice que lo estudiará."}],["«Que mi exmujer deje de llamarme.»",()=>{pFans(1.03);pMoral(-3);return "Risas en la sala. Tu ex lo ve en las noticias."}]]});
+  qs.push({q:"¿Qué le pareció el árbitro de hoy?",a:[["«Un ladrón con silbato.»",()=>{const v=nice(15*ek(curTier(),.7));S.money-=v;pFans(1.04);pMoral(4);return `Multa de ${v} € del comité. La grada aplaude.`}],["«Ha estado correcto.»",()=>"Aburrido, pero correcto."],["«Un señor honrado y muy guapo.»",()=>{pFans(.99);return S.ref?"En el comité te guiñan un ojo.":"Nadie entiende nada."}]]});
+  if(nf)qs.push({q:`El próximo rival es ${nf}. ¿Algún mensaje?`,a:[["«Les vamos a meter cinco.»",()=>{pTeam(6);addHeat(nf,1,"prometiste meterles cinco en la prensa");return `Tu vestuario se viene arriba. En ${nf} lo cuelgan en el tablón.`}],["«Mucho respeto.»",()=>"Respuesta de manual."],["«No sé ni quiénes son.»",()=>{pTeam(2);addHeat(nf,1,"dijiste que no sabías ni quiénes eran");pFans(1.02);return "Polémica en las redes. Te da igual."}]]});
+  qs.push({q:"¿Cuál es el objetivo de la temporada?",a:[["«Ascender, sin excusas.»",()=>{pFans(1.05);pTrust(3);pTeam(3);return "Lo has dicho delante de todos. Ahora a cumplir."}],["«Salvarnos y ya.»",()=>{pFans(.98);pTrust(-2);return "La afición esperaba algo más."}],["«Pasarlo bien y comer en Belsay.»",()=>{pTeam(5);pFans(1.02);return "El vestuario te quiere. La directiva no tanto."}]]});
+  const base=pressQuestions(R);
+  return base.slice(0,1).concat(qs.sort(()=>Math.random()-.5).slice(0,4));
+}
+function prodOf(){const b=BRANDS.find(x=>x.n===S.sponsors[0]);return b?{p:b.prod||"agua",b}:{p:"agua",b:null}}
+function drawPressCv(cv){if(!cv||!cv.getContext)return;let g=null;try{g=cv.getContext("2d")}catch(e){}if(!g)return;
+  const face=faceCanvas(coachLook());const pr=prodOf();const list=boardsList(true);const t0=performance.now();const flashes=[];
+  const draw=now=>{if(!document.body.contains(cv)||$("#modal").hidden)return;const t=Math.max(0,(now-t0)/1000),c=g,W=640,H=400;
+    // muro de patrocinadores
+    c.fillStyle="#f2f2f2";c.fillRect(0,0,W,H);const tw=172,th=70;
+    for(let r=0;r<5;r++)for(let k=-1;k<5;k++){const bb=list[((r*3+k)%list.length+list.length)%list.length];const x=k*tw+(r%2)*86,y=r*th-10;rrect(c,x+4,y+4,tw-8,th-8,6);c.fillStyle=bb.b;c.fill();
+      const nm=bb.n.toUpperCase(),ws=nm.split(" ");let L=[nm];if(nm.length>13&&ws.length>1){const h=Math.ceil(ws.length/2);L=[ws.slice(0,h).join(" "),ws.slice(h).join(" ")]}
+      c.fillStyle=bb.c;c.textAlign="center";c.textBaseline="middle";L.forEach((ln,i)=>{let fs=17;c.font=`bold ${fs}px Archivo Narrow, Arial Narrow, sans-serif`;const w=c.measureText(ln).width;if(w>tw-22){fs=Math.max(9,Math.floor(fs*(tw-22)/w));c.font=`bold ${fs}px Archivo Narrow, Arial Narrow, sans-serif`}c.fillText(ln,x+tw/2,y+th/2+(L.length>1?(i?9:-9):0))});c.textBaseline="alphabetic"}
+    const vg=c.createRadialGradient(320,170,100,320,200,420);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.4)");c.fillStyle=vg;c.fillRect(0,0,W,H);
+    // el míster (respira)
+    const br=Math.sin(t*1.6)*2;c.drawImage(face,150,-6+br,340,340);
+    // micrófonos (a los lados de la cara)
+    [["#c8233a","RF",208,248],["#2a5bd7","TV",250,232],["#1f8f4e","CS",392,232],["#111","PC",432,248]].forEach(([col,l,x,y])=>{c.strokeStyle="#222";c.lineWidth=4;c.beginPath();c.moveTo(x+(x<320?-14:14),306);c.lineTo(x,y+14);c.stroke();c.fillStyle="#333";c.beginPath();c.ellipse(x,y,10,14,0,0,7);c.fill();c.fillStyle=col;c.fillRect(x-12,y+10,24,15);c.fillStyle="#fff";c.font="bold 10px Archivo Narrow, sans-serif";c.textAlign="center";c.fillText(l,x,y+22)});
+    // mesa
+    c.fillStyle="#24357a";c.fillRect(0,300,W,12);c.fillStyle="#1b2a5c";c.fillRect(0,312,W,88);
+    c.fillStyle="#ffd23f";c.font="22px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText(clubName().toUpperCase(),320,380);
+    // cartelito
+    c.fillStyle="#fff";c.fillRect(245,314,150,30);c.strokeStyle="#000";c.lineWidth=2;c.strokeRect(245,314,150,30);c.fillStyle="#111";c.font="bold 15px Archivo Narrow, sans-serif";c.fillText(`MÍSTER ${(S.coach.name||"").split(" ")[0].toUpperCase()}`,320,335);
+    // producto del patrocinador y vaso
+    c.save();c.translate(545,302);c.scale(1.45,1.45);drawProd(c,pr,0,0);c.restore();
+    c.fillStyle="rgba(220,240,255,.55)";c.fillRect(96,256,30,46);c.strokeStyle="#9ab";c.lineWidth=2;c.strokeRect(96,256,30,46);
+    // flashes
+    if(Math.random()<.04)flashes.push({x:40+Math.random()*560,y:30+Math.random()*180,t});flashes.forEach(f=>{const a=1-(t-f.t)/.25;if(a>0){const gr=c.createRadialGradient(f.x,f.y,2,f.x,f.y,90);gr.addColorStop(0,`rgba(255,255,255,${a})`);gr.addColorStop(1,"rgba(255,255,255,0)");c.fillStyle=gr;c.fillRect(f.x-90,f.y-90,180,180)}});
+    while(flashes.length&&t-flashes[0].t>.3)flashes.shift();
+    requestAnimationFrame(draw)};requestAnimationFrame(draw)}
+function drawProd(c,pr,x,y){const b=pr.b||{n:"Agua del grifo",b:"#cfe8ff",c:"#1f5fa8"};c.save();c.translate(x,y);c.textAlign="center";
+  const lab=(w,h,yy)=>{c.fillStyle=b.b;c.fillRect(-w/2,yy,w,h);c.fillStyle=b.c;fitText(c,b.n.toUpperCase(),w-6,11,6);c.fillText(b.n.split(" ")[0].toUpperCase(),0,yy+h/2+4)};
+  const p=pr.p;
+  if(p==="cerveza"){c.fillStyle="#5a3010";c.beginPath();c.moveTo(-14,0);c.lineTo(-14,-60);c.quadraticCurveTo(-14,-74,-6,-80);c.lineTo(-6,-100);c.lineTo(6,-100);c.lineTo(6,-80);c.quadraticCurveTo(14,-74,14,-60);c.lineTo(14,0);c.fill();c.fillStyle="#c9a227";c.fillRect(-7,-104,14,6);lab(28,24,-48)}
+  else if(p==="lata"){c.fillStyle="#bfc5cc";c.fillRect(-20,-56,40,56);c.fillStyle="#9aa1a8";c.beginPath();c.ellipse(0,-56,20,5,0,0,7);c.fill();lab(40,30,-46)}
+  else if(p==="veneno"){c.fillStyle="#f4f4f4";c.fillRect(-18,-70,36,70);c.fillStyle="#c8233a";c.fillRect(-9,-84,18,14);c.fillStyle="#111";c.font="26px sans-serif";c.fillText("☠",0,-30);lab(36,14,-16)}
+  else if(p==="saco"){c.fillStyle=b.b;c.beginPath();c.moveTo(-34,0);c.lineTo(-30,-78);c.lineTo(30,-78);c.lineTo(34,0);c.fill();c.strokeStyle="#0004";c.lineWidth=2;c.stroke();c.fillStyle=b.c;c.font="bold 11px Archivo Narrow, sans-serif";c.fillText(b.n.split(" ")[0].toUpperCase(),0,-44);c.font="26px sans-serif";c.fillText(/Pienso/.test(b.n)?"🐶":/Pañal/.test(b.n)?"🧷":"🌱",0,-14)}
+  else if(p==="tabaco"){c.fillStyle="#f2f2f2";c.fillRect(-22,-50,44,50);c.fillStyle=b.b;c.fillRect(-22,-50,44,18);c.fillStyle="#111";c.font="bold 7px Archivo Narrow, sans-serif";c.fillText("FUMAR MATA",0,-8);c.fillStyle="#e8d7b0";c.fillRect(-12,-60,6,12);c.fillRect(-2,-62,6,14);lab(44,12,-30)}
+  else if(p==="nevera"){c.fillStyle="#2a5bd7";c.fillRect(-36,-46,72,46);c.fillStyle="#fff";c.fillRect(-38,-54,76,10);c.fillStyle="#fff";c.font="bold 9px Archivo Narrow, sans-serif";c.fillText("ÓRGANO HUMANO",0,-26);c.fillText("NO VOLCAR",0,-14)}
+  else if(p==="caja"){c.fillStyle=b.b;c.fillRect(-26,-70,52,70);c.fillStyle="#fff";c.font="bold 10px Archivo Narrow, sans-serif";c.fillText("¡ALEGRÍA!",0,-50);c.font="22px sans-serif";c.fillText("❤",0,-20)}
+  else if(p==="pollo"){c.fillStyle="#ddd";c.beginPath();c.ellipse(0,-6,40,8,0,0,7);c.fill();c.fillStyle="#c6782b";c.beginPath();c.ellipse(0,-24,28,20,0,0,7);c.fill();c.fillStyle="#a85c1c";c.fillRect(18,-34,16,6);c.fillRect(-34,-34,16,6)}
+  else if(p==="churros"){c.fillStyle="#fff";c.beginPath();c.moveTo(-22,-60);c.lineTo(22,-60);c.lineTo(0,0);c.fill();c.strokeStyle="#c98a3a";c.lineWidth=7;for(let i=-1;i<2;i++){c.beginPath();c.moveTo(i*9,-58);c.lineTo(i*14,-96);c.stroke()}}
+  else if(p==="bote"){c.fillStyle="#9fe0a0";c.fillRect(-16,-60,32,60);c.fillStyle="#2a1b12";c.fillRect(-10,-72,20,12);lab(32,22,-40)}
+  else{c.fillStyle="rgba(200,230,255,.7)";c.fillRect(-14,-72,28,72);c.fillStyle="#1f5fa8";c.fillRect(-8,-84,16,12);c.fillStyle="#ff8a1a";c.fillRect(-14,-46,28,18);c.fillStyle="#fff";c.font="bold 8px Archivo Narrow, sans-serif";c.fillText("GRIFO",0,-34)}
+  c.restore()}
+function pressChips(b){const a={fans:S.fans||0,moral:S.coach.moral,trust:S.board?S.board.trust:0,money:S.money};const o=[];
+  const d=(k,lab,f)=>{const v=a[k]-b[k];if(v)o.push(`<span class="pchip ${v>0?"up":"dn"}">${lab} ${v>0?"+":""}${f?f(v):v}</span>`)};
+  d("fans","Aficionados");d("moral","Moral");d("trust","Directiva");d("money","Dinero",v=>v.toLocaleString("es-ES")+" €");return o.length?`<div class="pchips">${o.join("")}</div>`:""}
 function pressStep(){
+  const R0=M&&M.report;if(R0&&M.bigPress==null){M.bigPress=!M.online&&(S.week-(S.lastPress==null?-99:S.lastPress))>=4;if(M.bigPress){S.lastPress=S.week;M.pq=bigPressQs(R0);M.pqi=0;M.pmedia=PRESS_MEDIA(curTier())}}
+  if(M&&M.bigPress&&M.pq){const q=M.pq[M.pqi||0];if(!q)return postPizza();
+    modal(`Rueda de prensa · pregunta ${(M.pqi||0)+1} de ${M.pq.length}`,`<canvas class="cinecv" id="presscv" width="640" height="400"></canvas><div class="talk"><div class="bub them"><b>${esc(pick(M.pmedia))}:</b> «${esc(q.q)}»</div><div class="pc-act">${q.a.map((a,i)=>`<button class="btn ${i?"":"primary"}" data-act="pressans" data-v="${i}">${esc(a[0])}</button>`).join("")}</div></div>`);
+    drawPressCv($("#presscv"));return}
   const R=M&&M.report;if(!R)return postPizza();M.pq=M.pq||pressQuestions(R);M.pqi=M.pqi||0;const q=M.pq[M.pqi];if(!q)return postPizza();
   modal("Preguntas de la prensa",`<div class="talk"><div class="bub them"><b>Periodista de Radio Fuentes:</b> «${esc(q.q)}»</div><div class="pc-act">${q.a.map((a,i)=>`<button class="btn ${i?"":"primary"}" data-act="pressans" data-v="${i}">${esc(a[0])}</button>`).join("")}</div></div>`);
 }
@@ -5274,7 +5354,10 @@ const A={
   arrpick:()=>{if(!M)return;closeModal();M.paused=false;renderSquad();if(!M.hold){M.timer=setTimeout(run,300)}else toast("Toca un hueco y elige quién entra.")},
   arrok:()=>{if(!M)return;M.hold=false;arrResume()},
   press:()=>pressStep(),
-  pressans:v=>{const q=M&&M.pq&&M.pq[M.pqi||0];if(!q)return postPizza();const r=q.a[+v][1]();M.pqi=(M.pqi||0)+1;save();modal("Preguntas de la prensa",`<p>${esc(r)}</p><button class="btn play" data-act="${M.pqi<M.pq.length?"press":"post2"}">${M.pqi<M.pq.length?"Siguiente pregunta":"A la Pizzería Belsay"}</button>`)},
+  pressans:v=>{const q=M&&M.pq&&M.pq[M.pqi||0];if(!q)return postPizza();const b={fans:S.fans||0,moral:S.coach.moral,trust:S.board?S.board.trust:0,money:S.money};const r=q.a[+v][1]();M.pqi=(M.pqi||0)+1;save();
+    const nx=`<button class="btn play" data-act="${M.pqi<M.pq.length?"press":"post2"}">${M.pqi<M.pq.length?"Siguiente pregunta":"A la Pizzería Belsay"}</button>`;
+    if(M.bigPress){modal(`Rueda de prensa · pregunta ${M.pqi} de ${M.pq.length}`,`<canvas class="cinecv" id="presscv" width="640" height="400"></canvas><div class="talk"><div class="bub me"><b>Tú:</b> ${esc(q.a[+v][0])}</div><p>${esc(r)}</p>${pressChips(b)}</div>${nx}`);drawPressCv($("#presscv"))}
+    else modal("Preguntas de la prensa",`<p>${esc(r)}</p>${pressChips(b)}${nx}`)},
   spz:v=>{if(!M||!M.sp)return;const t=resolvePiece(+v);modal("Resultado",`<p>${esc(t)}</p><button class="btn play" data-act="spgo">Seguir</button>`)},
   spgo:()=>{closeModal();if(!M||M.ended)return;M.paused=false;updScore();renderSquad();clearTimeout(M.timer);M.timer=setTimeout(run,400)},
   ttstest:()=>ttsTest(),
