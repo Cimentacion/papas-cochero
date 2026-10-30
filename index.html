@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="12.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="12.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -28,6 +28,9 @@ window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split
 [hidden]{display:none!important}
 *{box-sizing:border-box}
 html,body{height:100%}
+body.bganim::before{content:"";position:fixed;inset:-40px;z-index:-1;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.10) 1.5px,transparent 2px);background-size:22px 22px;animation:bgmove 18s linear infinite}
+@keyframes bgmove{from{transform:translate(0,0)}to{transform:translate(22px,22px)}}
+@media (prefers-reduced-motion:reduce){body.bganim::before{animation:none}}
 body{margin:0;background:var(--desk);background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.2px);background-size:4px 4px;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.35}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--desk2)}
 button,select{font:inherit;color:inherit;cursor:pointer}
@@ -2444,6 +2447,8 @@ function configBox(){
    ${tg("sound",S.sound!==false,"Sonido ambiente del partido (público, silbato, bombo)")}
    ${tg("skin",document.body.classList.contains("fm"),"Aspecto Football Manager")}
    ${tg("olon",olEnabled(),"Habilitar modos online (liga con amigos)")}
+   ${tg("music",S.music!==false,"Música de fondo en los menús")}
+   ${tg("bganim",S.bganim!==false,"Fondo animado")}
    <div class="offer"><div><b>Dificultad</b><small>Fuerza de los rivales y precios de los fichajes.</small></div><button class="btn mini primary" data-act="diff">${["Fácil","Normal","Difícil"][S.diff!=null?S.diff:1]}</button></div>
   </div>
   <div class="pc-act"><button class="btn" data-act="ttstest">Probar los comentaristas</button><button class="btn" data-act="updcheck">Buscar actualizaciones</button></div>
@@ -3101,6 +3106,33 @@ function olPost(){
    ${heatHTML()}<button class="btn play" data-act="olafter">Volver a la liga online</button>`);setTimeout(drawHeat,50)}
 function olAfter(){closeModal();$("#match").hidden=true;const d=$("#m-done");d.dataset.act="post1";d.textContent="Rueda de prensa";M=null;olRestore();render();window.scrollTo(0,0)}
 
+/* ================= música de menú (generada, estilo lounge de carreras) ================= */
+const MUS={ctx:null,on:false,t:0,step:0,timer:0,g:null,dly:null,
+  want(){return S&&S.music!==false&&!M},
+  init(){if(this.ctx)return true;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;const c=this.ctx=new AC();this.g=c.createGain();this.g.gain.value=0;this.g.connect(c.destination);
+    const d=c.createDelay(1);d.delayTime.value=.36;const fb=c.createGain();fb.gain.value=.32;const lp=c.createBiquadFilter();lp.type="lowpass";lp.frequency.value=2400;d.connect(fb);fb.connect(lp);lp.connect(d);const dg=c.createGain();dg.gain.value=.35;d.connect(dg);dg.connect(this.g);this.dly=d;return true}catch(e){return false}},
+  start(){if(!this.want())return;if(!this.init())return;try{this.ctx.resume()}catch(e){}if(this.on)return;this.on=true;this.t=this.ctx.currentTime+.1;this.step=0;this.g.gain.cancelScheduledValues(this.ctx.currentTime);this.g.gain.setTargetAtTime(.16,this.ctx.currentTime,1.2);clearInterval(this.timer);this.timer=setInterval(()=>this.sched(),60)},
+  stop(){if(!this.on||!this.ctx)return;this.on=false;const c=this.ctx;this.g.gain.setTargetAtTime(0,c.currentTime,.6);clearInterval(this.timer);this.timer=setTimeout(()=>{},0)},
+  sync(){if(this.want())this.start();else this.stop()},
+  note(f,t,dur,type,vol,dest,att){const c=this.ctx,o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+(att||.01));g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest||this.g);o.start(t);o.stop(t+dur+.05);return o},
+  ep(f,t,dur,v){const c=this.ctx;const g=c.createGain();g.gain.value=1;const trem=c.createOscillator(),tg=c.createGain();trem.frequency.value=5;tg.gain.value=.25;trem.connect(tg);tg.connect(g.gain);trem.start(t);trem.stop(t+dur);g.connect(this.g);if(Math.random()<.5)g.connect(this.dly);
+    this.note(f,t,dur,"sine",v,g,.01);this.note(f*2,t,dur*.4,"sine",v*.25,g,.005);this.note(f*3.01,t,dur*.15,"triangle",v*.08,g,.003)},
+  drum(kind,t){const c=this.ctx;if(kind==="k"){const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.12);g.gain.setValueAtTime(.55,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(this.g);o.start(t);o.stop(t+.3);return}
+    const len=kind==="s"?.18:.05,b=c.createBuffer(1,Math.floor(c.sampleRate*len),c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,kind==="s"?2:4);
+    const src=c.createBufferSource();src.buffer=b;const f=c.createBiquadFilter();f.type=kind==="s"?"bandpass":"highpass";f.frequency.value=kind==="s"?1800:7000;const g=c.createGain();g.gain.value=kind==="s"?.32:.12;src.connect(f);f.connect(g);g.connect(this.g);src.start(t)},
+  sched(){if(!this.on)return;const c=this.ctx,spb=60/96/4;
+    const CH=[[53,57,60,64,67],[52,55,59,62,66],[50,53,57,60,64],[55,59,62,65,69],[48,52,55,59,62],[52,55,59,62,67],[50,53,57,60,65],[55,58,62,65,69]];const BASS=[41,40,38,43,36,40,38,43];
+    const mtof=m=>440*Math.pow(2,(m-69)/12);
+    while(this.t<c.currentTime+.25){const st=this.step%128,bar=Math.floor(st/16),b16=st%16,t=this.t+((b16%2)?spb*.16:0);const ch=CH[bar%8];
+      if(b16===0||b16===10)ch.forEach((n,i)=>this.ep(mtof(n),t+i*.012,b16===0?1.9:1.1,.045));
+      if(b16===6&&Math.random()<.5)ch.slice(1,4).forEach(n=>this.ep(mtof(n),t,.4,.03));
+      const bn=BASS[bar%8];if([0,3,6,8,11,14].includes(b16))this.note(mtof(bn+(b16===11?12:b16===14?7:0)-12),t,b16===0?.45:.22,"triangle",.22);
+      if(b16===0||b16===8||(b16===10&&bar%2))this.drum("k",t);if(b16===4||b16===12)this.drum("s",t);if(b16%2===0||Math.random()<.3)this.drum("h",t);
+      if(st>=64&&(b16===2||b16===5||b16===9||b16===13)&&Math.random()<.55){const sc=[0,2,4,7,9,12,14];this.note(mtof(ch[0]+12+sc[Math.floor(Math.random()*sc.length)]),t,.35,"square",.025,this.dly);this.note(mtof(ch[0]+12+sc[2]),t,.01,"sine",0)}
+      this.t+=spb;this.step++}}};
+document.addEventListener("click",()=>{try{MUS.sync()}catch(e){}},true);
+setInterval(()=>{try{MUS.sync()}catch(e){}},1500);
+function bgSync(){document.body.classList.toggle("bganim",!(S&&S.bganim===false))}
 /* ================= render ================= */
 function render(){
   const v=$("#view");
@@ -3117,7 +3149,7 @@ function render(){
     online:viewOnline,
     campo:()=>{const k=sub("campo");return k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
   v.innerHTML=(S.tab!=="prep"?subBar(S.tab):"")+(VIEWS[S.tab]||viewClub)();
-  paintFaces(v);paintCrests(v);olBanner();
+  paintFaces(v);paintCrests(v);olBanner();bgSync();
   const fc=$("#fieldcv");if(fc)drawCampo(fc);
   const pc=$("#pitchcv");if(pc)drawPitch(pc);
   const mc=$("#mapcv");if(mc)drawMap(mc);
@@ -3718,6 +3750,8 @@ $("#photo-in").addEventListener("change",e=>{
 
 /* ================= acciones ================= */
 const A={
+  music:()=>{S.music=S.music===false;save();MUS.sync();render();toast(S.music===false?"Música apagada.":"Música encendida.")},
+  bganim:()=>{S.bganim=S.bganim===false;save();bgSync();render()},
   tprice:v=>{S.tprice=+v;save();render();toast(`Entradas: ${TICKETS[+v].n}.`)},
   turf:v=>{const t=TURFS[+v];if(!t||(t.req||0)>(S.reach||0)||+v<=(S.turf||0))return;if(S.money<t.c){toast(`Cuesta ${t.c} €.`);return}ledSync();S.money-=t.c;led(`Obra: ${t.n}`,-t.c);S.turf=+v;addNews(`Nuevo césped: ${t.n.toLowerCase()}. Los jugadores se tiran a revolcarse.`);save();render()},
   sstaff:v=>{const x=SSTAFF.find(y=>y.id===v);if(!x||sst(v))return;if(S.money<x.c){toast(`Cuesta ${x.c} € contratarlo.`);return}ledSync();S.money-=x.c;led(`Contrato: ${x.n}`,-x.c);S.sstaff=(S.sstaff||[]).concat([v]);save();render();toast(`${x.n} contratado.`)},
