@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="13.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="13.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2369,7 +2369,7 @@ function commentLabel(t){
 function banter(kind){vo("b_"+kind)}
 function paletoSay(force){if(force||Math.random()<.5)vo("b_any")}
 function coachNameKey(n){const L=[...FIRSTC,...MALE].sort((a,b)=>b.length-a.length);const f=L.find(x=>n===x||String(n).startsWith(x+" "));return "n_"+vslug(f||"el entrenador")}
-function oppCoachName(){const T=S.comp&&M&&S.comp.teams[M.opp];if(!T)return null;const c=S.world&&S.world.clubs[T.n];if(c)return wCoachOf(c).n;const r=seeded(hashStr(T.n)+3);return `${MALE[Math.floor(r()*MALE.length)]} ${SUR[Math.floor(r()*SUR.length)]}`}
+function oppCoachName(){const T=S.comp&&M&&S.comp.teams[M.opp];if(!T)return null;if(T.coachN)return T.coachN;const c=S.world&&S.world.clubs[T.n];if(c)return wCoachOf(c).n;const r=seeded(hashStr(T.n)+3);return `${MALE[Math.floor(r()*MALE.length)]} ${SUR[Math.floor(r()*SUR.length)]}`}
 async function voxWaitFree(ms){const t0=Date.now();while((VOX.busy||(window.speechSynthesis&&speechSynthesis.speaking))&&Date.now()-t0<ms)await new Promise(r=>setTimeout(r,250))}
 async function coachLine(st,ev,i,txt,name,who){
   if(!S||S.comm===false||(M&&M.skipping))return;
@@ -4658,7 +4658,8 @@ document.addEventListener("click",()=>{if(ttsPrimed||!window.speechSynthesis||wi
 if(window.speechSynthesis){try{speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}catch(e){}setInterval(()=>{try{if(speechSynthesis.speaking)speechSynthesis.resume()}catch(e){}},4000)}
 function ttsTest(){voxInit();if(VOX.man&&S.voxOff!==true&&!VOX.dead){const was=S.comm;S.comm=true;vo("intro",null,true);S.comm=was;setTimeout(()=>{const w=S.comm;S.comm=true;vo("b_any");S.comm=w},4500);setTimeout(()=>{if(S.tab==="mister")render()},7000);return}if(!window.AndroidTTS&&!window.speechSynthesis){toast("Este navegador no tiene voz. Prueba con Chrome o con la APK.");return}const was=S.comm;S.comm=true;speak("Probando, probando. Aquí Radio Fuentes, con el comentario del partido.",true);S.comm=was;setTimeout(()=>{try{if(window.speechSynthesis&&!window.AndroidTTS&&!speechSynthesis.getVoices().some(v=>/^es/i.test(v.lang)))toast("Tu navegador no tiene voces en español instaladas. Prueba con Chrome.")}catch(e){}},1500)}
 const PALETO=["No sé quién es ese, pero me parece horrible.","El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.","Me abro unas latas.","Pásame otra lata, Rubio.","Mi cuñado jugaba mejor, y eso que está cojo.","¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.","El árbitro es primo del alcalde, eso lo sé yo.","¿Ese no es el de la carnicería?","Qué calor, mi arma. Qué calor.","Eso en mis tiempos se arreglaba a guantazos.","A mí el fútbol moderno no me gusta. Esto sí, esto me gusta.","Mira el de amarillo, que va corriendo como un pato.","¿Quién ha traído las pipas?","Ese tiene más barriga que yo, y mira que es difícil.","Yo es que no veo bien de lejos, pero ese es malísimo."];
-function cruel(){return !!S&&(!S.comp||(S.comp.type!=="nat"&&S.comp.tier<=1))}
+/* los insultos van siempre a entrenadores inventados (el tuyo y los rivales), nunca a jugadores reales: valen en todas las ligas */
+function cruel(){return !!S}
 function castStyle(){const t=S.comp?S.comp.tier:0;return t<=1?"paleto":t<=4?"radio":t<=7?"local":"tele"}
 function castNames(){return {paleto:["Curro","El Rubio"],radio:["Manolo","Paco"],local:["Manolo","Paco"],tele:["Manolo","Paco"]}[castStyle()]}
 function visIdle(){
