@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1700,12 +1700,18 @@ function runJob(id){
   S.money+=pay;S.coach.moral=clamp(S.coach.moral+j.moral,0,100);
   S.sessLog=[`${day} · ${j.n}: +${pay} €.${msg?" "+msg:""}`].concat(S.sessLog).slice(0,14);save();render();toast(`${j.n}: +${pay} €.`);
 }
-function goToJail(y,why){
-  const ev=[];const wasTier=S.comp?S.comp.tier:S.tierNext;
+function goToJail(y,why,o){o=o||{};
+  const ev=[];const wasTier=S.comp?S.comp.tier:S.tierNext;const gone=[];
   S.comp=null;S.prep=null;S.phase="pre";
   for(let k=0;k<y;k++){S.coach.age++;S.season++;
-    S.players=S.players.filter(p=>{p.age++;if(p.age>=66||Math.random()<.32){ev.push(`${fullName(p)} deja el club mientras estás dentro.`);return false}return true});
+    if(o.bribe)S.players=S.players.filter(p=>{p.age++;
+      if(!p.real&&Math.random()<(p.age>=60?.12:p.age>=40?.03:.012)){S.memorial=(S.memorial||[]).concat(`${fullName(p)} (${p.age})`);ev.push(`${fullName(p)} fallece con ${p.age} años mientras estás dentro. No pudiste ir al entierro.`);return false}
+      if(p.age>=62||(p.age>=38&&Math.random()<.18)){ev.push(`${fullName(p)} se jubila con ${p.age} años.`);return false}
+      if(Math.random()<.15){ev.push(`${fullName(p)} se cansa de esperar y se va a otro club.`);gone.push(p);return false}
+      return true});
+    else S.players=S.players.filter(p=>{p.age++;if(p.age>=66||Math.random()<.32){ev.push(`${fullName(p)} deja el club mientras estás dentro.`);return false}return true});
     if(S.tierNext>0&&Math.random()<.5)S.tierNext--}
+  if(o.bribe){while(S.players.length<4&&gone.length){const p=gone.shift();S.players.push(p);ev.push(`${fullName(p)} vuelve al club: dice que te estaba esperando.`)}S.ref=0;S.refN=0;addNews("Escándalo arbitral: el míster de los Papas, condenado. El comité expulsa a su contacto.")}
   try{wSync(S.tierNext||0)}catch(e){}
   S.money=Math.min(S.money,0)+rnd(0,40);S.coach.moral=20;S.sponsors=[];S.sponsorPay={};S.scouts=[];S.house=Math.max(0,(S.house||0)-1);
   S.lineup=S.lineup.map(id=>id&&pById(id)?id:null);S.jailCount=(S.jailCount||0)+1;S.sessions=Array(sessCount()).fill(null);
@@ -1713,7 +1719,7 @@ function goToJail(y,why){
   addNews(`El míster sale de prisión tras ${y} año${y>1?"s":""} por ${why.toLowerCase()}.`);
   save();render();
   modal(`${y} año${y>1?"s":""} en prisión`,`<p>Te pillan: <b>${esc(why)}</b>. Condena: <b>${y} año${y>1?"s":""}</b>.</p>
-   <p>Mientras estás dentro, el club lo lleva tu primo Rafi. Se nota.</p>
+   <p>Mientras estás dentro, el club lo lleva tu primo Rafi. Se nota.${o.bribe?" Y tu contacto en el comité ya no te coge el teléfono.":""}</p>
    <div class="sec"><h4>AL SALIR</h4><ul><li>Tienes ${S.coach.age} años.</li><li>El equipo está en ${esc(TIERS[S.tierNext].n)}${S.tierNext<wasTier?" (ha bajado)":""}.</li><li>Te quedan ${S.players.length} jugadores. Los patrocinadores y los ojeadores se han ido.</li><li>Dinero: ${S.money} €.</li>
    ${ev.slice(0,8).map(e=>`<li>${esc(e)}</li>`).join("")}${ev.length>8?`<li>Y ${ev.length-8} más.</li>`:""}</ul></div>
    <button class="btn play" data-act="close">Volver al pueblo</button>`);
@@ -1726,7 +1732,7 @@ function trainingBox(){
    ${S.sessLog.length?`<div class="tele">${S.sessLog.slice(0,8).map(l=>`<div>${esc(l)}</div>`).join("")}</div>`:""}
   </div></section>`;
 }
-const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["mercado","Mercado"],["ranking","Ranking"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["europa","Europa"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["redes","Redes"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
+const TABSUB={online:[["ligas","Ligas"],["amigos","Amigos"],["mercado","Mercado"],["ranking","Ranking"],["crear","Organizar liga"]],club:[["semana","Esta semana"],["entreno","Entrenar"]],squad:[["once","Once"],["plantilla","Plantilla"],["fichar","Fichar"],["estrellas","Estrellas","stars"],["cantera","Cantera","cantera"]],comp:[["liga","Liga"],["europa","Europa"],["copa","Copa"],["datos","Datos"],["historia","Historia"]],campo:[["campo","Campo"],["redes","Redes"],["sede","Sede"],["directiva","Directiva","board"],["staff","Staff","staff"],["arbitros","Árbitros"],["tienda","Tienda","merch"],["escudo","Escudo y camiseta"]],mister:[["ficha","Ficha"],["familia","Familia"],["trabajos","Trabajos"],["mafia","Mafia"],["chaparral","Chaparral"],["partida","Partida"],["config","Configuración"],["cambios","Pedir cambios"]]};
 function sub(t){S.sub=S.sub||{};const l=TABSUB[t];if(!l)return null;if(!l.some(x=>x[0]===S.sub[t]))S.sub[t]=l[0][0];return S.sub[t]}
 function subBar(t){const l=TABSUB[t];if(!l)return "";const cur=sub(t);return `<div class="subtabs">${l.map(([k,n,u])=>`<button class="${k===cur?"sel":""} ${u&&!unl(u)?"lk":""}" data-act="sub" data-v="${k}">${u&&!unl(u)?"🔒 ":""}${n}${k==="plantilla"?` (${S.players.length})`:""}</button>`).join("")}</div>`}
 function renewBox(){const L=(S.renew||[]).map(r=>({r,p:pById(r.id)})).filter(x=>x.p);if(!L.length){S.renew=[];return ""}
@@ -2326,6 +2332,62 @@ const STAFF=[
 const STAFF_REQ=[2,5,8],STAFF_COST=[300,60000,2000000],STAFF_WAGE=[15,1500,40000];
 const stf=id=>(S.staff||{})[id]||0;
 const staffWages=()=>STAFF.reduce((a,s)=>a+(stf(s.id)?STAFF_WAGE[stf(s.id)-1]:0),0);
+/* ---------- sobornos a árbitros ---------- */
+const REFS=[
+ {n:"El cuñado del linier",d:"Le pasas algo para el bocadillo y pita a favor cuando se acuerda.",c:300,fee:40,b:.04,risk:.05,t:0},
+ {n:"Árbitro de la comarca",d:"Conoce a todo el comité de la provincia. Las faltas dudosas son vuestras.",c:4000,fee:300,b:.08,risk:.045,t:2},
+ {n:"Delegado del comité regional",d:"Elige qué árbitro os toca cada domingo.",c:60000,fee:3000,b:.12,risk:.04,t:4},
+ {n:"Vicepresidente del comité técnico",d:"Los informes arbitrales pasan por su mesa antes de llegar a nadie.",c:2000000,fee:60000,b:.17,risk:.035,t:6}];
+const refLv=()=>S.ref?REFS[S.ref-1]:null;
+const refFee=()=>{const L=refLv();if(!L)return 0;const t=curTier();return Math.max(L.fee,nice(L.fee*EK[t]/EK[L.t]))};
+const refRisk=()=>{const L=refLv();return L?Math.min(.18,L.risk+(S.refN||0)*.004):0};
+function refBox(){const lv=S.ref||0;
+  return `<section class="win"><div class="bar">Árbitros <small>contactos en el comité</small></div><div class="body">
+   <p>Con un contacto en el comité puedes darle un sobre al árbitro <b>antes de cada partido de liga o copa</b> (en el paso de las apuestas). Sube las posibilidades de ganar.</p>
+   <p class="hint">Si te pillan: <b>5 años de cárcel</b>. Mientras estás dentro, unos jugadores se van, otros se jubilan y alguno no llega a verte salir. Cada sobre que das aumenta un poco el riesgo del siguiente.</p>
+   ${lv?`<p>Contacto actual: <b>${esc(refLv().n)}</b> · sobre de ${refFee().toLocaleString("es-ES")} € · +${Math.round(refLv().b*100)} % de rendimiento · riesgo ${Math.round(refRisk()*100)} %. Sobres dados: ${S.refN||0}.</p>`:""}
+   <div class="list">${REFS.map((L,i)=>{const own=lv>i,next=lv===i,lock=(S.reach||0)<L.t;return `<div class="offer"><div><b>${i+1}. ${esc(L.n)}</b><small>${esc(L.d)} +${Math.round(L.b*100)} % · riesgo ${Math.round(L.risk*100)} %.${lock&&!own?` ${unlTxtShort(L.t)}.`:""}</small></div>${own?`<small class="tag">${lv===i+1?"TU CONTACTO":"SUPERADO"}</small>`:next&&!lock?`<button class="btn mini primary" data-act="refbuy" data-v="${i}" ${S.money<L.c?"disabled":""}>${L.c.toLocaleString("es-ES")} €</button>`:`<small class="tag">🔒</small>`}</div>`}).join("")}</div>
+  </div></section>`}
+function refPrepHTML(P,c){if(!S.ref||P.ol||!(c.type==="league"||c.type==="cup"))return "";const L=refLv(),fee=refFee();
+  return `<section class="win"><div class="bar">Sobre para el árbitro <small>${esc(L.n)}</small></div><div class="body">
+   ${P.bribe?`<p>✉️ <b>Sobre entregado.</b> El árbitro os mira con cariño: +${Math.round(P.bribe*100)} % de rendimiento en este partido.</p>`:`<p class="hint">Un sobre de <b>${fee.toLocaleString("es-ES")} €</b>: +${Math.round(L.b*100)} % de rendimiento en este partido. Riesgo de que te pillen: <b>${Math.round(refRisk()*100)} %</b> (5 años de cárcel).</p>
+   <button class="btn" data-act="bribe" ${S.money<fee?"disabled":""}>Pagar al árbitro</button>`}
+  </div></section>`}
+function bribe(){const P=S.prep;if(!P||P.bribe||!S.ref)return;const L=refLv(),fee=refFee();if(S.money<fee){toast("No tienes para el sobre.");return}
+  ledSync();S.money-=fee;led("Sobre (ya sabes para qué)",-fee);const caught=Math.random()<refRisk();S.refN=(S.refN||0)+1;
+  if(!caught)P.bribe=L.b;save();
+  modal(caught?"¡Os han pillado!":"El sobre",`<canvas class="cinecv" id="bribecv" width="640" height="400"></canvas>
+   ${caught?`<p><b>Había una cámara oculta en el vestuario arbitral.</b> El vídeo sale en el telediario esa misma noche.</p><button class="btn play" data-act="bribejail">Ir al juzgado</button>`:`<p>El árbitro se guarda el sobre en el bolsillo de la camiseta sin mirarte. Hoy las dudosas son vuestras: <b>+${Math.round(L.b*100)} %</b>.</p><button class="btn play" data-act="close">Volver</button>`}`);
+  const cv=$("#bribecv");let g=null;try{g=cv&&cv.getContext("2d")}catch(e){}if(!g){render();return}const t0=performance.now();
+  const draw=now=>{if($("#bribecv")!==cv||$("#modal").hidden)return;try{drawBribe(g,(now-t0)/1000,caught)}catch(e){return}requestAnimationFrame(draw)};requestAnimationFrame(draw);render()}
+function drawBribe(c,t,caught){const W=640,H=400;
+  c.fillStyle="#1d1a17";c.fillRect(0,0,W,H);const lg=c.createRadialGradient(320,140,20,320,180,380);lg.addColorStop(0,"rgba(255,220,150,.35)");lg.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=lg;c.fillRect(0,0,W,H);
+  // taquillas y banco del vestuario
+  c.fillStyle="#3c4650";for(let i=0;i<7;i++){c.fillRect(i*92+6,10,84,200);c.fillStyle="#2b333b";c.fillRect(i*92+70,90,6,26);c.fillStyle="#3c4650"}
+  c.fillStyle="#6b4a2b";c.fillRect(0,250,W,150);c.fillStyle="#5a3d22";for(let i=0;i<5;i++)c.fillRect(0,262+i*28,W,3);
+  // reparto de tiempos: el sobre entra por la izquierda, la mano del árbitro lo coge y se lo lleva
+  const e=Math.min(1,t/1.2),grab=clamp((t-1.3)/.5,0,1),away=clamp((t-2.1)/1,0,1);
+  const ex=120+e*170-away*420*0,ey=300;
+  const envX=away>0?ex+away*380:ex,envY=away>0?ey-away*120:ey;
+  // nuestra manga + mano (empuja el sobre)
+  const ourX=-60+e*230-grab*120;c.fillStyle="#1f5fae";c.beginPath();c.moveTo(-10,330);c.lineTo(ourX,306);c.lineTo(ourX,350);c.lineTo(-10,380);c.fill();c.fillStyle="#e0ac7e";c.beginPath();c.ellipse(ourX+22,328,26,18,0,0,7);c.fill();
+  // sobre
+  c.save();c.translate(envX,envY);c.rotate(-.08-away*.3);c.fillStyle="#f3e6c4";c.fillRect(-70,-42,140,84);c.strokeStyle="#b8a57a";c.lineWidth=2;c.strokeRect(-70,-42,140,84);
+  c.beginPath();c.moveTo(-70,-42);c.lineTo(0,8);c.lineTo(70,-42);c.stroke();
+  c.fillStyle="#5fa463";c.fillRect(-52,-56,96,18);c.fillRect(-44,-62,96,18);c.fillStyle="#2f6b35";c.font="bold 13px Archivo Narrow, sans-serif";c.textAlign="center";c.fillText("€ 500 €",4,-49);c.restore();
+  // mano del árbitro (manga negra) baja desde arriba a la derecha y lo agarra
+  const hx=envX+30+(1-grab)*200*(away>0?0:1),hy=envY-30-(1-grab)*160*(away>0?0:1);
+  c.fillStyle="#111";c.beginPath();c.moveTo(W+20,-20);c.lineTo(W+20,60);c.lineTo(hx+10,hy+12);c.lineTo(hx-6,hy-22);c.fill();
+  c.fillStyle="#d9a77c";c.beginPath();c.ellipse(hx,hy,30,20,-.5,0,7);c.fill();
+  for(let i=0;i<4;i++){c.beginPath();c.ellipse(hx-26+i*12,hy+12+grab*6,6,14,.2,0,7);c.fill()}
+  c.fillStyle="#d9a77c";c.beginPath();c.ellipse(hx+24,hy+4,7,13,-1,0,7);c.fill();
+  c.textAlign="center";
+  if(!caught){if(t>2.4){c.fillStyle="#ffd23f";c.font="34px Bungee, Impact, sans-serif";c.fillText("TRATO HECHO",320,60)}}
+  else if(t>1.8){const k=t-1.8;if(k<.25){c.fillStyle=`rgba(255,255,255,${1-k*4})`;c.fillRect(0,0,W,H)}
+    const blink=Math.floor(t*4)%2;c.fillStyle=blink?"rgba(255,0,0,.25)":"rgba(0,60,255,.25)";c.fillRect(0,0,W,H);
+    c.save();c.translate(320,170);c.rotate(-.15);c.scale(Math.min(1,k*3),Math.min(1,k*3));c.strokeStyle="#e01b1b";c.lineWidth=8;c.strokeRect(-190,-50,380,100);c.fillStyle="#e01b1b";c.font="58px Bungee, Impact, sans-serif";c.fillText("¡PILLADO!",0,22);c.restore();
+    c.fillStyle="#e01b1b";c.beginPath();c.arc(590,40,10,0,7);c.fill();c.fillStyle="#fff";c.font="16px Bungee, Impact, sans-serif";c.textAlign="right";c.fillText("REC",575,46)}
+}
 function staffBox(){
   if(!unl("staff"))return lockedBox("Cuerpo técnico","staff");
   return `<section class="win"><div class="bar">Cuerpo técnico <small>${staffWages()} €/sem en sueldos</small></div><div class="body"><div class="list">${STAFF.map(s=>{const l=stf(s.id),nx=l<3?l:null;const can=nx!=null&&(S.reach||0)>=STAFF_REQ[nx];
@@ -2982,7 +3044,7 @@ function viewPrep(){
     const scSel=P.scPick||S.lastScPick||"";const scorerOpts=arrived.map(p=>`<option value="u${p.id}">${esc(short(p))} (tuyo) · x${scOdds(p)}</option>`).join("")+(fewArrived()?"":opp.roster.map((r,i)=>r.pos==="POR"?"":`<option value="r${i}">${esc(r.n)} (${esc(opp.n)}) · x${rivOdds(r)}</option>`).join(""));
     return (P.ol?"":`<div style="margin:0 0 10px"><button class="btn play" data-act="kick">Saltar al campo</button></div>`)+matchPreview(c,m.a===0?m.b:m.a)+`<section class="win"><div class="bar">${c.type==="nat"?"Convocatoria":"4 · Llegada"} <small>${arrived.length} ${c.type==="nat"?"disponibles":"en el campo"}</small></div><div class="body">
      <p>${c.type==="nat"?"Convocados":"Han llegado"}: ${arrived.map(p=>esc(short(p))+(P.arrive[p.id].min>0?` (al ${P.arrive[p.id].min}')`:"")).join(", ")||"nadie"}.</p><p class="hint">Ahora que sabes quién ha llegado, monta el once. Los que llegan tarde pueden empezar en el banquillo.</p>${c.type==="euro"?`<div class="pc-act"><button class="btn mini" data-act="eucancel">Dejarlo para luego</button></div>`:""}</div></section>`+lineupSection()+`
-    ${c.type==="league"||c.type==="cup"?prePressHTML(P,opp):""}${S.bookie?bookieHTML(P,opp,pu,scorerOpts,scSel):`<section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
+    ${c.type==="league"||c.type==="cup"?prePressHTML(P,opp):""}${refPrepHTML(P,c)}${S.bookie?bookieHTML(P,opp,pu,scorerOpts,scSel):`<section class="win"><div class="bar">Apuestas <small>Paco el de las quinielas, en la banda</small></div><div class="body">
      <p class="hint">Se apuesta al resultado de los 90 minutos. A favor o en contra, aquí no se juzga a nadie.${fewArrived()?" Pero con menos de 11 en el campo, Paco no te deja apostar contra tu equipo: sería demasiado fácil.":""}</p>
      <div class="amts">${[5,10,20,50].map(a=>a*Math.max(1,nice(ek(null,.6)))).map(a=>`<button class="btn ${P.amt===a?"sel":""}" data-act="amt" data-v="${a}">${a} €</button>`).join("")}</div>
      <div class="bet"><button class="btn ${P.bets.some(b=>b.pick==="W")?"sel":""}" data-act="bet" data-v="W">${S.natSwap?"Gana España":"Ganan los Papas"}<small>x${P.odds.W}</small></button><button class="btn ${P.bets.some(b=>b.pick==="D")?"sel":""}" data-act="bet" data-v="D">Empate<small>x${P.odds.D}</small></button><button class="btn ${P.bets.some(b=>b.pick==="L")?"sel":""}" data-act="bet" data-v="L" ${fewArrived()?"disabled":""}>Gana el rival<small>${fewArrived()?"bloqueado":"x"+P.odds.L}</small></button></div>
@@ -4140,7 +4202,7 @@ function render(){
   if(S.tab==="pueblo"){S.tab="squad";sub("squad");S.sub.squad="fichar"}if(S.tab==="datos"){S.tab="comp";sub("comp");S.sub.comp="datos"}
   const VIEWS={club:viewClub,squad:viewSquad,comp:()=>{const k=sub("comp");return k==="europa"?euBox():k==="historia"?historyBox():k==="datos"?viewDatos():k==="copa"?(S.cup?cupSection():`<section class="win"><div class="bar">Copa del Rey</div><div class="body"><p class="hint">La copa se sortea al empezar la temporada.</p></div></section>`):viewComp()},
     online:viewOnline,
-    campo:()=>{const k=sub("campo");return k==="redes"?redesBox():k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
+    campo:()=>{const k=sub("campo");return k==="redes"?redesBox():k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="arbitros"?refBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
   v.innerHTML=(S.tab==="club"&&euBlocksClub()?`<div class="natban" style="background:linear-gradient(90deg,#04103a,#1b4fd8)">⭐<span>Toca partido europeo.</span><button class="btn mini" data-act="eugo">Ir a Europa</button></div>`:"")+(S.tab==="club"&&natBlocksClub()?`<div class="natban">${flagSVG(ME,40,"wave")}<span>Ahora toca partido de España.</span><button class="btn mini" data-act="natview" data-v="nat">Ir a España</button></div>`:"")+(S.tab!=="prep"?subBar(S.tab):"")+(VIEWS[S.tab]||viewClub)();
   paintFaces(v);paintCrests(v);olBanner();bgSync();natHeader();
   const fc=$("#fieldcv");if(fc)drawCampo(fc);
@@ -4629,7 +4691,7 @@ function startMatch(olo){
     tactic:"normal",shouts:3,boost:0,pause:0,mod:1,omod:1,drain:0,fires:[],used:new Set(),warned:new Set(),inj:{},dead:[],goals:{},rivScorers:[],own:[],subs:0,sel:null,hold:false,skipping:false,ended:false,speed:1,paused:false,
     scorers:[],early:null,timer:0,ball:{x:80,y:50},ballT:{x:80,y:50},col:T.col,cine:null,cineUntil:0,net:null,
     dots:{us:[],them:F2.map(s=>({bx:160-s.x,by:s.y,x:160-s.x,y:s.y}))},oForm:of,oA:sh.a,oD:sh.d};
-  if(S.adapt>0&&S.comp.type==="league"){M.mod*=.86+.015*(8-S.adapt)}if(has("videoarb"))M.mod*=1.03;if(has("camara"))M.mod*=1.01;
+  if(S.adapt>0&&S.comp.type==="league"){M.mod*=.86+.015*(8-S.adapt)}if(has("videoarb"))M.mod*=1.03;if(has("camara"))M.mod*=1.01;if(P.bribe){M.mod*=1+P.bribe;M.omod*=1-P.bribe*.4;M.bribed=1}
   if(!olo&&S.comp.type!=="online"){M.oppStyle=styleOf(T);const sd=S.comp.type==="nat"||S.comp.type==="euro"?null:studied(T,S.comp.tier);if(sd){M.oppStyle=sd.style;M.studied=true}M.diffK=diffK(1.1,.9)}
   M.ref=refFor(S.comp,opp);M.weather=weatherFor(S.comp,opp);S.fixNext=false;weatherApply();
   {const tm=tacMods(0,0,M.form,[]);M.oppStr*=tm.opp;M.mod*=reportBonus(T);if(T.tag==="↑")M.omod*=1.03;if(isRiv(T.n))M.derbi=true;if(S.grudge&&S.grudge===T.n){M.omod*=1.05;M.grudgeLog=1;S.grudge=null}}
@@ -5096,6 +5158,9 @@ const A={
     S.upg.push(v);addNews(`Obras en el descampado: ${u.n.toLowerCase()}.`);save();render();toast("Hecho. "+u.d)},
   reset:()=>{if(!pendingReset){pendingReset=true;render();return}try{localStorage.removeItem(KEY)}catch(e){}S=null;pendingReset=false;newCreator();render()},
   close:()=>closeModal(),
+  refbuy:v=>{const i=+v,L=REFS[i];if(!L||(S.ref||0)!==i||(S.reach||0)<L.t)return;if(S.money<L.c){toast("No te llega.");return}ledSync();S.money-=L.c;led(`Contacto: ${L.n}`,-L.c);S.ref=i+1;save();render();toast(`Nuevo contacto: ${L.n}.`)},
+  bribe:()=>bribe(),
+  bribejail:()=>{closeModal();goToJail(5,"Sobornar a un árbitro",{bribe:1})},
   tac:v=>{if(!M||M.ended)return;M.tactic=v;document.querySelectorAll("[data-act=tac]").forEach(b=>b.classList.toggle("sel",b.dataset.v===v));
     addLog(M.min,{normal:"Táctica normal.",bus:"Os encerráis atrás. Se cansan menos.",arriba:"¡Al ataque! Se cansan más rápido.",patadon:"Patadón y a correr. Sistema clásico de la Campiña."}[v],"ev")},
   shout:()=>{if(!M||M.ended||M.shouts<=0)return;M.shouts--;$("#m-shout").textContent=`Gritar (${M.shouts})`;if(!M.shouts)$("#m-shout").disabled=true;
