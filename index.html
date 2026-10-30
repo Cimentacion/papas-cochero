@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="13.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="13.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -783,7 +783,7 @@ function wToPlayer(wp,t,club,tmp){
   if(wp.pos==="POR"){p.def+=6;p.atk-=8}else if(wp.pos==="DEF"){p.def+=4;p.atk-=4}else if(wp.pos==="DEL"){p.atk+=4;p.def-=4}
   ["atk","def","fis","cab"].forEach(k=>p[k]=clamp(p[k],1,99));if(wp.foot)p.foot=wp.foot;if(wp.alt)p.alt=wp.alt;if(wp.build)p.build=wp.build;if(wp.spd!=null)p.spd=wp.spd;xattr(p);p.trait=R()<.7?"normal":pick(["muro","punteria","pierna","hacienda"]);
   if(R()<.45){const v=wpick(VEH,x=>x.w);p.veh={t:v.t,n:pick(v.ns),plazas:v.plazas,brk:v.brk,gasK:v.gasK,slow:v.slow||0}}
-  p.wage=wageFor(ovr(p),t);p.ct=rnd(1,3);p.pot=Math.max(ovr(p),wp.pot||ovr(p));p.wid=wp.n;p.wclub=club;return p}
+  p.wage=wageFor(ovr(p),t);p.ct=rnd(1,3);p.pot=Math.max(ovr(p),wp.pot||ovr(p));if(wp.real){p.real=1;p.trait="normal";p.mote=""}p.wid=wp.n;p.wclub=club;return p}
 function genTransfers(){
   if((S.reach||0)<1)return[];const tier=S.tierNext||0;
   if(S.world&&S.world.v===1){const out=[],seen=new Set();const ts=[tier-1,tier,tier,tier,tier+1].filter(t=>t>=0&&t<TIERS.length);
@@ -890,7 +890,7 @@ function wRealize(){const W=S.world;if(!W||W.v!==1)return;const real=REAL_ALL();
 function glN(){return S.players.filter(p=>p.glory).length}
 function glFee(g){return Math.round(Math.pow(g.pk,2)*.6*(1+g.t*.6)*diffK(1.2,.85))}
 function glPlayer(g,tmp){const yrs=Math.max(0,g.age-31);const wp={n:g.n,pos:g.pos,age:g.age,q:Math.max(8,Math.round(g.pk-yrs*3)),pot:0,foot:g.foot,alt:g.alt,spd:Math.max(5,Math.round((g.spd||50)-yrs*4)),build:g.age>45&&hashStr(g.n)%2?"gordo":g.build};
-  const p=wToPlayer(wp,curTier(),g.club,tmp);p.fis=Math.max(5,p.fis-Math.round(yrs*3));p.pot=ovr(p);p.glory=true;p.origen=`Vieja gloria del ${g.club}`;p.trait="normal";p.conf=80;p.veh=null;p.wage=Math.round(wageFor(g.pk,curTier())*1.5);p.ct=1;if(tmp)NATTMP["p"+p.id]=p;return p}
+  wp.real=g.real;const p=wToPlayer(wp,curTier(),g.club,tmp);p.fis=Math.max(5,p.fis-Math.round(yrs*3));p.pot=ovr(p);p.glory=true;p.origen=`Vieja gloria del ${g.club}`;p.trait="normal";p.conf=80;p.veh=null;p.wage=Math.round(wageFor(g.pk,curTier())*1.5);p.ct=1;if(tmp)NATTMP["p"+p.id]=p;return p}
 function gloriesBox(){const G=(S.world&&S.world.glories)||[];if(!G.length)return "";
   return `<section class="win"><div class="bar">Viejas glorias <small>retirados que aman los fans</small></div><div class="body"><p class="hint">Ya no corren, pero llenan el campo: cada vieja gloria en tu plantilla sube la afición tras cada partido y la taquilla en casa. Traerlas cuesta un pastizal.</p>
    <div class="list">${G.slice(0,12).map((g,i)=>{const p=glPlayer(g,true);return `<div class="offer"><div><b><a class="plink" data-act="card" data-id="${p.id}">${esc(g.n)}</a> · ${g.pos} · ${g.age} años</b><small>Leyenda del ${esc(g.club)} (${esc(TIERS[g.t].n)}) · media en su día ${g.pk}, ahora ${ovr(p)} · pide ${p.wage} €/sem</small></div><button class="btn mini primary" data-act="glory" data-v="${i}">${glFee(g).toLocaleString("es-ES")} €</button></div>`}).join("")}</div></div></section>`}
@@ -945,8 +945,8 @@ function wSeason(c,ourPos){
       if(p.age<24)p.q=Math.min(p.pot,p.q+Math.floor(R()*4));else if(p.age<30)p.q=Math.min(p.pot,p.q+Math.floor(R()*3)-1);else if(p.age<34)p.q-=Math.floor(R()*3);else p.q-=1+Math.floor(R()*4);p.q=Math.max(3,p.q);
       const retire=pro?(p.age>=38||(p.age>=34&&R()<.3)):(p.age>=62||(p.age>=50&&R()<.15)||R()<.06);
       if(retire&&nt>=0&&Math.abs(t-nt)<=0&&R()<.3)lines.push(`${p.n} (${p.age}) se retira en el ${cl.n}.`);
-      if(retire&&(p.pt||t)>=3&&(p.pk||p.q)>=TIER_Q[p.pt||t]-1){W.glories=W.glories||[];W.glories.push({n:p.n,pos:p.pos,age:p.age,pk:p.pk||p.q,t:p.pt||t,club:cl.n,foot:p.foot,alt:p.alt,spd:p.spd,build:p.build,s:S.season});if((p.pt||t)>=6&&lines.length<14)lines.push(`Se retira ${p.n} (${p.age}), mito del ${cl.n}. Ya es una vieja gloria: se le puede fichar… pagando.`)}
-      if(!retire&&R()<(p.age>55?.03:p.age>35?.004:.0008)){if(Math.abs(t-nt)<=1&&lines.length<14)lines.push(`Fallece ${p.n} (${p.age}), jugador del ${cl.n}. Minuto de silencio en toda la categoría.`);return false}
+      if(retire&&(p.pt||t)>=3&&(p.pk||p.q)>=TIER_Q[p.pt||t]-1){W.glories=W.glories||[];W.glories.push({n:p.n,pos:p.pos,age:p.age,pk:p.pk||p.q,t:p.pt||t,club:cl.n,foot:p.foot,alt:p.alt,spd:p.spd,build:p.build,s:S.season,real:p.real?1:0});if((p.pt||t)>=6&&lines.length<14)lines.push(`Se retira ${p.n} (${p.age}), mito del ${cl.n}. Ya es una vieja gloria: se le puede fichar… pagando.`)}
+      if(!retire&&!p.real&&R()<(p.age>55?.03:p.age>35?.004:.0008)){if(Math.abs(t-nt)<=1&&lines.length<14)lines.push(`Fallece ${p.n} (${p.age}), jugador del ${cl.n}. Minuto de silencio en toda la categoría.`);return false}
       return !retire});
     // fichajes según el dinero
     let buys=0;const price=q=>Math.round(Math.pow(Math.max(1,q),2.2)*(pro?.9:.05));
@@ -962,7 +962,7 @@ function wSeason(c,ourPos){
       if(buys>8)break}
     if(cl.ps.length>20)cl.ps=cl.ps.sort((a,b)=>b.q-a.q).slice(0,20)});
   const mv=[];if(nt>=0){W.tiers[nt].forEach(n=>{const cl=W.clubs[n];if(cl&&cl.tag)mv.push(`${cl.n} ${cl.tag==="↑"?"sube":"baja"} a ${TIERS[nt].n}.`)})}
-  {W.glories=(W.glories||[]).filter(g=>{g.age++;const pd=g.age>=100?1:g.age>=60?(g.age-58)*.012:.002;if(Math.random()<pd){if(g.t>=5&&lines.length<16)lines.push(`Muere ${g.n} a los ${g.age} años, leyenda del ${g.club}. Los fans le lloran en la puerta del estadio.`);return false}return true}).sort((a,b)=>b.pk+b.t*4-a.pk-a.t*4).slice(0,30)}
+  {W.glories=(W.glories||[]).filter(g=>{g.age++;if(g.real)return g.age<60;const pd=g.age>=100?1:g.age>=60?(g.age-58)*.012:.002;if(Math.random()<pd){if(g.t>=5&&lines.length<16)lines.push(`Muere ${g.n} a los ${g.age} años, leyenda del ${g.club}. Los fans le lloran en la puerta del estadio.`);return false}return true}).sort((a,b)=>b.pk+b.t*4-a.pk-a.t*4).slice(0,30)}
   return mv.concat(lines)}
 const mktVal=(q,tier,age)=>Math.round(Math.max(15,(q-TIER_Q[tier]+12)*(6+tier*7))*(age<24?1.3:age>31?.7:1)*diffK(1.25,.8));
 function huntMult(wp){return 5+(hashStr(wp.n+S.season)%51)/10}
@@ -2337,7 +2337,7 @@ async function wifeJoke(){if(!M)return;const nm=castNames(),st=castStyle()==="pa
   if(!M)return;addLog(M.min,`${nm[1]}: «${l2}»`,"ev");await coachLine(st,"b_esposa",0,l2,"",1)}
 function vo(ev,name,important,nojoke){
   if(!S||S.comm===false||(M&&M.skipping))return;
-  if(!nojoke&&M&&!M.wifeJ&&!/goal|pen|red|end|intro/.test(ev)&&Math.random()<.01){M.wifeJ=1;return wifeJoke()}const st=castStyle();const style=st==="paleto"?"paleto":(st==="tele"&&VOL.tele[ev]?"tele":"normal");
+  if(!nojoke&&M&&!M.wifeJ&&cruel()&&!/goal|pen|red|end|intro/.test(ev)&&Math.random()<.01){M.wifeJ=1;return wifeJoke()}const st=castStyle();const style=st==="paleto"?"paleto":(st==="tele"&&VOL.tele[ev]?"tele":"normal");
   const lines=VOL[style][ev]||(style==="paleto"?null:VOL.normal[ev]);if(!lines){if(style==="paleto"&&Math.random()<.3)vo("b_any");return}
   const realStyle=VOL[style][ev]?style:"normal";VOX.recent=VOX.recent||{};const rk=realStyle+ev,rec=VOX.recent[rk]||(VOX.recent[rk]=[]);let pool=[...lines.keys()].filter(x=>!rec.includes(x));if(!pool.length){rec.length=0;pool=[...lines.keys()]}const i=pick(pool);rec.push(i);if(rec.length>Math.max(1,Math.floor(lines.length*.7)))rec.shift();const txt=lines[i];if(important&&VOX.banter&&!/goal|pen|red|end|intro|esposa/.test(ev))important=false;if(!important&&(VOX.busy||(window.speechSynthesis&&speechSynthesis.speaking)))return;const spk=(realStyle==="paleto"&&ev==="b_any")?i%2:(ev.startsWith("b_")?1:0);
   if(/latas?/.test(txt))setTimeout(()=>SFX.can(),txt.length*55);
@@ -2367,7 +2367,7 @@ async function coachLine(st,ev,i,txt,name,who){
   if(voxReady()&&VOX.man.has(`${st}_${ev}_${i}`)){const nk=name?coachNameKey(name):null;await voxWaitFree(9000);if(/latas?/.test(txt))setTimeout(()=>SFX.can(),txt.length*55);VOX.banter=true;try{await voxPlay([`${st}_${ev}_${i}`].concat(nk&&VOX.man.has(nk)?[nk]:[]),false)}finally{VOX.banter=false}}
   else{await voxWaitFree(6000);speak(`${txt} ${name||""}`,true,who);await new Promise(r=>setTimeout(r,txt.length*70))}}
 function coachBanter(){
-  if(!M||M.skipping||!S||S.comm===false)return;const ours=Math.random()<.5;const name=ours?S.coach.name:(oppCoachName()||"el entrenador");
+  if(!M||M.skipping||!S||S.comm===false||!cruel())return;const ours=Math.random()<.5;const name=ours?S.coach.name:(oppCoachName()||"el entrenador");
   const st=castStyle()==="paleto"?"paleto":"normal";const A=VOL[st].coach_s,B=VOL[st].b_coach_o;if(!A||!B)return;const nm=castNames();
   M.cbRec=M.cbRec||[];let i;do{i=Math.floor(Math.random()*A.length)}while(M.cbRec.includes("a"+i)&&M.cbRec.length<A.length);let j;do{j=Math.floor(Math.random()*B.length)}while(M.cbRec.includes("b"+j)&&M.cbRec.length<B.length);M.cbRec.push("a"+i,"b"+j);
   if(M.cbBusy)return;M.cbBusy=true;
@@ -3753,7 +3753,7 @@ function render(){
 function sessCount(){return HOUSES[S.house||0].sess}
 function hangTick(){S.players.forEach(p=>{if(p.hang>0)p.hang--})}
 function drinkSession(i,t){
-  const ps=S.players.filter(p=>!p.injured);const cost=ps.length*2;
+  const ps=S.players.filter(p=>!p.injured&&!p.real);const cost=ps.length*2;
   if(S.money<cost){toast(`No te llega ni para las latas (${cost} €).`);return}
   hangTick();S.money-=cost;const out=[];
   ps.forEach(p=>{const g=rnd(5,11),dg=rnd(4,9)+(p.dep>50?3:0);p.conf=clamp((p.conf||0)+g,0,100);p.dep=clamp((p.dep||0)+dg,0,100);p.drank=true;
@@ -3957,7 +3957,7 @@ function tick(){
     if(M.slots[i]!==p.id)return;
     if(p.trait==="nietos"&&m===60&&!inAdd){removeAt(i,"críos",`${short(p)} se va a darles de comer a los ${p.female?"nietos":"críos"}. «Comen a la una».`);hole=true}
     else if(p.trait==="pelea"&&Math.random()<.0015){removeAt(i,"roja",`Roja a ${short(p)} por decirle al árbitro algo que no se puede repetir.`);hole=true}
-    else if(M.ours&&S.embargo&&Math.random()<.0011){M.dead.push(p.id);removeAt(i,"DEP",pick([`A ${short(p)} lo atropella un Seat León que iba a 90 por la Calle Real. No ha frenado ni para mirar.`,`Pasa el camión de la basura y ${short(p)} no lo ve venir. Descanse en paz.`,`${short(p)} va a por un balón que se va a la carretera. El autobús de Écija no perdona.`,`Una moto sin luces se lleva por delante a ${short(p)}. El de la moto ni se para.`]));hole=true;M.lost+=3}
+    else if(!p.real&&M.ours&&S.embargo&&Math.random()<.0011){M.dead.push(p.id);removeAt(i,"DEP",pick([`A ${short(p)} lo atropella un Seat León que iba a 90 por la Calle Real. No ha frenado ni para mirar.`,`Pasa el camión de la basura y ${short(p)} no lo ve venir. Descanse en paz.`,`${short(p)} va a por un balón que se va a la carretera. El autobús de Écija no perdona.`,`Una moto sin luces se lleva por delante a ${short(p)}. El de la moto ni se para.`]));hole=true;M.lost+=3}
     else if(Math.random()<.0006*(1+curTier()*.08)*(M.ours&&has("cesped")?.5:1)*(M.ours&&has("enfermeria")?.75:1)*(M.ours?TURFS[S.turf||0].inj*(has("riego")?.9:1)*(sst("jardinero")?.85:1):1)*(p.mE<30?2.5:1)){const w=Math.max(1,rnd(1,3)-stf("fisio"));M.inj[p.id]=w;removeAt(i,"lesión",`${short(p)} ${pick(INJ)}. Se lo llevan al ambulatorio en la furgoneta de la fruta. Fuera ${w} sem.`);hole=true;M.lost+=2}
     else if(p.age>55&&p.mE<30&&Math.random()<.0008){M.dead.push(p.id);removeAt(i,"DEP",pick(DEATH)(short(p)));hole=true;M.lost+=3}
     else if(Math.random()<.00025*relNow()){removeAt(i,"trabajo",`A ${short(p)} le llaman del almacén: tiene que entrar ya. Se va con las botas puestas.`);hole=true}
@@ -4095,7 +4095,7 @@ function setFormation(f,inMatch){
 function setDots(){if(M&&M.vis)visSync()}
 function startMatch(olo){
   const P=S.prep;const m=ourFixture();const opp=m.a===0?m.b:m.a;const v=P.venue;
-  const sq=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).map(p=>({...p,mE:clamp(p.energy+P.arrive[p.id].en-(p.hang>0?15:0),10,100),drunk:Math.random()<(p.dep||0)/180}));
+  const sq=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).map(p=>({...p,mE:clamp(p.energy+P.arrive[p.id].en-(p.hang>0?15:0),10,100),drunk:!p.real&&Math.random()<(p.dep||0)/180}));
   const arr={};sq.forEach(p=>arr[p.id]=P.arrive[p.id].min);
   const T=S.comp.teams[opp];const of=S.comp.type==="online"||S.comp.type==="nat"?(T.form||"4-4-2"):oppForm(T);const F2=slotXY(of);const sh=shapeOf(of);
   M={m,opp,outHoles:0,addLeft:0,addN:0,a1:0,a2:0,lost:0,ht:false,home:v.home,ours:v.ours,venue:v,oppStr:T.str*(.9+Math.random()*.2)*(v.home||S.comp.type==="cup"?1:1.06),us:0,them:0,min:0,sq,arr,form:S.formation,slots:Array(11).fill(null),out:new Map(),
@@ -4262,10 +4262,10 @@ function compEnd(){
   S.players=S.players.filter(p=>{p.age++;p.goals=0;
     const r=Math.random(),rel=REL[c.tier];
     if(p.age>=72||(p.age>=66&&r<.5)||(p.age>=60&&r<.15)){ev.push(`${fullName(p)} (${p.age}) se jubila de verdad. Le regaláis una placa de la ferretería.`);return false}
-    if(p.age>=64&&Math.random()<.05){S.memorial.push(`${fullName(p)} (${p.age})`);ev.push(`${fullName(p)} (${p.age}) ha fallecido durante el verano. Lo despedís con el chándal puesto.`);return false}
-    if(Math.random()<.035*rel){ev.push(`${fullName(p)} entra en la cárcel por un asunto con unas gallinas que no ha querido explicar.`);return false}
-    if(Math.random()<.025*rel){ev.push(`${fullName(p)} se va a vendimiar a Francia. Dice que vuelve en noviembre. No vuelve.`);return false}
-    if(Math.random()<.02){ev.push(`${fullName(p)} se casa y su pareja le prohíbe el fútbol.`);return false}
+    if(!p.real&&p.age>=64&&Math.random()<.05){S.memorial.push(`${fullName(p)} (${p.age})`);ev.push(`${fullName(p)} (${p.age}) ha fallecido durante el verano. Lo despedís con el chándal puesto.`);return false}
+    if(!p.real&&Math.random()<.035*rel){ev.push(`${fullName(p)} entra en la cárcel por un asunto con unas gallinas que no ha querido explicar.`);return false}
+    if(!p.real&&Math.random()<.025*rel){ev.push(`${fullName(p)} se va a vendimiar a Francia. Dice que vuelve en noviembre. No vuelve.`);return false}
+    if(!p.real&&Math.random()<.02){ev.push(`${fullName(p)} se casa y su pareja le prohíbe el fútbol.`);return false}
     if(p.age<=25)["atk","def","fis","cab"].forEach(k=>{if(Math.random()<.5)p[k]=Math.min(99,p[k]+rnd(1,3))});
     if(p.age>=32)p.fis=Math.max(1,p.fis-rnd(1,3));if(p.age>=38){p.atk=Math.max(1,p.atk-rnd(0,2));p.def=Math.max(1,p.def-rnd(0,2))}
     return true});
@@ -4649,6 +4649,7 @@ document.addEventListener("click",()=>{if(ttsPrimed||!window.speechSynthesis||wi
 if(window.speechSynthesis){try{speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}catch(e){}setInterval(()=>{try{if(speechSynthesis.speaking)speechSynthesis.resume()}catch(e){}},4000)}
 function ttsTest(){voxInit();if(VOX.man&&S.voxOff!==true&&!VOX.dead){const was=S.comm;S.comm=true;vo("intro",null,true);S.comm=was;setTimeout(()=>{const w=S.comm;S.comm=true;vo("b_any");S.comm=w},4500);setTimeout(()=>{if(S.tab==="mister")render()},7000);return}if(!window.AndroidTTS&&!window.speechSynthesis){toast("Este navegador no tiene voz. Prueba con Chrome o con la APK.");return}const was=S.comm;S.comm=true;speak("Probando, probando. Aquí Radio Fuentes, con el comentario del partido.",true);S.comm=was;setTimeout(()=>{try{if(window.speechSynthesis&&!window.AndroidTTS&&!speechSynthesis.getVoices().some(v=>/^es/i.test(v.lang)))toast("Tu navegador no tiene voces en español instaladas. Prueba con Chrome.")}catch(e){}},1500)}
 const PALETO=["No sé quién es ese, pero me parece horrible.","El gordo calvo ese del campo no sabe ni jugar. Yo lo haría mejor.","Me abro unas latas.","Pásame otra lata, Rubio.","Mi cuñado jugaba mejor, y eso que está cojo.","¿Quién va ganando? Ah, que no ha empezado. Ah, que sí.","El árbitro es primo del alcalde, eso lo sé yo.","¿Ese no es el de la carnicería?","Qué calor, mi arma. Qué calor.","Eso en mis tiempos se arreglaba a guantazos.","A mí el fútbol moderno no me gusta. Esto sí, esto me gusta.","Mira el de amarillo, que va corriendo como un pato.","¿Quién ha traído las pipas?","Ese tiene más barriga que yo, y mira que es difícil.","Yo es que no veo bien de lejos, pero ese es malísimo."];
+function cruel(){return !!S&&(!S.comp||(S.comp.type!=="nat"&&S.comp.tier<=1))}
 function castStyle(){const t=S.comp?S.comp.tier:0;return t<=1?"paleto":t<=4?"radio":t<=7?"local":"tele"}
 function castNames(){return {paleto:["Curro","El Rubio"],radio:["Manolo","Paco"],local:["Manolo","Paco"],tele:["Manolo","Paco"]}[castStyle()]}
 function visIdle(){
