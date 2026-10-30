@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="16.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2484,12 +2484,14 @@ function canteraBox(){
   </div></section>`;
 }
 /* ---------- tienda ---------- */
-const MERCH=[{id:"bufanda",n:"Bufanda de punto",c:150,r:.006},{id:"camiseta",n:"Camiseta réplica (talla única: XL)",c:600,r:.015},{id:"taza",n:"Taza con el escudo",c:100,r:.003},{id:"calendario",n:"Calendario de la plantilla sin camiseta",c:400,r:.01},{id:"colonia",n:"Colonia «Eau de Cochero»",c:30000,r:.012},{id:"tapas",n:"Bar oficial del club",c:150000,r:.02},{id:"app",n:"App oficial con suscripción",c:2500000,r:.03},{id:"gira",n:"Gira de verano por Asia",c:15000000,r:.05}];
-const merchIncome=()=>!unl("merch")?0:Math.round((has("tiendacentro")?1.5:1)*MERCH.filter(m=>(S.merch||{})[m.id]).reduce((a,m)=>a+m.r,0)*(S.fans||3)*(1+curTier()*.15)*10)/10|0;
+const MERCH=[{id:"bufanda",n:"Bufanda de punto",d:"Hecha por las abuelas del hogar del pensionista. Se vende en el bar después de los partidos.",c:150,t:0,r:0.104167},{id:"camiseta",n:"Camiseta réplica (talla única: XL)",d:"La equipación del club estampada en el polígono. Al que le quede pequeña, que adelgace.",c:600,t:0,r:0.416667},{id:"taza",n:"Taza con el escudo",d:"El escudo se borra en el tercer lavado. Regalo perfecto para el Día del Padre.",c:100,t:0,r:0.0694444},{id:"calendario",n:"Calendario de la plantilla sin camiseta",d:"Doce meses de barrigas. Las peñas lo compran por pena y las madres por orgullo.",c:400,t:1,r:0.0525924},{id:"colonia",n:"Colonia «Eau de Cochero»",d:"Huele a césped, linimento y aceituna. Se vende en droguerías de toda la provincia.",c:30000,t:3,r:0.285577},{id:"tapas",n:"Bar oficial del club",d:"Una franquicia de bares con el escudo en la puerta: montaditos, cañas y los partidos en la tele.",c:150000,t:4,r:0.375879},{id:"app",n:"App oficial con suscripción",d:"Vídeos de los goles, entrevistas y la cara del míster en pegatinas. Cobra 3 € al mes a los socios.",c:2500000,t:6,r:0.456871},{id:"gira",n:"Gira de verano por Asia",d:"Diez días de amistosos por Japón, Corea y China. Millones de aficionados nuevos que compran camisetas a precio de oro. La mayor fuente de ingresos de un club grande.",c:15000000,t:7,r:0.782317}];
+const merchRate=m=>Math.round(Math.min(m.r*(S.fans||3)*(1+curTier()*.15)*ek(curTier(),.5),m.c/20)*(has("tiendacentro")?1.5:1));
+const merchIncome=()=>!unl("merch")?0:MERCH.filter(m=>(S.merch||{})[m.id]).reduce((a,m)=>a+merchRate(m),0);
 function merchBox(){
   if(!unl("merch"))return lockedBox("Tienda del club","merch");
   return `<section class="win"><div class="bar">Tienda del club <small>${merchIncome()} €/sem</small></div><div class="body"><p class="hint">Lo que se vende depende de cuántos aficionados tengas (${(S.fans||3).toLocaleString("es-ES")}).</p>
-   <div class="list">${MERCH.map(m=>{const own=(S.merch||{})[m.id];return `<div class="offer"><div><b>${esc(m.n)}</b><small>${own?`A la venta. ~${Math.round(m.r*(S.fans||3)*(1+curTier()*.15)*10)/10} €/sem.`:`Fabricar el primer lote: ${m.c} €.`}</small></div>${own?`<span class="tag pos">EN VENTA</span>`:`<button class="btn mini primary" data-act="merch" data-v="${m.id}">${m.c} €</button>`}</div>`}).join("")}</div></div></section>`;
+   <div class="list">${MERCH.map(m=>{const own=(S.merch||{})[m.id];const w=merchRate(m);const lock=(S.reach||0)<m.t;const pay=w>0?Math.ceil(m.c/w):0;
+     return `<div class="offer"><div><b>${esc(m.n)}</b><small>${esc(m.d)}</small><small>${own?`<b>A la venta: ${eur(w).replace("+","")} por semana.</b>`:lock?`🔒 ${unlTxtShort(m.t)}.`:`Cuesta ${m.c.toLocaleString("es-ES")} € y ahora daría unos <b>${w.toLocaleString("es-ES")} € por semana</b>${pay?` (lo recuperas en ${pay>200?"más de 200":pay} semanas${pay>80?": todavía no compensa, te faltan aficionados":""})`:""}.`}</small></div>${own?`<span class="tag pos">EN VENTA</span>`:lock?`<small class="tag">🔒</small>`:`<button class="btn mini primary" data-act="merch" data-v="${m.id}" ${S.money<m.c?"disabled":""}>${m.c.toLocaleString("es-ES")} €</button>`}</div>`}).join("")}</div></div></section>`;
 }
 /* ---------- estrellas ---------- */
 const DEMANDS=[
@@ -5177,7 +5179,7 @@ const A={
   academy:()=>{const lv=S.academy||0,nx=ACAD[lv+1];if(!nx)return;if(S.money<nx.c){toast(`Necesitas ${nx.c} €.`);return}S.money-=nx.c;S.academy=lv+1;S.youth=S.youth||[];if(!S.youth.length)for(let i=0;i<1+S.academy;i++)S.youth.push(genYouth());addNews(`El club monta: ${nx.n}.`);save();render()},
   promote:(v,el)=>{const id=+el.dataset.id;const p=(S.youth||[]).find(x=>x.id===id);if(!p)return;if(S.players.length>=22){toast("Plantilla llena: 22.");return}S.youth=S.youth.filter(x=>x!==p);p.origen="Canterano";p.energy=100;S.players.push(p);S.promoted=(S.promoted||0)+1;if(S.promoted>=3)ach("cantera");addNews(`${fullName(p)} sube de la cantera al primer equipo. Su madre llora en la grada.`);save();render()},
   release:(v,el)=>{const id=+el.dataset.id;S.youth=(S.youth||[]).filter(x=>x.id!==id);save();render()},
-  merch:v=>{const m=MERCH.find(x=>x.id===v);if(!m)return;if(S.money<m.c){toast(`Necesitas ${m.c} €.`);return}S.money-=m.c;S.merch=S.merch||{};S.merch[v]=true;addNews(`A la venta: ${m.n}.`);save();render()},
+  merch:v=>{const m=MERCH.find(x=>x.id===v);if(!m||(S.reach||0)<m.t)return;if(S.money<m.c){toast(`Necesitas ${m.c} €.`);return}S.money-=m.c;S.merch=S.merch||{};S.merch[v]=true;addNews(`A la venta: ${m.n}.`);save();render()},
   talk:(v,el)=>{const p=(S.stars||[]).find(x=>x.id===+el.dataset.id);if(!p)return;modal("Negociación",talkHTML(p));paintFaces($("#mod-b"))},
   haggle:(v,el)=>{const p=(S.stars||[]).find(x=>x.id===+el.dataset.id);if(!p)return;p.haggled=true;if(Math.random()<.45){S.stars=S.stars.filter(x=>x!==p);save();render();modal("Negociación",`<p>${esc(p.agent)}: «¿Nos estás tomando el pelo?» Se levantan y se van. ${esc(short(p))} ficha por otro equipo.</p><button class="btn play" data-act="close">Vaya</button>`);return}
     p.wage=Math.round(p.wage*.8);save();modal("Negociación",`<div class="bub them"><b>${esc(p.agent)}:</b> «Vaaale. ${p.wage} a la semana. Pero ni un euro menos.»</div>`+talkHTML(p,"haggle"));paintFaces($("#mod-b"))},
