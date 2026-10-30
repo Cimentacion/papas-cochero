@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="15.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="15.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1206,7 +1206,8 @@ function drawFace(cv,L){
     return;
   }
   const W=cv.width,u=W/100;c.save();c.scale(u,u);c.imageSmoothingEnabled=true;
-  const sk=L.skin,sd=shade(sk,-38),sl=shade(sk,22),hc=L.hc,hd=shade(hc,-30),hl=shade(hc,35);
+  const mixC=(a,b,k)=>{const x=parseInt(a.slice(1),16),y=parseInt(b.slice(1),16);const f=(sh)=>Math.round(((x>>sh)&255)*(1-k)+((y>>sh)&255)*k);return "#"+((1<<24)|(f(16)<<16)|(f(8)<<8)|f(0)).toString(16).slice(1)};
+  const sk=L.skin,sd=shade(sk,-38),sl=shade(sk,22),hc=L.grey&&/^#[0-9a-f]{6}$/i.test(L.hc||"")?mixC(L.hc,"#d6d2cc",clamp(((L.age||40)-42)/30,0,.92)):L.hc,hd=shade(hc,-30),hl=shade(hc,35);
   const E=(x,y,rx,ry,col,rot)=>{c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,rot||0,0,Math.PI*2);c.fill()};
   if(!L.noBg){const bg=c.createRadialGradient(50,40,10,50,50,75);bg.addColorStop(0,shade(L.bg||"#9fb8c9",25));bg.addColorStop(1,shade(L.bg||"#9fb8c9",-25));c.fillStyle=bg;c.fillRect(0,0,100,100)}
   const age=L.age||40,fat=!!L.belly,hw=fat?25:22;
@@ -1226,6 +1227,7 @@ function drawFace(cv,L){
   c.beginPath();c.moveTo(50-hw,44);c.bezierCurveTo(50-hw,18,50+hw,18,50+hw,44);c.bezierCurveTo(50+hw,62,50+hw*.6,76,50,77);c.bezierCurveTo(50-hw*.6,76,50-hw,62,50-hw,44);c.fill();
   if(fat){E(50,74,15,5.5,shade(sk,-10));c.strokeStyle=shade(sk,-45);c.lineWidth=.8;c.beginPath();c.ellipse(50,73,13,3.5,0,.2,Math.PI-.2);c.stroke()}
   // arrugas
+  if(age>66){c.strokeStyle="rgba(80,40,20,.3)";c.lineWidth=.8;c.beginPath();c.moveTo(31,47);c.lineTo(28,45.5);c.moveTo(31,49.5);c.lineTo(28,50);c.moveTo(69,47);c.lineTo(72,45.5);c.moveTo(69,49.5);c.lineTo(72,50);c.moveTo(38,58);c.quadraticCurveTo(39,64,42,66.5);c.moveTo(62,58);c.quadraticCurveTo(61,64,58,66.5);c.stroke()}
   if(age>48){c.strokeStyle=`rgba(80,40,20,${age>62?.35:.2})`;c.lineWidth=.8;c.beginPath();c.moveTo(40,32);c.quadraticCurveTo(50,30,60,32);c.moveTo(42,35.5);c.quadraticCurveTo(50,34,58,35.5);c.stroke();
     c.beginPath();c.moveTo(34,51);c.lineTo(31,49);c.moveTo(34,53);c.lineTo(31,54);c.moveTo(66,51);c.lineTo(69,49);c.moveTo(66,53);c.lineTo(69,54);c.stroke()}
   // pelo
@@ -1253,7 +1255,8 @@ function drawFace(cv,L){
   if(L.beard){c.fillStyle=hc;c.globalAlpha=.85;c.beginPath();c.moveTo(50-hw+2,56);c.quadraticCurveTo(50-hw+3,74,50,79);c.quadraticCurveTo(50+hw-3,74,50+hw-2,56);c.quadraticCurveTo(50+hw-6,66,50,67);c.quadraticCurveTo(50-hw+6,66,50-hw+2,56);c.fill();c.globalAlpha=1}
   else if(L.stubble){const r=seeded(13);c.fillStyle=`rgba(40,25,15,.28)`;for(let i=0;i<140;i++){const a=r()*Math.PI,rr=8+r()*14;c.fillRect(50+Math.cos(a)*rr*1.1,63+Math.sin(a)*rr*.75,.7,.7)}}
   const lip=L.lips?"#b8324a":shade(sk,-55);c.strokeStyle=lip;c.lineWidth=L.lips?2.4:1.8;c.beginPath();
-  if(L.mood==="happy"){c.moveTo(42,67);c.quadraticCurveTo(50,74,58,67);c.stroke();c.fillStyle="#fff";c.beginPath();c.moveTo(44,68);c.quadraticCurveTo(50,72,56,68);c.quadraticCurveTo(50,70,44,68);c.fill()}
+  if(L.mood==="surp"){c.fillStyle="#3a1414";c.beginPath();c.ellipse(50,69,4.2,5.4,0,0,7);c.fill();c.strokeStyle="rgba(60,30,20,.55)";c.lineWidth=1.2;c.beginPath();c.moveTo(36,38);c.quadraticCurveTo(41,33.5,46,37);c.moveTo(54,37);c.quadraticCurveTo(59,33.5,64,38);c.stroke()}
+  else if(L.mood==="happy"){c.moveTo(42,67);c.quadraticCurveTo(50,74,58,67);c.stroke();c.fillStyle="#fff";c.beginPath();c.moveTo(44,68);c.quadraticCurveTo(50,72,56,68);c.quadraticCurveTo(50,70,44,68);c.fill()}
   else if(sad){c.moveTo(43,70);c.quadraticCurveTo(50,65,57,70);c.stroke()}
   else{c.moveTo(43,68);c.quadraticCurveTo(50,69.5,57,68);c.stroke()}
   if(L.stache){c.fillStyle=hc;c.beginPath();c.moveTo(39,67);c.quadraticCurveTo(42,61,50,62);c.quadraticCurveTo(58,61,61,67);c.quadraticCurveTo(55,64.5,50,65.5);c.quadraticCurveTo(45,64.5,39,67);c.fill()}
@@ -1272,7 +1275,7 @@ function lookOf(p,mood){
 }
 function coachLook(){
   const c=S?S.coach:C;const L={...c.look};const moral=S?S.coach.moral:55;
-  L.mood=moral>65?"happy":moral<30?"sad":"neutral";L.tired=L.ojeras||moral<30;L.age=c.age;L.eye="#4a3020";L.photo=c.photo;L.bg="#9fb8c9";L.stubble=true;return L;
+  L.mood=moral>65?"happy":moral<30?"sad":"neutral";L.tired=L.ojeras||moral<30;L.age=c.age;L.grey=true;L.eye="#4a3020";L.photo=c.photo;L.bg="#9fb8c9";L.stubble=true;return L;
 }
 function faceCanvas(L){L=Object.assign({},L,{noBg:true});const cv=document.createElement("canvas");cv.width=260;cv.height=260;drawFace(cv,L);return cv}
 function findAny(id){let p=S.players.find(x=>x.id===id)||(S.reports||[]).find(x=>x.id===id)||(S.stars||[]).find(x=>x.id===id)||(S.youth||[]).find(x=>x.id===id);if(!p&&S.sites)for(const l of Object.values(S.sites)){p=l.find(x=>x.id===id);if(p)break}if(!p&&S.nat&&S.nat.squad)p=S.nat.squad.find(x=>x.id===id);if(!p)p=NATTMP["p"+id];return p}
@@ -1701,6 +1704,8 @@ function runJob(id){
   S.sessLog=[`${day} · ${j.n}: +${pay} €.${msg?" "+msg:""}`].concat(S.sessLog).slice(0,14);save();render();toast(`${j.n}: +${pay} €.`);
 }
 function goToJail(y,why,o){o=o||{};
+  const prev=(S.crimes||[]).slice();const age0=S.coach.age;let before=null;try{before=faceCanvas(Object.assign(coachLook(),{mood:"surp"}))}catch(e){}
+  S.crimes=prev.concat({why,y,season:S.season});
   const ev=[];const wasTier=S.comp?S.comp.tier:S.tierNext;const gone=[];
   S.comp=null;S.prep=null;S.phase="pre";
   for(let k=0;k<y;k++){S.coach.age++;S.season++;
@@ -1718,12 +1723,49 @@ function goToJail(y,why,o){o=o||{};
   S.sites=genSites();S.tmarket=genTransfers();S.tab="club";
   addNews(`El míster sale de prisión tras ${y} año${y>1?"s":""} por ${why.toLowerCase()}.`);
   save();render();
-  modal(`${y} año${y>1?"s":""} en prisión`,`<p>Te pillan: <b>${esc(why)}</b>. Condena: <b>${y} año${y>1?"s":""}</b>.</p>
+  modal(`${y} año${y>1?"s":""} en prisión`,`<canvas class="cinecv" id="juiciocv" width="640" height="400"></canvas><p>Te pillan: <b>${esc(why)}</b>. Condena: <b>${y} año${y>1?"s":""}</b>.</p>
    <p>Mientras estás dentro, el club lo lleva tu primo Rafi. Se nota.${o.bribe?" Y tu contacto en el comité ya no te coge el teléfono.":""}</p>
    <div class="sec"><h4>AL SALIR</h4><ul><li>Tienes ${S.coach.age} años.</li><li>El equipo está en ${esc(TIERS[S.tierNext].n)}${S.tierNext<wasTier?" (ha bajado)":""}.</li><li>Te quedan ${S.players.length} jugadores. Los patrocinadores y los ojeadores se han ido.</li><li>Dinero: ${S.money} €.</li>
    ${ev.slice(0,8).map(e=>`<li>${esc(e)}</li>`).join("")}${ev.length>8?`<li>Y ${ev.length-8} más.</li>`:""}</ul></div>
    <button class="btn play" data-act="close">Volver al pueblo</button>`);
-}
+  let after=null;try{after=faceCanvas(Object.assign(coachLook(),{mood:"sad"}))}catch(e){}
+  const ant=prev.length?prev.map(x=>`${x.why.toLowerCase()} (${x.y} año${x.y>1?"s":""})`).join(", "):"";
+  const lines=[`Se abre la sesión. Acusado: don ${S.coach.name}, ${age0} años, entrenador de ${clubName()}.`,`Se le acusa de: ${why.toLowerCase()}.`,prev.length?`Antecedentes: ${prev.length} condena${prev.length>1?"s":""}. ${ant}.`:"Antecedentes: ninguno. Hasta hoy.",prev.length?`Como reincidente, este tribunal no va a tener piedad.`:`Este tribunal no se cree lo del bocadillo.`,`Le condeno a ${y} AÑO${y>1?"S":""} DE PRISIÓN. Visto para sentencia.`];
+  playTrial(lines,before,after,y)}
+function playTrial(lines,before,after,y){
+  const cv=$("#juiciocv");let g=null;try{g=cv&&cv.getContext("2d")}catch(e){}if(!g)return;const t0=performance.now();
+  let judge=null;try{judge=faceCanvas(Object.assign({},coachLook(),{photo:null,skin:"#e7bd98",hair:1,hc:"#dcdcdc",grey:false,beard:false,stache:true,glasses:true,cap:false,lips:false,belly:false,shirt:"#141414",age:68,mood:"neutral",tired:false,stubble:false}))}catch(e){}
+  const LT=3.2,T1=lines.length*LT;try{SFX.init()}catch(e){}
+  const wrap=(c,txt,x,y,w,lh)=>{const words=txt.split(" ");let ln="";for(const wd of words){const tt=ln?ln+" "+wd:wd;if(c.measureText(tt).width>w&&ln){c.fillText(ln,x,y);y+=lh;ln=wd}else ln=tt}c.fillText(ln,x,y)};
+  const draw=now=>{if($("#juiciocv")!==cv||$("#modal").hidden)return;const t=Math.max(0,(now-t0)/1000);const c=g,W=640,H=400;
+    if(t<T1){// el juez
+      c.fillStyle="#5a3418";c.fillRect(0,0,W,H);for(let i=0;i<8;i++){c.fillStyle=i%2?"#6b3f1e":"#61391b";c.fillRect(i*80,0,80,260)}c.strokeStyle="#3d220f";c.lineWidth=3;for(let i=0;i<8;i++)c.strokeRect(i*80+10,20,60,200);
+      c.fillStyle="#8a1f2a";c.fillRect(250,8,140,36);c.fillStyle="#e7b923";c.font="15px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText("JUZGADO",320,32);
+      const z=1+(t%LT)*.01;c.save();c.translate(320,170);c.scale(z,z);
+      c.fillStyle="#111";c.beginPath();c.moveTo(-150,150);c.quadraticCurveTo(-140,60,-60,50);c.lineTo(60,50);c.quadraticCurveTo(140,60,150,150);c.fill();
+      c.fillStyle="#f4f4f4";c.beginPath();c.moveTo(-26,52);c.lineTo(0,90);c.lineTo(26,52);c.fill();
+      if(judge)c.drawImage(judge,-110,-160,220,220);c.restore();
+      c.fillStyle="#4a2a12";c.fillRect(0,250,W,150);c.fillStyle="#3a200d";c.fillRect(0,250,W,12);
+      // mazo: golpea al empezar cada frase
+      const k=(t%LT);const up=k<.25?k/.25:1;const ang=-.9+(1-Math.min(1,k/.12))*.9*(k<.12?1:0)+(k>=.12&&k<.25?0:0);const hit=k<.12;
+      c.save();c.translate(520,250);c.rotate(hit?0:-.7);c.fillStyle="#7a4a22";c.fillRect(-4,-70,8,70);c.fillStyle="#5a3418";c.fillRect(-22,-86,44,22);c.restore();c.fillStyle="#5a3418";c.fillRect(495,250,50,10);
+      if(hit){c.strokeStyle="rgba(255,255,255,.6)";c.lineWidth=3;for(let i=0;i<5;i++){const a=-Math.PI+i*Math.PI/4;c.beginPath();c.moveTo(520+Math.cos(a)*30,252+Math.sin(a)*14);c.lineTo(520+Math.cos(a)*48,252+Math.sin(a)*22);c.stroke()}}
+      // subtítulo
+      const li=Math.min(lines.length-1,Math.floor(t/LT));const txt=lines[li];const n=Math.floor(Math.min(1,(t-li*LT)/1.6)*txt.length);
+      c.fillStyle="rgba(0,0,0,.78)";c.fillRect(0,300,W,100);c.fillStyle=li===lines.length-1?"#ffd23f":"#fff";c.font=`${li===lines.length-1?"bold ":""}20px Archivo Narrow, sans-serif`;c.textAlign="left";wrap(c,txt.slice(0,n),20,346,600,26);
+      c.fillStyle="#ffd23f";c.font="13px Bungee, Impact, sans-serif";c.fillText("EL JUEZ:",20,320);
+    }else{// contraplano: el míster
+      const k=t-T1;const dark=clamp((k-1)/1,0,1);
+      c.fillStyle="#6b3f1e";c.fillRect(0,0,W,H);c.fillStyle=`rgba(0,0,0,${dark*.92})`;c.fillRect(0,0,W,H);
+      const aged=clamp((k-4.2)/1.2,0,1);const sh=k<.5?Math.sin(k*60)*4*(1-k*2):0;
+      if(before){c.globalAlpha=1-aged;c.drawImage(before,190+sh,40,260,260)}if(after){c.globalAlpha=aged;c.drawImage(after,190,40,260,260)}c.globalAlpha=1;
+      if(dark>0){const sp=clamp((k-2)/1.1,0,1);const e=1-Math.pow(1-sp,3);c.fillStyle="#2b2b2f";c.strokeStyle="#6d6d75";c.lineWidth=2;
+        for(let i=0;i<5;i++){const xl=-40+(80+i*64)*e,xr=W+40-(80+i*64)*e;[xl,xr].forEach(x=>{const gr=c.createLinearGradient(x-9,0,x+9,0);gr.addColorStop(0,"#3a3a40");gr.addColorStop(.5,"#9a9aa4");gr.addColorStop(1,"#2a2a2e");c.fillStyle=gr;c.fillRect(x-9,0,18,H)})}
+        if(sp>=1){c.fillStyle="#55555c";c.fillRect(0,60,W,14);c.fillRect(0,320,W,14);if(k<3.3){c.fillStyle="rgba(255,255,255,.5)";c.fillRect(0,0,W,H)}}}
+      c.textAlign="center";if(k<2){c.fillStyle="#ffd23f";c.font="30px Bungee, Impact, sans-serif";c.fillText("¿¿QUÉ??",320,345)}
+      if(aged>0){c.fillStyle=`rgba(255,255,255,${aged})`;c.font="28px Bungee, Impact, sans-serif";c.fillText(`${y} AÑO${y>1?"S":""} DESPUÉS`,320,375)}
+    }
+    requestAnimationFrame(draw)};requestAnimationFrame(draw)}
 function trainingBox(){
   const next=S.sessions.findIndex(x=>!x);
   return `<section class="win"><div class="bar">Entrenamientos <small>${Math.round((.12+fieldBonus()*.01)*100)} % de mejora por jugador y sesión</small></div><div class="body">
@@ -2359,7 +2401,7 @@ function bribe(){const P=S.prep;if(!P||P.bribe||!S.ref)return;const L=refLv(),fe
   modal(caught?"¡Os han pillado!":"El sobre",`<canvas class="cinecv" id="bribecv" width="640" height="400"></canvas>
    ${caught?`<p><b>Había una cámara oculta en el vestuario arbitral.</b> El vídeo sale en el telediario esa misma noche.</p><button class="btn play" data-act="bribejail">Ir al juzgado</button>`:`<p>El árbitro se guarda el sobre en el bolsillo de la camiseta sin mirarte. Hoy las dudosas son vuestras: <b>+${Math.round(L.b*100)} %</b>.</p><button class="btn play" data-act="close">Volver</button>`}`);
   const cv=$("#bribecv");let g=null;try{g=cv&&cv.getContext("2d")}catch(e){}if(!g){render();return}const t0=performance.now();
-  const draw=now=>{if($("#bribecv")!==cv||$("#modal").hidden)return;try{drawBribe(g,(now-t0)/1000,caught)}catch(e){return}requestAnimationFrame(draw)};requestAnimationFrame(draw);render()}
+  const draw=now=>{if($("#bribecv")!==cv||$("#modal").hidden)return;try{drawBribe(g,Math.max(0,(now-t0)/1000),caught)}catch(e){return}requestAnimationFrame(draw)};requestAnimationFrame(draw);render()}
 function drawBribe(c,t,caught){const W=640,H=400;
   c.fillStyle="#1d1a17";c.fillRect(0,0,W,H);const lg=c.createRadialGradient(320,140,20,320,180,380);lg.addColorStop(0,"rgba(255,220,150,.35)");lg.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=lg;c.fillRect(0,0,W,H);
   // taquillas y banco del vestuario
@@ -4304,7 +4346,7 @@ function trainCine(kind,title,lines,ps,X){
   if(!F.length)F.push({c1:K.c1,sh:K.sh||"#222",skin:"#e0ac7e",hair:"#333",num:9,name:"",hs:1,bw:1,kit:K,ph:0});
   modal(title,`<canvas class="cinecv" id="trcv" width="640" height="400"></canvas><div class="tele">${lines.slice(0,10).map(l=>`<div>${esc(l)}</div>`).join("")}${lines.length>10?`<div>Y ${lines.length-10} más.</div>`:""}</div><button class="btn play" data-act="close">Seguir</button>`);
   const cv=$("#trcv");if(!cv||!cv.getContext)return;let g=null;try{g=cv.getContext("2d")}catch(e){}if(!g)return;const t0=performance.now();
-  const draw=now=>{if($("#trcv")!==cv||$("#modal").hidden)return;try{drawTrain(g,kind,(now-t0)/1000,F,X||{})}catch(e){console.log(e);return}requestAnimationFrame(draw)};requestAnimationFrame(draw)}
+  const draw=now=>{if($("#trcv")!==cv||$("#modal").hidden)return;try{drawTrain(g,kind,Math.max(0,(now-t0)/1000),F,X||{})}catch(e){console.log(e);return}requestAnimationFrame(draw)};requestAnimationFrame(draw)}
 function drawTrain(c,kind,t,F,X){const W=640,H=400;const f=i=>F[i%F.length];const n=Math.min(6,Math.max(F.length,3));
   const sky=(a,b,h)=>{const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,a);g.addColorStop(1,b);c.fillStyle=g;c.fillRect(0,0,W,h)};
   const grass=(y,a,b)=>{c.fillStyle=a;c.fillRect(0,y,W,H-y);c.fillStyle=b;for(let i=0;y+i*26<H;i+=2)c.fillRect(0,y+i*26,W,26)};
