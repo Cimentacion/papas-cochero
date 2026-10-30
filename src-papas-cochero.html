@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="16.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -391,6 +391,7 @@ nav.tabs button.sel{background:var(--desk2);color:var(--gold);border-color:#000 
 .chatin{display:grid;grid-template-columns:1fr auto;gap:6px;margin-top:8px}.chatin .inp{width:100%;min-width:0}
 body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frlast{background:#262b62;color:#e9eaf7}body.fm .chat{background:#141838}body.fm .msg.them .cb{background:#2c3170;color:#fff}body.fm .chday{color:#ccd;background:#ffffff1a}body.fm .chathead{border-color:#fff2}
 .pchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.pchip{font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:12px}.pchip.up{background:#d6f5df;color:#14612f}.pchip.dn{background:#fbdada;color:#8a1f2a}
+.legcrest{width:96px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:44px;color:#e7b923;background:linear-gradient(#fff,#dfe8f5);border-radius:6px;box-shadow:0 4px 12px #0005;text-shadow:0 2px 0 #8a6a00}
 .offer.fr{flex-wrap:wrap}.offer.fr>div:first-child{flex:1 1 100%}.offer.fr>.row{width:100%;flex-wrap:wrap;gap:6px;margin-top:6px}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#888;vertical-align:middle}.pdot.on{background:#2fbf6a}.pdot.live{background:#ff4d4d;box-shadow:0 0 6px #ff4d4d;animation:trophy 1s infinite}
 .wsb{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;background:#0b1f3a;color:#fff;border-radius:8px;padding:10px}.wsb span{font-family:var(--f-mono);font-size:30px;color:#ffd23f}.wlog{font-family:var(--f-mono);font-size:14px;background:#000;color:#ffd23f;padding:6px;border-radius:6px;margin-top:6px}.wlog div{padding:2px 0;border-bottom:1px solid #ffffff14}.olquick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
@@ -2180,12 +2181,90 @@ function drawKit(cv,t){
   c.fillStyle=sh;c.beginPath();c.moveTo(28,66);c.lineTo(72,66);c.lineTo(76,92);c.lineTo(54,92);c.lineTo(50,80);c.lineTo(46,92);c.lineTo(24,92);c.closePath();c.fill();c.stroke();
   c.restore();
 }
+/* ================= CELEBRACIÓN Y PARTIDO DE LEYENDAS ================= */
+const LEGENDS=[["Lev Yashin","POR"],["Carlos Alberto Torres","DEF"],["Franz Beckenbauer","DEF"],["Bobby Moore","DEF"],["Giacinto Facchetti","DEF"],["Johan Cruyff","MED"],["Sócrates","MED"],["Alfredo Di Stéfano","MED"],["Diego Armando Maradona","DEL"],["Pelé","DEL"],["Eusébio","DEL"],["Ferenc Puskás","DEL"],["Gerd Müller","DEL"],["Garrincha","DEL"],["Bobby Charlton","MED"],["Luis Suárez Miramontes","MED"]];
+function paradeShow(kind,ret){const esp=kind==="esp";const K=esp?{c1:NAT[ME][5],c2:NAT[ME][6],sh:NAT[ME][7]}:ourKit();
+  const pool=esp&&S.nat&&S.nat.squad?S.nat.squad:S.players;const cap=pool.slice().sort((a,b)=>(b.games||0)-(a.games||0)||ovr(b)-ovr(a))[0];
+  let face=null;try{face=cap?faceCanvas(Object.assign(lookOf(cap,"happy"),{shirt:K.c1})):null}catch(e){}
+  const town=esp?"MADRID":"FUENTES DE ANDALUCÍA";const what={esp:"¡CAMPEONES!",liga:"¡CAMPEONES DE LIGA!",euro:"¡CAMPEONES DE EUROPA!"}[kind]||"¡CAMPEONES!";
+  if(!esp){S.fans=Math.round((S.fans||3)*1.05+10);S.coach.moral=clamp(S.coach.moral+10,0,100);save()}
+  modal("La celebración",`<canvas class="cinecv" id="parcv" width="640" height="400"></canvas><p>${esp?`Rúa de la selección por <b>Madrid</b>: autobús descapotable, la copa en alto y medio país en la calle.`:`Autobús descapotable por las calles de <b>Fuentes de Andalucía</b>, con el pueblo entero en los balcones. Termina, como siempre, con todos dentro de la fuente.`}</p>${esp?"":`<p class="hint">El pueblo se viene arriba: más aficionados y moral del míster al máximo.</p>`}<button class="btn play" data-act="paradeend" data-v="${ret||""}">Seguir</button>`);
+  const cv=$("#parcv");let g=null;try{g=cv&&cv.getContext("2d")}catch(e){}if(!g)return;const t0=performance.now();
+  const conf=Array.from({length:120},(_,i)=>({x:Math.random()*640,y:Math.random()*400,v:40+Math.random()*90,r:Math.random()*6,c:[K.c1,K.c2||"#fff","#ffd23f","#fff"][i%4]}));
+  const crowd=Array.from({length:70},(_,i)=>({x:i*14+Math.random()*8,h:30+Math.random()*12,s:["#f1c9a5","#e0ac7e","#c68a5a","#8d5a3b"][i%4],j:Math.random()*6}));
+  try{SFX.init();SFX.start();SFX.swell(.3,4)}catch(e){}
+  const cup=(c,x,y,s)=>{c.save();c.translate(x,y);c.scale(s,s);const gr=c.createLinearGradient(-40,0,40,0);gr.addColorStop(0,"#b8860b");gr.addColorStop(.5,"#ffe680");gr.addColorStop(1,"#b8860b");c.fillStyle=gr;c.strokeStyle="#5a4300";c.lineWidth=2.5;
+    c.beginPath();c.moveTo(-34,-70);c.lineTo(34,-70);c.quadraticCurveTo(36,-20,0,-6);c.quadraticCurveTo(-36,-20,-34,-70);c.fill();c.stroke();c.beginPath();c.arc(-36,-52,12,Math.PI*.5,Math.PI*1.5);c.stroke();c.beginPath();c.arc(36,-52,12,-Math.PI*.5,Math.PI*.5);c.stroke();c.fillRect(-6,-8,12,22);c.fillRect(-22,12,44,10);c.strokeRect(-22,12,44,10);c.restore()};
+  const confetti=(c,t)=>conf.forEach(q=>{const y=(q.y+t*q.v)%420-10,x=q.x+Math.sin(t*2+q.r)*12;c.save();c.translate(x,y);c.rotate(t*3+q.r);c.fillStyle=q.c;c.fillRect(-3,-5,6,10);c.restore()});
+  const draw=now=>{if($("#parcv")!==cv||$("#modal").hidden)return;const T=Math.max(0,(now-t0)/1000)%14,c=g,W=640,H=400;c.textAlign="center";
+    if(T<4.5){// 1 · la copa al cielo
+      c.fillStyle="#0b1030";c.fillRect(0,0,W,H);for(let i=0;i<5;i++){const fx=80+i*120,ft=(T*1.3+i*.37)%1.6;if(ft<1){const r=ft*90;for(let k=0;k<14;k++){const a=k/14*Math.PI*2;c.fillStyle=["#ffd23f","#ff5a5a","#7dd3ff","#fff"][(i+k)%4];c.globalAlpha=1-ft;c.beginPath();c.arc(fx+Math.cos(a)*r,90+i%2*30+Math.sin(a)*r,3,0,7);c.fill()}c.globalAlpha=1}}
+      for(let i=0;i<220;i++){c.fillStyle=`rgba(255,255,${180+i%60},${.15+((i*7+Math.floor(T*8))%10)/30})`;c.fillRect((i*53)%W,250+((i*31)%140),2,2)}
+      const up=Math.min(1,T/1.2),yy=200-up*40;c.strokeStyle="#e0ac7e";c.lineWidth=16;c.lineCap="round";c.beginPath();c.moveTo(250,300);c.lineTo(270,yy-20);c.moveTo(390,300);c.lineTo(370,yy-20);c.stroke();
+      cup(c,320,yy,1.25);if(face)c.drawImage(face,190,170,260,260);
+      c.fillStyle="#ffd23f";c.font="40px Bungee, Impact, sans-serif";c.lineWidth=6;c.strokeStyle="#000";c.strokeText(what,320,60);c.fillText(what,320,60);if(cap){c.font="18px Bungee, Impact, sans-serif";c.fillStyle="#fff";c.fillText(`EL CAPITÁN: ${fullName(cap).toUpperCase()}`,320,388)}
+    }else if(T<10){// 2 · la rúa en autobús descapotable
+      const k=T-4.5;const sky=c.createLinearGradient(0,0,0,200);sky.addColorStop(0,"#5aa0e8");sky.addColorStop(1,"#cfe6ff");c.fillStyle=sky;c.fillRect(0,0,W,H);
+      const off=(k*70)%220;for(let i=-1;i<5;i++){const x=i*220-off;c.fillStyle="#f6f2e8";c.fillRect(x,70,210,200);c.fillStyle="#c8602b";c.beginPath();c.moveTo(x-6,74);c.lineTo(x+105,40);c.lineTo(x+216,74);c.fill();
+        c.fillStyle="#e2b04a";c.fillRect(x,250,210,20);for(let w=0;w<3;w++){const wx=x+20+w*65;c.fillStyle="#3d5a7a";c.fillRect(wx,110,36,48);c.strokeStyle="#222";c.lineWidth=2;c.strokeRect(wx-4,158,44,14);for(let b=0;b<6;b++){c.beginPath();c.moveTo(wx-2+b*8,158);c.lineTo(wx-2+b*8,172);c.stroke()}
+          c.fillStyle=(i+w)%2?K.c1:(esp?"#ffc400":(K.c2||"#fff"));c.fillRect(wx,172,36,26);if(!esp){c.fillStyle=(i+w)%2?(K.c2||"#fff"):K.c1;c.fillRect(wx,180,36,6)}
+          c.fillStyle="#e0ac7e";c.beginPath();c.arc(wx+18,150+Math.sin(T*6+w)*2,7,0,7);c.fill()}}
+      // multitud
+      crowd.forEach((p,i)=>{const x=(p.x-k*25)%990;const xx=x<-20?x+990:x;const jy=Math.abs(Math.sin(T*5+p.j))*6;c.fillStyle=i%3?K.c1:(K.c2||"#fff");c.fillRect(xx-6,400-p.h-jy+12,12,p.h);c.fillStyle=p.s;c.beginPath();c.arc(xx,400-p.h-jy+6,6,0,7);c.fill();if(i%4===0){c.fillStyle=K.c1;c.fillRect(xx-14,400-p.h-jy-14+Math.sin(T*8+i)*4,28,6)}});
+      // autobús
+      const bx=170+Math.sin(k)*6;c.fillStyle=K.c1;c.fillRect(bx,250,300,90);c.fillStyle=K.c2||"#fff";c.fillRect(bx,300,300,12);c.fillStyle="#222";c.fillRect(bx,262,300,28);
+      c.fillStyle="#fff";c.font="17px Bungee, Impact, sans-serif";c.fillText(what.replace(/!|¡/g,""),bx+150,283);c.fillStyle="#111";[bx+50,bx+250].forEach(x=>{c.beginPath();c.arc(x,342,18,0,7);c.fill()});
+      for(let i=0;i<7;i++){const px=bx+25+i*40,py=236+Math.abs(Math.sin(T*7+i))*-6;c.fillStyle=K.c1;c.fillRect(px-9,py,18,20);c.fillStyle=["#f1c9a5","#e0ac7e","#c68a5a","#8d5a3b"][i%4];c.beginPath();c.arc(px,py-6,8,0,7);c.fill();if(i===3)cup(c,px,py-14,.45);else{c.strokeStyle=c.fillStyle;c.lineWidth=4;c.beginPath();c.moveTo(px-8,py+2);c.lineTo(px-14,py-14+Math.sin(T*9+i)*4);c.moveTo(px+8,py+2);c.lineTo(px+14,py-14);c.stroke()}}
+      // bengalas
+      [90,560].forEach((x,i)=>{for(let j=0;j<10;j++){c.fillStyle=`rgba(255,${60+j*15},40,${.5-j*.04})`;c.beginPath();c.arc(x+Math.sin(T*3+j)*10,330-j*14-((T*40)%14),10+j*2,0,7);c.fill()}});
+      c.fillStyle="rgba(10,15,40,.8)";c.fillRect(0,0,W,34);c.fillStyle="#ffd23f";c.font="18px Bungee, Impact, sans-serif";c.fillText(`RÚA POR ${town}`,320,24);
+    }else{// 3 · todos a la fuente
+      const k=T-10;c.fillStyle="#f3e3c0";c.fillRect(0,0,W,H);c.fillStyle="#f6f2e8";c.fillRect(0,40,W,170);c.fillStyle="#c8602b";c.fillRect(0,32,W,14);for(let i=0;i<8;i++){c.fillStyle="#3d5a7a";c.fillRect(20+i*80,80,30,44);c.fillStyle=i%2?K.c1:(K.c2||"#ffc400");c.fillRect(20+i*80,124,30,22)}
+      c.fillStyle="#d9cfb8";c.beginPath();c.ellipse(320,320,230,60,0,0,7);c.fill();c.fillStyle="#4aa3c9";c.beginPath();c.ellipse(320,315,205,46,0,0,7);c.fill();c.fillStyle="#bdb29a";c.fillRect(305,200,30,110);c.beginPath();c.ellipse(320,205,60,14,0,0,7);c.fill();
+      for(let j=0;j<40;j++){const a=j/40*Math.PI*2,r=(k*120+j*13)%60;c.fillStyle="rgba(200,240,255,.8)";c.beginPath();c.arc(320+Math.cos(a)*r*1.4,195-Math.sin(Math.min(1,r/60)*Math.PI)*40+Math.sin(a)*8,3,0,7);c.fill()}
+      for(let i=0;i<9;i++){const ph=(k*1.2+i*.31)%1.5;const sx=120+i*48,ex=200+i*30;const x=sx+(ex-sx)*Math.min(1,ph/1.1),y=250-Math.sin(Math.min(1,ph/1.1)*Math.PI)*90+Math.max(0,ph-1.1)*80;
+        if(ph<1.2){c.fillStyle=i%2?K.c1:"#fff";c.fillRect(x-7,y,14,18);c.fillStyle="#e0ac7e";c.beginPath();c.arc(x,y-6,7,0,7);c.fill()}else{c.fillStyle="rgba(220,245,255,.9)";for(let s2=0;s2<8;s2++){c.beginPath();c.arc(ex+Math.cos(s2)*20*(ph-1.1)*4,300-Math.abs(Math.sin(s2*2))*25*(ph-1.1)*3,4,0,7);c.fill()}}}
+      c.fillStyle="rgba(10,15,40,.8)";c.fillRect(0,0,W,34);c.fillStyle="#ffd23f";c.font="18px Bungee, Impact, sans-serif";c.fillText(esp?"¡A LA FUENTE!":"¡TODO EL PUEBLO A LA FUENTE!",320,24)}
+    confetti(c,T);requestAnimationFrame(draw)};requestAnimationFrame(draw)}
+function legPlay(){const N=S.nat;if(!N||N.legPending==null){toast("El Partido de las Leyendas se gana ganando un Mundial.");return}
+  if(M){toast("Termina antes el partido que estás jugando.");return}if(S.prep||S.olSwap||S.natSwap||S.euroSwap){toast("Tienes un partido a medias. Acábalo primero.");return}
+  closeModal();natAutoConv();const POOL=natPool();
+  S.natSwap={players:S.players,lineup:S.lineup.slice(),formation:S.formation,club:S.club,comp:S.comp,league:S.league,cup:S.cup,prep:S.prep,phase:S.phase,tab:S.tab,results:S.results,rival:S.rival};
+  S.players=POOL.filter(p=>N.conv.includes(p.id));S.lineup=N.lineup.map(id=>id&&S.players.some(p=>p.id===id)?id:null);S.formation=N.form;
+  S.club={name:"España",kit:{c1:NAT[ME][5],c2:NAT[ME][6],sh:NAT[ME][7],pat:0},nat:ME};S.rival=null;
+  const roles=FORMS["4-3-3"];const oppT=Object.assign({n:"Leyendas del Cielo",town:"",str:0,col:"#f4f4f4",kit:{c1:"#f4f4f4",c2:"#e7b923",sh:"#f4f4f4",pat:3},roster:LEGENDS.map(([n,pos],i)=>({n,pos:i<11?roles[i]:pos})),form:"4-3-3",form0:"4-3-3",tierOf:9,venue:1,gl:{},coachN:"Helenio Herrera",legends:1},z());
+  const meT=Object.assign({n:"España",flag:ME,town:"",str:0,us:1,col:NAT[ME][5]},z());
+  S.comp={type:"nat",legends:1,ko:false,tier:9,ed:0,name:"Partido de las Leyendas",teams:[meT,oppT],rounds:[[{a:0,b:1}]],r:0,stage:["Partido de las Leyendas · Estadio de las Nubes"],results:[],done:false,nat:{st:"leg",opp:null}};S.league=null;S.cup=null;S.phase="season";
+  const keepL=S.lineup.slice();autoLineup();const pw=power(lineupPlayers(),S.formation,{home:true});const ref=(pw.a+pw.d)/2;S.lineup=keepL;if(S.lineup.filter(Boolean).length<11)autoLineup();
+  oppT.str=+(ref*1.3).toFixed(1);
+  const arrive={};S.players.forEach(p=>{if(!p.injured)arrive[p.id]={min:0,en:0}});
+  S.prep={step:"apuestas",venue:{n:"Estadio de las Nubes",town:"",d:0,ours:false,home:false},conv:{},absent:{},assign:{},gas:{},routes:[],bets:[],amt:10,arrive,cost:0,nat:1};
+  S.players.forEach(p=>S.prep.conv[p.id]=true);S.tab="prep";save();render();window.scrollTo(0,0)}
+function legPreview(c){const opp=c.teams[1];return `<section class="win mp natprev"><div class="bar">${esc(c.stage[0])}</div><div class="body">
+   <div class="natvs"><div>${flagSVG(ME,96,"wave")}<b>España</b></div><div class="vs">VS</div><div><div class="legcrest">★</div><b>Leyendas del Cielo</b></div></div>
+   <p style="text-align:center"><b>Estadio de las Nubes</b> · partido homenaje por ganar el Mundial</p>
+   <div class="sec"><h4>EL ONCE DE LAS LEYENDAS (4-3-3)</h4><ul>${opp.roster.slice(0,11).map(r=>`<li><b>${r.pos}</b> · ${esc(r.n)}</li>`).join("")}</ul><p class="hint">En el banquillo: ${opp.roster.slice(11).map(r=>esc(r.n)).join(", ")}. Entrenador: ${esc(opp.coachN)}.</p></div>
+  </div></section>`}
+function legEndMatch(res){const c=S.comp,N=S.nat;const ga=M.us,gb=M.them;
+  M.sq.forEach(sp=>{const p=pById(sp.id);if(!p)return;p.energy=Math.round(sp.mE);p.goals=(p.goals||0)+(M.goals[sp.id]||0);p.allGoals=(p.allGoals||0)+(M.goals[sp.id]||0);if(M.slots.includes(sp.id)||M.out.has(sp.id)){p.games=(p.games||0)+1;p.caps=(p.caps||0)+1}});
+  N.legHist=(N.legHist||[]).concat({y:N.legPending,ga,gb});N.legPending=null;
+  if(res==="W"){ledSync();const pr=nice(200000*ek(9,.3));S.money+=pr;led("Partido de las Leyendas: prima",pr);ach&&ach("leyendas")}
+  M.report={nat:1,legends:1,home:true,res,us:ga,them:gb,opN:"Leyendas del Cielo",scorers:M.scorers,riv:M.rivScorers,own:M.own,inj:[],bets:[],betWin:0,stage:c.stage[0]};
+  S.tab="prep";save();$("#mctl").hidden=true;const d=$("#m-done");d.hidden=false;d.textContent="Ver el resultado";d.dataset.act="legpost";renderSquad()}
+function legPost(){const R=M.report;const li=a=>a.map(s=>`<li>${esc(s)}</li>`).join("");
+  modal("Partido de las Leyendas",`<div class="natres ${R.res==="W"?"w":R.res==="L"?"l":""}"><div>${flagSVG(ME,64,"wave")}<b>España</b></div><div class="natsc">${R.us} – ${R.them}<em>${R.res==="W"?"HAS GANADO A LAS LEYENDAS":R.res==="D"?"EMPATE HISTÓRICO":"LAS LEYENDAS SIGUEN SIENDO LEYENDAS"}</em></div><div><div class="legcrest">★</div><b>Leyendas</b></div></div>
+   <div class="sec"><h4>GOLES</h4><ul>${R.scorers.length||R.riv.length||R.own.length?li(R.scorers.concat(R.riv.map(n=>n+" (Leyendas)"),R.own.map(n=>n+" (en propia)"))):"<li>Ninguno.</li>"}</ul></div>
+   <p>${R.res==="W"?"Lo que nadie había hecho. Al acabar, las leyendas te dan la mano una a una y se pierden entre las nubes.":R.res==="D"?"Te despides de ellas con un empate y un abrazo. Pocos pueden decir lo mismo.":"Una lección de fútbol que no olvidará nadie. Ha sido un honor perder contra ellas."}</p>
+   ${R.res==="W"?`<p class="hint">Prima de la federación y logro «Más que leyenda».</p>`:""}<button class="btn play" data-act="legafter">Seguir</button>`)}
+function legAfter(){closeModal();$("#match").hidden=true;const d=$("#m-done");d.dataset.act="post1";d.textContent="Rueda de prensa";const won=M&&M.report&&M.report.res==="W";M=null;natRestore();S.view="nat";save();render();window.scrollTo(0,0);if(won)setTimeout(()=>paradeShow("esp"),80)}
+
 function paintCrests(root){(root||document).querySelectorAll("canvas[data-crest]").forEach(cv=>{const t=CRESTT[cv.dataset.crest];if(!t)return;cv.dataset.kit?drawKit(cv,t):drawTeamCrest(cv,t)})}
 const CRESTT={};let crestN=0;
 function crestCv(t,size,kit){const k="c"+(crestN++);CRESTT[k]=t;return `<canvas class="${kit?"kitcv":"crestcv"}" data-crest="${k}" ${kit?'data-kit="1"':""} width="${size*2}" height="${size*2}" style="width:${size}px;height:${size}px"></canvas>`}
 function teamForm(c,idx){const out=[];c.rounds.slice(0,c.r).forEach(r=>r.forEach(m=>{if(m.ga==null)return;if(m.a===idx)out.push(m.ga>m.gb?"W":m.ga===m.gb?"D":"L");else if(m.b===idx)out.push(m.gb>m.ga?"W":m.ga===m.gb?"D":"L")}));return out.slice(-5)}
 function teamTop(t,idx){if(idx===0||t.us){const p=S.players.filter(x=>x.goals).sort((a,b)=>b.goals-a.goals)[0];return p?`${short(p)} (${p.goals})`:"—"}const g=t.gl||{};const k=Object.keys(g).sort((a,b)=>g[b]-g[a])[0];return k?`${k.split(" ")[0]} ${k.split(" ")[1]||""} (${g[k]})`:"—"}
 function matchPreview(c,oppIdx,o){
+  if(c.type==="nat"&&c.legends)return legPreview(c);
   if(c.type==="nat")return natPreview(c,oppIdx);
   o=o||{};const us=c.teams[0],opp=c.teams[oppIdx];const order=sortIdx(c,[...Array(c.teams.length).keys()]);const friendly=c.type==="friendly",nl=c.type!=="league";
   const pw=power(lineupPlayers(),S.formation,{home:true});const usStr=(pw.a+pw.d)/2;
@@ -2612,7 +2691,7 @@ function maybeEvent(){
 function showEvent(){if(!S.event)return;const e=EVENTS.find(x=>x.id===S.event.id);if(!e){S.event=null;return}
   modal("Mientras tanto en el pueblo…",`<p>${esc(S.event.t)}</p><div class="pc-act">${e.o.map((o,i)=>`<button class="btn ${i?"":"primary"}" data-act="evpick" data-v="${i}">${esc(o[0])}</button>`).join("")}</div>`)}
 /* ---------- historia, leyendas, logros ---------- */
-const ACH=[["goleada","Goleada","Gana por 5 o más goles."],["win9","Con nueve","Gana acabando con 9 o menos en el campo."],["borrachos","Barra libre","Juega un partido con 5 borrachos."],["calle","Fútbol callejero","Gana jugando en mitad de la calle."],["remontada","Remontada","Gana un partido que perdías al descanso."],["derbi","Rey del pueblo","Gana un derbi."],["ascenso","Para arriba","Consigue un ascenso."],["copa","Su Majestad","Gana la Copa del Rey."],["primera","Primera División","Llega a Primera."],["arena","Cochero Arena","Construye el mega estadio."],["boda","Por la iglesia","Cásate en el Chaparral."],["mafia","Deuda saldada","Termina de pagar a la mafia."],["cantera","Hecho en casa","Sube 3 chavales de la cantera."],["leyenda","Leyenda","Ten una leyenda en el muro del club."]];
+const ACH=[["goleada","Goleada","Gana por 5 o más goles."],["leyendas","Más que leyenda","Gana el Partido de las Leyendas con España."],["win9","Con nueve","Gana acabando con 9 o menos en el campo."],["borrachos","Barra libre","Juega un partido con 5 borrachos."],["calle","Fútbol callejero","Gana jugando en mitad de la calle."],["remontada","Remontada","Gana un partido que perdías al descanso."],["derbi","Rey del pueblo","Gana un derbi."],["ascenso","Para arriba","Consigue un ascenso."],["copa","Su Majestad","Gana la Copa del Rey."],["primera","Primera División","Llega a Primera."],["arena","Cochero Arena","Construye el mega estadio."],["boda","Por la iglesia","Cásate en el Chaparral."],["mafia","Deuda saldada","Termina de pagar a la mafia."],["cantera","Hecho en casa","Sube 3 chavales de la cantera."],["leyenda","Leyenda","Ten una leyenda en el muro del club."]];
 function ach(id){S.ach=S.ach||{};if(S.ach[id])return;S.ach[id]=S.season;const a=ACH.find(x=>x[0]===id);if(a){addNews(`Logro desbloqueado: ${a[1]}.`);toast(`🏆 Logro: ${a[1]}`)}}
 function legendCheck(p){if(!p)return;const g=(p.allGames||0),gl=(p.allGoals||0);if(g>=30||gl>=15){S.legends=S.legends||[];if(!S.legends.some(x=>x.id===p.id)){S.legends.push({id:p.id,n:fullName(p),g,gl,s:S.season});ach("leyenda")}}}
 function historyBox(){
@@ -3573,6 +3652,7 @@ function natFinal(T){if(T.done||T.k==="amis")return;T.done=true;const pos=natPos
   const top=Object.values(T.goals).sort((a,b)=>b.g-a.g)[0];
   S.nat.hist.unshift({t:tn,k:T.k,y:T.year,pos,champ,fed:pr.fed,cur:pr.cur,prima,top:top?`${top.n} (${NATN(top.c)}, ${top.g})`:""});
   S.nat.n++;S.nat.turn=false;
+  if(pos===1&&T.k==="mundial")S.nat.legPending=T.year;
   addNews(pos===1?`¡¡ESPAÑA CAMPEONA DEL ${tn.toUpperCase()}!! El pueblo entero se tira a la fuente.`:`${tn}: España acaba en ${POSTXT[pos]||pos}. Campeón: ${NATN(champ)}.`)}
 function natAging(yrs){yrs=yrs||1;const N=S.nat;const R=Math.random;const q=NAT[ME][1];
   N.squad.forEach(p=>{p.age+=yrs;p.goals=0;if(p.age<24)["atk","def","fis","cab"].forEach(k=>p[k]=Math.min(99,p[k]+Math.floor(R()*4)));else if(p.age>30)["fis","atk","def"].forEach(k=>p[k]=Math.max(20,p[k]-Math.floor(R()*4)));p.sta=clamp((p.sta||70)-(p.age>31?3:0),35,99);p.energy=100;p.injured=0});
@@ -3658,7 +3738,7 @@ function natEndShow(){const T=S.nat.tour;const h=S.nat.hist[0];if(!h)return;cons
    ${T.ko.f&&T.ko.f[0]?`<p style="text-align:center">Final en ${esc(T.ko.f[0].v)}: ${flagN(T.ko.f[0].a,20)} <b>${T.ko.f[0].ga}-${T.ko.f[0].gb}${T.ko.f[0].pa!=null?` (${T.ko.f[0].pa}-${T.ko.f[0].pb} pen.)`:""}</b> ${flagN(T.ko.f[0].b,20)}</p>`:""}
    ${h.top?`<p style="text-align:center" class="hint">Bota de Oro: ${esc(h.top)}</p>`:""}
    <div class="sec"><h4>PREMIOS (${T.k==="mundial"?"FIFA, dólares":"UEFA, euros"})</h4>${pr.lines.map(([n,v])=>`<div class="ecol"><span>${esc(n)}</span><b>${mny(v,pr.cur)}</b></div>`).join("")}<div class="ecol tot"><span>La federación cobra</span><b>${mny(pr.fed,pr.cur)}</b></div><div class="ecol tot"><span>Tu prima de seleccionador</span><b class="pos">+${T.prima.toLocaleString("es-ES")} €</b></div></div>
-   <p class="hint">Próximo torneo: ${tourN(tourKind(T.year+2))} ${T.year+2}.</p><button class="btn play" data-act="close">Cerrar</button>`)}
+   <p class="hint">Próximo torneo: ${tourN(tourKind(T.year+2))} ${T.year+2}.</p>${win?`<button class="btn" data-act="parade" data-v="esp">🚌 Ver la celebración</button>`:""}${win&&T.k==="mundial"&&S.nat.legPending!=null?`<div class="sec"><h4>PARTIDO DE LAS LEYENDAS</h4><p>Por ganar el Mundial, España juega un partido homenaje contra un once de leyendas que ya no están: Yashin, Beckenbauer, Cruyff, Di Stéfano, Maradona, Pelé, Eusébio…</p><button class="btn primary" data-act="legplay">Jugar contra las Leyendas</button></div>`:""}<button class="btn play" data-act="close">Cerrar</button>`)}
 function natOffer(){modal("Llamada de la Federación",`<div class="nathero">${flagSVG(ME,120,"wave")}<h2>¿SELECCIONADOR NACIONAL?</h2></div>
   <p>Suena el teléfono del bar. Es la Real Federación: han visto que <b>${esc(S.coach.name)}</b> ha ganado la Primera División con ${esc(clubName())} y quieren que lleves a <b>España</b> sin dejar el club.</p>
   <p class="hint">Llevarás los dos equipos a la vez: un partido con el club y otro con España. Estamos en la temporada ${seasonLbl()}. El Mundial es cada 4 años (2030, 2034…) y la Eurocopa entre medias (2028, 2032…); el resto de años, amistosos. Formato real, banderas, cuadro y premios de la FIFA y la UEFA. Arriba, tocando el nombre del club, cambias de equipo.</p>
@@ -3669,7 +3749,7 @@ function natHeader(){const ct=$("#club-title");if(!ct)return;const can=natOn()||
   if(natView()){ct.textContent="España ▾";const hc=$("#crest");if(hc&&hc.dataset.v!=="ESP"){hc.dataset.v="ESP";hc.width=48;hc.height=48;flagToCanvas(hc,ME)}$("#sub").textContent=S.nat.tour&&!S.nat.tour.done?`${seasonLbl()} · ${tourN(S.nat.tour.k)} ${S.nat.tour.year} · ${S.nat.tour.out?"eliminados":NSTAGEN[S.nat.tour.steps[S.nat.tour.st]]||""}`:`${seasonLbl()} · Selección española`}
   else if(can&&!S.natSwap)ct.textContent=clubName()+" ▾"}
 function natNextCard(){const N=S.nat,T=N.tour;const Y=yStart()+1;const nx=[0,1,2,3].map(i=>Y+i).find(y=>tourKind(y)!=="amis"&&!(T&&T.year===y&&T.done));if(!T||T.done&&T.k==="amis")return `<section class="win"><div class="bar">Calendario <small>${seasonLbl()}</small></div><div class="body"><p>Próximo torneo: <b>${tourN(tourKind(nx))} ${nx}</b>${nx===Y?" (empieza con la temporada del club)":` (temporada ${nx-1}/${String(nx).slice(2)})`}.</p><p class="hint">El Mundial es cada 4 años y la Eurocopa a mitad de camino. Los demás años, amistosos.</p><p class="hint">Mientras, prepara la lista de 26 en «Convocatoria».</p></div></section>`;
-  if(T.done)return `<section class="win"><div class="bar">${tourN(T.k)} ${T.year} terminado</div><div class="body"><p>España: <b>${POSTXT[T.pos]||T.pos}</b>. Campeón: ${flagN(T.champ)}.</p><p class="hint">Próximo: ${tourN(tourKind(nx))} ${nx}.</p><button class="btn" data-act="natend">Ver el resumen y los premios</button></div></section>`;
+  if(T.done)return `<section class="win"><div class="bar">${tourN(T.k)} ${T.year} terminado</div><div class="body"><p>España: <b>${POSTXT[T.pos]||T.pos}</b>. Campeón: ${flagN(T.champ)}.</p><p class="hint">Próximo: ${tourN(tourKind(nx))} ${nx}.</p><button class="btn" data-act="natend">Ver el resumen y los premios</button>${S.nat.legPending!=null?`<button class="btn primary" data-act="legplay" style="margin-top:6px">★ Jugar el Partido de las Leyendas</button>`:""}</div></section>`;
   const mm=natMine(T);if(!mm)return `<section class="win"><div class="bar">${T.k==="mundial"?"Mundial":"Eurocopa"} ${T.year}</div><div class="body"><p>España está eliminada.</p></div></section>`;
   const opp=mm.m.a===ME?mm.m.b:mm.m.a;const R=natRival(opp,T.year);const g=NREG[NAT[opp][3]];const blocked=!N.turn&&S.phase==="season"&&S.comp&&!S.comp.done;
   return `<section class="win natnext"><div class="bar">${esc(T.k==="amis"?`Amistoso ${T.year}`:mm.tp?NSTAGEN.tp:mm.st[0]==="g"?`Grupo ${"ABCDEFGHIJKL"[T.groups.findIndex(g=>g.includes(ME))]} · Jornada ${mm.st[1]}`:NSTAGEN[mm.st])} <small>${esc(mm.m.v)}</small></div><div class="body">
@@ -3851,7 +3931,7 @@ function euPost(){const R=M.report;const lbl={W:"VICTORIA",D:"EMPATE",L:"DERROTA
    ${R.bets.length?(S.bookie?ticketHTML(Object.assign({},R,{home:R.home})):""):""}${heatHTML()}<button class="btn play" data-act="euafter">Seguir</button>`);setTimeout(drawHeat,50)}
 function euAfter(){closeModal();$("#match").hidden=true;const d=$("#m-done");d.dataset.act="post1";d.textContent="Rueda de prensa";M=null;euRestore();const E=S.euro;const st=EU_STEPS[E.st];euFinishStage(E);save();render();window.scrollTo(0,0);
   const ms=euStageMatches(E,st);const row=m=>`<div class="natfx ${m.a===US_EU||m.b===US_EU?"me":""}"><span>${esc(euName(m.a))}</span><b>${m.ga}-${m.gb}${m.pa!=null?`<small> (${m.pa}-${m.pb} p)</small>`:""}</b><span class="r">${esc(euName(m.b))}</span></div>`;
-  setTimeout(()=>modal(`${EUK[E.k].n} · ${EUST[st]}`,`${E.out?`<p><b>Eliminados (${esc(E.out)}).</b> La aventura europea se acaba aquí. Dinero ganado en Europa: ${E.money.toLocaleString("es-ES")} €.</p>`:E.done&&E.champ===US_EU?`<div class="nathero gold"><div class="nattrophy big">🏆</div><h2>¡CAMPEONES DE EUROPA!</h2></div>`:""}<div class="natfxl">${ms.map(row).join("")}</div><button class="btn play" data-act="close">Vale</button>`),80)}
+  setTimeout(()=>modal(`${EUK[E.k].n} · ${EUST[st]}`,`${E.out?`<p><b>Eliminados (${esc(E.out)}).</b> La aventura europea se acaba aquí. Dinero ganado en Europa: ${E.money.toLocaleString("es-ES")} €.</p>`:E.done&&E.champ===US_EU?`<div class="nathero gold"><div class="nattrophy big">🏆</div><h2>¡CAMPEONES DE EUROPA!</h2></div><button class="btn primary" data-act="parade" data-v="euro">🚌 Celebración por Fuentes</button>`:""}<div class="natfxl">${ms.map(row).join("")}</div><button class="btn play" data-act="close">Vale</button>`),80)}
 function euBox(){const E=S.euro;if(!E)return `<section class="win"><div class="bar">Europa</div><div class="body"><p>Este año no jugáis en Europa.</p><p class="hint">Si acabáis en Primera entre los 4 primeros: Liga de Campeones. 5º y 6º: Europa League. 7º: Conference League. Hay premios de la UEFA por participar, por cada victoria y por cada ronda.</p></div></section>`;
   const K=EUK[E.k];const tb=euTable(E);const mm=euMine(E);const st=EU_STEPS[E.st];
   const head=`<div class="euhero" style="background:${K.bg}"><div class="eustars">★ ★ ★ ★ ★ ★ ★ ★</div><h2>${K.n.toUpperCase()}</h2><p>${E.year-1}/${String(E.year).slice(2)} · ${E.done?(E.champ===US_EU?"¡CAMPEONES!":`Campeón: ${esc(euName(E.champ||""))}`):E.out?`Eliminados (${esc(E.out)})`:esc(EUST[st]||"")}</p><small>Ganado en Europa: ${E.money.toLocaleString("es-ES")} €</small></div>`;
@@ -4959,7 +5039,8 @@ function startMatch(olo){
   visInit();
   {const md=$("#m-done");if(!olo&&S.comp.type!=="online"){md.dataset.act="post1";md.textContent="Rueda de prensa"}}
   if(!olo)M.olBot=S.comp.type==="online";
-  if(!olo&&S.comp.gira){const T0=S.comp.teams[M.opp];const st=(T0.roster||[]).filter(x=>/«/.test(x.n));M.oppN=11;addLog(0,`${T0.n} sale con todas sus estrellas: ${st.map(x=>x.n).join(", ")}. El estadio está lleno.`,"goal")}
+  if(!olo&&S.comp.legends){M.oppN=11;addLog(0,"Saltan al campo las Leyendas del Cielo: Yashin, Beckenbauer, Cruyff, Di Stéfano, Maradona, Pelé… El estadio entero se pone en pie.","goal")}
+  else if(!olo&&S.comp.gira){const T0=S.comp.teams[M.opp];const st=(T0.roster||[]).filter(x=>/«/.test(x.n));M.oppN=11;addLog(0,`${T0.n} sale con todas sus estrellas: ${st.map(x=>x.n).join(", ")}. El estadio está lleno.`,"goal")}
   else if(!olo){const T0=S.comp.teams[M.opp];const tr=T0.tierOf!=null?T0.tierOf:S.comp.tier;const pm=[.6,.4,.18][tr]||0;let miss=0;if(Math.random()<pm){miss=wpick([1,2,3,4],x=>[5,3,1.5,.6][x-1]);}
    if(tr>=3&&Math.random()<.35){const ro=(T0.roster||[]).slice(0,11).filter(x=>x.pos!=="POR");const b=ro.length?pick(ro):null;if(b){M.oppStr*=.96;addLog(0,`${T0.n} llega sin ${b.n}: ${pick(["lesionado","sancionado","con gripe","de baja por paternidad"])}. Juega un suplente.`,"ev")}}
    if(miss){M.oppN=11-miss;M.oppStr*=Math.pow(M.oppN/11,1.4);const out=M.vis.them.filter(p=>p.role!=="POR").sort(()=>Math.random()-.5).slice(0,miss);M.vis.them=M.vis.them.filter(p=>!out.includes(p));
@@ -4979,6 +5060,7 @@ function endMatch(normal){
   if(S.comp&&S.comp.type==="online")return olEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   const c=S.comp,m=M.m,ko=isKO(c);
   if(ko&&M.us===M.them&&!M.early&&normal){const sh=shootout();c.pensRes=m.a===0?[sh.us,sh.them]:[sh.them,sh.us]}
+  if(c.type==="nat"&&c.legends)return legEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   if(c.type==="nat")return natEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   if(c.type==="euro")return euEndMatch(M.us>M.them?"W":M.us===M.them?"D":"L");
   const ga=m.a===0?M.us:M.them,gb=m.a===0?M.them:M.us;
@@ -5168,7 +5250,7 @@ function showGala(c,order,next){
 function offersModal(c){
   const avail=BRANDS.filter(b=>!S.sponsors.includes(b.n)).sort(()=>Math.random()-.5).slice(0,4);
   S.offers=avail.map(b=>({n:b.n,pay:b.pay,v:b.pay==="dinero"?nice((rnd(8,25)+c.tier*8)*ek(c.tier,.85)):0}));
-  const best=[...S.players].sort((a,b)=>ovr(b)-ovr(a))[0];if(S.pendingSeason){modal("Fin de la temporada",S.pendingSeason+`<button class="btn play" data-act="to-offers">Ver quién ha venido</button>`);S.pendingSeason=null;S.offers=avail.map(b=>({n:b.n,pay:b.pay,v:b.pay==="dinero"?nice((rnd(8,25)+c.tier*10)*ek(c.tier,.85)):0}));S.scout=best?{id:best.id,v:nice((60+ovr(best)*6+c.tier*80)*EK[c.tier])}:null;save();return}
+  const best=[...S.players].sort((a,b)=>ovr(b)-ovr(a))[0];if(S.pendingSeason){modal("Fin de la temporada",S.pendingSeason+(c.tier===TIERS.length-1&&sortIdx(c,[...Array(c.teams.length).keys()])[0]===0?`<button class="btn primary" data-act="parade" data-v="liga|offers">🚌 Celebración por Fuentes</button>`:"")+`<button class="btn play" data-act="to-offers">Ver quién ha venido</button>`);S.pendingSeason=null;S.offers=avail.map(b=>({n:b.n,pay:b.pay,v:b.pay==="dinero"?nice((rnd(8,25)+c.tier*10)*ek(c.tier,.85)):0}));S.scout=best?{id:best.id,v:nice((60+ovr(best)*6+c.tier*80)*EK[c.tier])}:null;save();return}
   S.scout=best?{id:best.id,v:nice((60+ovr(best)*6+c.tier*80)*EK[c.tier])}:null;
   save();renderOffers();
 }
@@ -5211,7 +5293,8 @@ const A={
   natview:v=>{closeModal();if(v==="nat"&&!natOn()){if(S.nat)natOffer();return}if(v==="nat"&&prepLocked()){toast("Termina antes de preparar el partido del club.");return}S.view=v;save();render();window.scrollTo(0,0)},
   natyes:()=>{const off=S.nat;natInit();S.view="nat";closeModal();if(S.phase==="season"&&S.comp&&!S.comp.done&&S.comp.type!=="online"){natMaybeStart()}addNews(`${S.coach.name}, nuevo seleccionador nacional. En el bar no se lo creen.`);save();render();window.scrollTo(0,0)},
   natno:()=>{closeModal()},
-  natplay:()=>natPlay(),natpost:()=>natPost(),natafter:()=>natAfter(),natcancel:()=>natCancel(),natend:()=>natEndShow(),
+  natplay:()=>natPlay(),legplay:()=>legPlay(),legpost:()=>legPost(),legafter:()=>legAfter(),
+  parade:v=>{const [k,r]=String(v||"").split("|");paradeShow(k,r)},paradeend:v=>{if(v==="offers")renderOffers();else closeModal()},natpost:()=>natPost(),natafter:()=>natAfter(),natcancel:()=>natCancel(),natend:()=>natEndShow(),
   natsub:v=>{S.nat.sub=v;save();render();window.scrollTo(0,0)},natsq:v=>natSqModal(v),
   natconv:v=>{const N=S.nat;if(N.tour&&!N.tour.done)return;const id=+v;const i=N.conv.indexOf(id);if(i>=0)N.conv.splice(i,1);else{if(N.conv.length>=26){toast("Ya tienes 26. Quita a alguien.");return}N.conv.push(id)}N.lineup=N.lineup.map(x=>N.conv.includes(x)?x:null);save();render()},
   natautoconv:()=>{natAutoConv();natAutoXI();save();render()},natautoxi:()=>{natAutoXI();save();render()},natform:v=>{S.nat.form=v;natAutoXI();save();render()},
