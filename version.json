@@ -1,1 +1,1 @@
-{"v": "18.1", "notes": ["Pequeños arreglos."]}
+{"v": "18.2", "notes": ["Arreglado: el partido se quedaba congelado en un minuto (los jugadores se movían pero el reloj no avanzaba). Además, si algo se atasca, el partido sigue solo a los pocos segundos.", "Arreglado: la celebración del gol salía antes de que el balón entrara. Ahora sale justo cuando es gol.", "Arreglado: el que saca de banda se quedaba con los brazos levantados."]}
