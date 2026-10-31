@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="16.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="16.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -972,7 +972,8 @@ function wCoach(R,t,seed){R=R||seeded(seed||Math.floor(Math.random()*1e9));const
 function wCoachOf(c){if(!c.coach)c.coach=wCoach(seeded(hashStr(c.n)+99),c.t);return c.coach}
 const coachName=k=>k?`${k.n}${k.m?` «${k.m}»`:""}`:"—";
 function wStyle(c){const st=c.coach&&c.coach.st;return st==="ofensivo"?"ataque":st==="defensivo"?"contra":st==="del patadón"?"patadon":st==="de toque"?"toque":"normal"}
-function wStr(c){const xi=wXI(c.ps,c.form);if(!xi.length)return 5;const k=wCoachOf(c);return +(strOfQ(xi.reduce((a,p)=>a+p.q,0)/11)*(.95+Math.min(100,k.rep)/1000)).toFixed(1)}
+function wStr(c){const xi=wXI(c.ps,c.form);if(!xi.length)return 5;const k=wCoachOf(c);return +(strOfQ(xi.reduce((a,p)=>a+p.q,0)/11)*(.95+Math.min(100,k.rep)/1000)*(1+Math.min(10,c.fac||0)*.012)).toFixed(1)}
+const OWNERS=["un constructor de Marbella","un jeque que se ha perdido buscando Sevilla","el dueño de una cadena de gimnasios","un youtuber de criptomonedas","un empresario chino de bazares","el rey de las tragaperras de la comarca","un futbolista retirado con mucho dinero y poco juicio","el de los pollos asados del polígono"];
 function wExtraName(t,used){const towns=Object.keys(GEO).filter(x=>x!==HOME);const pre=["CD","UD","Atlético","CF","Racing","Real","Deportivo"];
   for(let k=0;k<400;k++){const R=seeded(t*1000+k);const n=t===0?pick(LOCAL_TEAMS.concat(COMARCA_TEAMS)):`${pre[Math.floor(R()*pre.length)]} ${towns[Math.floor(R()*towns.length)]}`;if(!used.has(n))return[n,towns[k%towns.length]]}return[`Club ${t}-${used.size}`,towns[0]]}
 function wInit(){
@@ -1045,7 +1046,16 @@ function wSeason(c,ourPos){
     W.tiers[t]=W.tiers[t].filter(n=>!up.includes(n)).concat(dn);W.tiers[t+1]=W.tiers[t+1].filter(n=>!dn.includes(n)).concat(up)}
   const nt=W.tiers.findIndex(l=>l.includes("__us"));
   // dinero por la temporada
-  for(let t=0;t<TIERS.length;t++)order[t].forEach((n,i)=>{const cl=W.clubs[n];if(!cl)return;cl.money=Math.round(cl.money*.5+TIER_MONEY[t]*(1+(order[t].length-i)/order[t].length))});
+  for(let t=0;t<TIERS.length;t++)order[t].forEach((n,i)=>{const cl=W.clubs[n];if(!cl)return;cl.money=Math.round(cl.money*(cl.amb?.75:.5)+TIER_MONEY[t]*(1+(order[t].length-i)/order[t].length))});
+  // dueños nuevos y clubes que invierten bien
+  Object.values(W.clubs).forEach(cl=>{if(cl.t>=TIERS.length-1)return;
+    if(Math.random()<.007+(cl.t<=2?.006:0)){const o=pick(OWNERS);cl.amb=Math.min(3,(cl.amb||0)+1);cl.owner=o;const inj=Math.round(TIER_MONEY[Math.min(TIERS.length-1,cl.t+2)]*(2+Math.random()*2));cl.money+=inj;
+      lines0.push(`Bombazo: ${o} compra el ${cl.n} (${TIERS[cl.t].n}) y mete ${inj.toLocaleString("es-ES")} €. Quiere llegar a Primera.`)}
+    if(cl.amb){const inv=Math.round(cl.money*.12);if(inv>TIER_MONEY[cl.t]*.4&&(cl.fac||0)<10){cl.money-=inv;cl.fac=(cl.fac||0)+1}
+      if(Math.random()<.08){cl.amb=Math.max(0,cl.amb-1);if(!cl.amb)lines0.push(`El dueño del ${cl.n} se cansa del fútbol y cierra el grifo.`)}}
+    cl.hist=(cl.hist||[]).concat(cl.t).slice(-12)});
+  // escaladas: equipos que vienen desde abajo
+  Object.values(W.clubs).forEach(cl=>{const h=cl.hist||[];if(h.length>=3&&cl.tag==="↑"){const from=Math.min(...h);if(cl.t-from>=3)lines0.push(`Lo del ${cl.n} es de película: de ${TIERS[from].n} a ${TIERS[cl.t].n} en ${h.length-h.indexOf(from)} temporadas.`)}});
   // sueldos y crisis: los que se quedan sin dinero venden a su mejor jugador a uno más rico
   Object.values(W.clubs).forEach(cl=>{const pay=Math.round(cl.ps.reduce((a,p)=>a+p.q,0)*TIER_MONEY[cl.t]/900);cl.money-=pay;
     if(cl.money<0&&cl.ps.length>12){const star=cl.ps.slice().sort((a,b)=>b.q-a.q)[0];const buyers=Object.values(W.clubs).filter(o=>o!==cl&&o.t>=cl.t&&o.money>TIER_MONEY[o.t]);const b=buyers.length?pick(buyers):null;
@@ -1062,10 +1072,10 @@ function wSeason(c,ourPos){
       return !retire});
     if(cl.jrs){cl.ps=cl.ps.concat(cl.jrs);delete cl.jrs}
     // fichajes según el dinero
-    let buys=0;const price=q=>Math.round(Math.pow(Math.max(1,q),2.2)*(pro?.9:.05));
-    while(cl.ps.length<16||(buys<2&&cl.money>price(TIER_Q[t]+4)*1.5)){
+    let buys=0;const price=q=>Math.round(Math.pow(Math.max(1,q),2.2)*(pro?.9:.05));const bmax=cl.amb?16:8;
+    while(cl.ps.length<16||(buys<(cl.amb?4:2)&&cl.money>price(TIER_Q[t]+4)*1.5)){
       const pos=W_SHAPE.find((x,i)=>cl.ps.filter(p=>p.pos===x).length<W_SHAPE.filter(y=>y===x).length)||pick(["DEF","MED","DEL"]);
-      const budget=Math.max(0,cl.money*.35);let boost=0;while(boost<8&&price(TIER_Q[t]+boost+2)<budget)boost+=2;
+      const budget=Math.max(0,cl.money*(cl.amb?.55:.35));let boost=0;while(boost<bmax&&price(TIER_Q[t]+boost+2)<budget)boost+=2;
       const np=wPlayer(seeded(hashStr(cl.n)+S.season*13+buys*7+cl.ps.length),t,pos,boost-2);const cost=price(np.q);
       if((np.pos==="DEF"||np.pos==="MED")&&cl.ps.filter(p=>(p.pos==="DEF"||p.pos==="MED")&&p.foot==="I").length<2)np.foot="I";
       if(np.pos==="DEL"&&wStyle(cl)==="contra")np.spd=Math.max(np.spd,60+Math.floor(Math.random()*25));if(np.pos==="DEL"&&wStyle(cl)==="patadon")np.alt=Math.max(np.alt,186);
@@ -1097,18 +1107,24 @@ function huntDo(v){const[cn,ix,full]=v.split("|");const cl=S.world&&S.world.club
   addNews(`¡${clubName()} le arranca a ${fullName(p)} al ${cl.n} por ${fee} €!`);addHeat(cl.n,1,`les quitasteis a ${fullName(p)}`);feedPost("sign",{p:short(p)});closeModal();save();render();toast(`${short(p)} es tuyo.`)}
 /* ofertas que llegan solas */
 function genTOffer(){if(!S.world||!S.comp||S.comp.type==="online"||Math.random()>.14)return;const tier=curTier();
-  if(Math.random()<.5&&S.players.length>12){const mine=S.players.filter(p=>!p.injured&&!p.loan).sort((a,b)=>ovr(b)-ovr(a)).slice(0,5);const p=pick(mine);if(!p)return;
-    const buyers=Object.values(S.world.clubs).filter(c=>Math.abs(c.t-tier)<=1&&c.money>TIER_MONEY[c.t]*.5);const c=pick(buyers);if(!c)return;
-    S.tOffer={type:"sell",id:p.id,club:c.n,fee:Math.round(mktVal(ovr(p),tier,p.age)*(1.2+Math.random()*1.4))}}
+  if(Math.random()<.55&&S.players.length>12){const pool=S.players.filter(p=>!p.injured&&!p.loan&&!p.gravLock);if(!pool.length)return;
+    const top=pool.slice().sort((a,b)=>ovr(b)-ovr(a));const r=Math.random();
+    const p=r<.4?top[0]:r<.6?top[top.length-1]:pick(top.slice(0,5));const d=ovr(p)-TIER_Q[tier];
+    // muy bueno: lo quieren de arriba; muy malo: te lo compran de abajo; normal: de tu nivel
+    let lo=tier-1,hi=tier+1,kind="eq";if(d>=6&&tier<TIERS.length-1){lo=tier+1;hi=Math.min(TIERS.length-1,tier+Math.ceil(d/6));kind="up"}else if(d<=-6&&tier>0){lo=Math.max(0,tier-2);hi=tier-1;kind="down"}
+    const buyers=Object.values(S.world.clubs).filter(c=>c.t>=lo&&c.t<=hi&&c.money>TIER_MONEY[c.t]*.3);const c=pick(buyers);if(!c)return;
+    const base=mktVal(ovr(p),tier,p.age);const fee=Math.max(10,Math.round(kind==="up"?base*(1.4+(c.t-tier)*.5+Math.random()*.8):kind==="down"?base*(.5+Math.random()*.5):base*(1.2+Math.random()*1.4)));
+    S.tOffer={type:"sell",id:p.id,club:c.n,ct:c.t,kind,fee}}
   else{const cs=S.world.tiers[tier].filter(n=>n!=="__us").map(n=>S.world.clubs[n]).filter(c=>c&&c.ps.length>14);const c=pick(cs);if(!c)return;const wp=pick(c.ps.slice().sort((a,b)=>b.q-a.q).slice(0,8));if(!wp)return;
     S.tOffer={type:"buy",club:c.n,ix:c.ps.indexOf(wp),fee:Math.round(mktVal(wp.q,tier,wp.age)*(1.5+Math.random()*1.5)),wage:wageFor(wp.q,tier)+1,why:pick(["necesita dinero para pagar la luz","quiere hacer caja","el jugador ha discutido con el entrenador","se ha peleado con la mujer del presidente"])}}}
 function showTOffer(){const o=S.tOffer;if(!o)return false;const tier=curTier();
   if(o.type==="sell"){const p=pById(o.id);if(!p){S.tOffer=null;return false}modal(`Oferta del ${o.club}`,cardHTML(p));const b=$("#mod-b");paintFaces(b);const r=b.querySelector("#radar");if(r)drawRadar(r,p);
-    const act=b.querySelector(".pc-act");if(act)act.innerHTML=`<p class="hint" style="width:100%">El <b>${esc(o.club)}</b> quiere a <b>${esc(fullName(p))}</b> y ofrece <b>${o.fee} €</b>.</p><button class="btn primary" data-act="toff" data-v="1">Aceptar (+${o.fee} €)</button><button class="btn" data-act="toff" data-v="0">Rechazar</button>`;return true}
+    const act=b.querySelector(".pc-act");if(act)act.innerHTML=`<p class="hint" style="width:100%">El <b>${esc(o.club)}</b>${o.ct!=null?` (${esc(TIERS[o.ct].n)})`:""} quiere a <b>${esc(fullName(p))}</b> y ofrece <b>${o.fee.toLocaleString("es-ES")} €</b>.${o.kind==="up"?` Es un club de más categoría: <b>${esc(short(p))} se quiere ir</b>. Si dices que no, se enfada.`:o.kind==="down"?` Es de una división más baja: aquí no juega y allí sería titular. Te lo quitan de encima.`:""}</p><button class="btn primary" data-act="toff" data-v="1">Aceptar (+${o.fee} €)</button><button class="btn" data-act="toff" data-v="0">Rechazar</button>`;return true}
   const cl=S.world.clubs[o.club];const wp=cl&&cl.ps[o.ix];if(!wp){S.tOffer=null;return false}const p=wToPlayer(wp,tier,cl.n,true);p.wage=o.wage=Math.max(o.wage,p.wage);modal(`Te ofrecen a ${fullName(p)}`,cardHTML(p));const b=$("#mod-b");b.querySelectorAll("canvas[data-face]").forEach(c=>{c.removeAttribute("data-face");drawFace(c,lookOf(p))});const r=b.querySelector("#radar");if(r)drawRadar(r,p);
   const act=b.querySelector(".pc-act");if(act)act.innerHTML=`<p class="hint" style="width:100%">El <b>${esc(o.club)}</b> te lo ofrece porque ${esc(o.why)}. Traspaso: <b>${o.fee} €</b>. Pide <b>${o.wage} €/semana</b> y dos temporadas de contrato.</p><button class="btn primary" data-act="toff" data-v="1">Aceptar contrato</button><button class="btn" data-act="toff" data-v="0">Rechazar contrato</button>`;return true}
 function tOfferAnswer(yes){const o=S.tOffer;S.tOffer=null;closeModal();if(!o)return;const tier=curTier();
-  if(!yes){addNews(o.type==="sell"?`Rechazas la oferta del ${o.club}.`:`Le dices que no al ${o.club}.`);save();render();return}
+  if(!yes){if(o.type==="sell"&&o.kind==="up"){const p=pById(o.id);if(p){p.conf=clamp((p.conf||0)-20,0,100);p.dep=clamp((p.dep||0)+5,0,100);toast(`${short(p)} se ha enfadado: quería irse al ${o.club}.`)}}
+    addNews(o.type==="sell"?`Rechazas la oferta del ${o.club}.`:`Le dices que no al ${o.club}.`);save();render();return}
   if(o.type==="sell"){const p=pById(o.id);const cl=S.world.clubs[o.club];if(!p||!cl)return;ledSync();S.money+=o.fee;led(`Venta de ${fullName(p)} al ${o.club}`,o.fee);S.players=S.players.filter(x=>x!==p);S.lineup=S.lineup.map(x=>x===p.id?null:x);legendCheck(p);cl.ps.push({n:fullName(p),pos:p.pos,age:p.age,q:ovr(p),pot:potOf(p)});cl.money-=o.fee;addNews(`${fullName(p)} se va al ${o.club} por ${o.fee} €.`);save();render();toast(`Vendido: +${o.fee} €.`);return}
   const cl=S.world.clubs[o.club];const wp=cl&&cl.ps[o.ix];if(!wp)return;if(S.players.length>=22){toast("Plantilla llena: 22.");return}if(S.money<o.fee){toast(`Necesitas ${o.fee} €.`);return}
   const p=wToPlayer(wp,tier,cl.n);p.wage=o.wage;p.ct=2;ledSync();S.money-=o.fee;led(`Fichaje de ${fullName(p)} (del ${o.club})`,-o.fee);S.players.push(p);const e=S.lineup.findIndex(x=>!x);if(e>=0)S.lineup[e]=p.id;wSold(p,o.fee);addNews(`${fullName(p)} llega desde el ${o.club} por ${o.fee} €.`);save();render();toast(`${short(p)} fichado.`)}
