@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="17.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="17.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -703,6 +703,7 @@ const HOME="Fuentes de Andalucía",KO=660;
 const VENUES=[{n:"Descampado de los Papas",d:.8,ours:1},{n:"Campo de la Feria",d:1.6},{n:"Pista del Polígono",d:2.6},{n:"Explanada de la Cooperativa",d:3.4}];
 const GEO={"Fuentes de Andalucía":[37.46,-5.35],"Marchena":[37.33,-5.42],"La Luisiana":[37.53,-5.22],"Cañada Rosal":[37.60,-5.22],"Écija":[37.54,-5.08],"La Campana":[37.57,-5.43],"Carmona":[37.47,-5.64],"Mairena del Alcor":[37.37,-5.75],"El Viso del Alcor":[37.39,-5.72],"Palma del Río":[37.70,-5.28],"Osuna":[37.24,-5.10],"Utrera":[37.18,-5.78],"Lebrija":[36.92,-6.08],"Morón":[37.12,-5.45],"Estepa":[37.29,-4.88],"Dos Hermanas":[37.28,-5.92],"Alcalá de Guadaíra":[37.34,-5.84],"Lora del Río":[37.66,-5.53],"Coria del Río":[37.29,-6.05],"Paradas":[37.29,-5.50],"El Arahal":[37.26,-5.55],"Lantejuela":[37.35,-5.22],"La Puebla de Cazalla":[37.22,-5.31],"Sevilla":[37.39,-5.98],"La Rinconada":[37.49,-5.98],"Los Palacios":[37.16,-5.92],"Tomares":[37.37,-6.05],"Córdoba":[37.88,-4.78],"Puente Genil":[37.39,-4.77],"Montilla":[37.59,-4.64],"Lucena":[37.41,-4.48],"Antequera":[37.02,-4.56],"Huelva":[37.26,-6.95],"Jerez de la Frontera":[36.69,-6.13],"San Fernando":[36.46,-6.20],"Cádiz":[36.53,-6.29]};
 const HAMLETS=["Venta El Cruce","Apeadero de Vado Hondo","Cortijo Los Jarales","Barriada San Isidro","El Rincón (pedanía)","Gasolinera La Parrilla","Poblado Los Motillos"];
+const PROMO=3; /* suben y bajan 3 en cada liga */
 const TIERS=[
  {n:"Liga Local de Fuentes",teams:8,s:10.5,r:6},
  {n:"Tercera Andaluza (Sevilla)",teams:14,s:17,r:7},
@@ -1037,7 +1038,7 @@ function wSeason(c,ourPos){
   W.free=W.free||[];const sacked=[];
   for(let t=0;t<TIERS.length;t++){const L=order[t],N=L.length;const exp=L.slice().filter(n=>n!=="__us").sort((a,b)=>wStr(W.clubs[b])-wStr(W.clubs[a]));
     L.forEach((n,i)=>{const cl=W.clubs[n];if(!cl)return;const k=wCoachOf(cl);const want=exp.indexOf(n);const perf=(want-i)/N;
-      k.rep=clamp(Math.round(k.rep+perf*30+(i<2&&t<TIERS.length-1?8:0)-(i>=N-2&&t>0?8:0)),5,100);k.exp++;k.age++;
+      k.rep=clamp(Math.round(k.rep+perf*30+(i<PROMO&&t<TIERS.length-1?8:0)-(i>=N-PROMO&&t>0?8:0)),5,100);k.exp++;k.age++;
       if(i===0)k.car.push(`Campeón de ${TIERS[t].n} (T${S.season})`);
       const bad=(i>=N-3&&Math.random()<.5)||(perf<-.3&&Math.random()<.6);
       if(k.age>=70||(k.age>=64&&Math.random()<.25)){if(t===nt0())lines0.push(`${coachName(k)} se jubila tras ${k.exp} años en los banquillos. Último club: ${cl.n}.`);cl.coach=null;sacked.push(cl)}
@@ -1051,7 +1052,7 @@ function wSeason(c,ourPos){
     if(!k){k=wCoach(null,cl.t);k.car.push(`Debuta en el ${cl.n} (T${S.season})`);if(cl.t===nt0())lines0.push(`El ${cl.n} apuesta por un desconocido: ${coachName(k)}.`)}
     k.since=S.season+1;k.w=k.d=k.l=0;cl.coach=k;k.car=k.car.slice(-8)});
   W.free.forEach(k=>k.age++);W.free=W.free.filter(k=>k.age<70).slice(-40);
-  for(let t=0;t<TIERS.length-1;t++){const up=order[t].slice(0,2),dn=order[t+1].slice(-2);
+  for(let t=0;t<TIERS.length-1;t++){const up=order[t].slice(0,PROMO),dn=order[t+1].slice(-PROMO);
     up.forEach(n=>{if(n!=="__us"){W.clubs[n].t=t+1;W.clubs[n].tag="↑"}});dn.forEach(n=>{if(n!=="__us"){W.clubs[n].t=t;W.clubs[n].tag="↓"}});
     W.tiers[t]=W.tiers[t].filter(n=>!up.includes(n)).concat(dn);W.tiers[t+1]=W.tiers[t+1].filter(n=>!dn.includes(n)).concat(up)}
   const nt=W.tiers.findIndex(l=>l.includes("__us"));
@@ -2041,10 +2042,10 @@ function viewComp(){
   const ladder=TIERS.map((t,i)=>`<div class="${i===(c?c.tier:S.tierNext)?"us":""}">${i?`${TIERS.length-i}.`:"·"} ${esc(t.n)}${i?"":" (no federada)"} · ${t.teams} equipos · ${(t.teams-1)*2} jornadas${i===(c?c.tier:S.tierNext)?" ← estáis aquí":""}</div>`).reverse().join("");
   if(!c)return `<section class="win"><div class="bar">Pretemporada <small>Temporada ${S.season}</small></div><div class="body"><p>Siguiente: <b>${esc(TIERS[S.tierNext].n)}</b>.</p><div class="ko">${ladder}</div><p class="hint">Suben los dos primeros y bajan los dos últimos. Victoria 3, empate 1, derrota 0.</p></div></section>${S.trophies.length?`<section class="win"><div class="bar">Vitrina</div><div class="body"><p>${S.trophies.map(esc).join(" · ")}</p></div></section>`:""}`;
   const N=c.teams.length;
-  const tbl=`<div class="tblw"><table class="tbl"><thead><tr><th>#</th><th class="t">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>PTS</th></tr></thead><tbody>${sortIdx(c,[...Array(N).keys()]).map((i,k)=>{const r=c.teams[i];return `<tr class="${r.us?"us":""} ${k<2&&c.tier<TIERS.length-1?"up":""} ${k>=N-2&&c.tier>0?"down":""}"><td>${k+1}</td><td class="t">${crestCv(r,18).replace('class="crestcv"','class="crestcv tcrest"')}${!r.us&&S.world&&S.world.clubs[r.n]?`<a class="wlink" data-act="wclub" data-v="${esc(r.n)}">${esc(r.n)}</a>`:esc(r.n)}${r.tag?` <small>${r.tag}</small>`:""}${isRiv(r.n)?" <small>⚔</small>":""}</td><td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td><td>${r.gf}</td><td>${r.gc}</td><td>${r.pts}</td></tr>`}).join("")}</tbody></table></div>`;
+  const tbl=`<div class="tblw"><table class="tbl"><thead><tr><th>#</th><th class="t">Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>PTS</th></tr></thead><tbody>${sortIdx(c,[...Array(N).keys()]).map((i,k)=>{const r=c.teams[i];return `<tr class="${r.us?"us":""} ${k<PROMO&&c.tier<TIERS.length-1?"up":""} ${k>=N-PROMO&&c.tier>0?"down":""}"><td>${k+1}</td><td class="t">${crestCv(r,18).replace('class="crestcv"','class="crestcv tcrest"')}${!r.us&&S.world&&S.world.clubs[r.n]?`<a class="wlink" data-act="wclub" data-v="${esc(r.n)}">${esc(r.n)}</a>`:esc(r.n)}${r.tag?` <small>${r.tag}</small>`:""}${isRiv(r.n)?" <small>⚔</small>":""}</td><td>${r.pj}</td><td>${r.g}</td><td>${r.e}</td><td>${r.p}</td><td>${r.gf}</td><td>${r.gc}</td><td>${r.pts}</td></tr>`}).join("")}</tbody></table></div>`;
   const next=c.rounds[c.r]?c.rounds[c.r].map(m=>`<div class="${m.a===0||m.b===0?"us":""}">${esc(c.teams[m.a].n)} – ${esc(c.teams[m.b].n)}</div>`).join(""):"";
   return `<section class="win"><div class="bar">${esc(c.name)} <small>Temporada ${S.season} · ${esc(c.stage[Math.min(c.r,c.stage.length-1)])}</small></div><div class="body">
-   <p class="hint">${N} equipos a ida y vuelta: ${(N-1)*2} jornadas, una por semana. Victoria 3, empate 1, derrota 0. ${c.tier<TIERS.length-1?"Suben los dos primeros.":""} ${c.tier>0?"Bajan los dos últimos.":""}</p>${tbl}
+   <p class="hint">${N} equipos a ida y vuelta: ${(N-1)*2} jornadas, una por semana. Victoria 3, empate 1, derrota 0. ${c.tier<TIERS.length-1?"Suben los tres primeros.":""} ${c.tier>0?"Bajan los tres últimos.":""}</p>${tbl}
    ${next?`<div class="ko"><div class="h">PRÓXIMA JORNADA</div>${next}</div>`:""}</div></section>
   <section class="win"><div class="bar">La escalera</div><div class="body"><div class="ko">${ladder}</div></div></section>`;
 }
@@ -2517,7 +2518,7 @@ function setObjective(c){
   const N=c.teams.length;const type=better<=1&&c.tier<TIERS.length-1?"sube":better<=N/2?"mitad":"salva";
   S.board.obj={type,tier:c.tier,season:S.season};
 }
-function objMet(pos,N){const o=S.board&&S.board.obj;if(!o)return null;return o.type==="sube"?pos<=2:o.type==="campeon"?pos===1:o.type==="mitad"?pos<=N/2:pos<N-1}
+function objMet(pos,N){const o=S.board&&S.board.obj;if(!o)return null;return o.type==="sube"?pos<=PROMO:o.type==="campeon"?pos===1:o.type==="mitad"?pos<=N/2:pos<=N-PROMO}
 function boardEnd(pos,N){
   if(!S.board||!S.board.obj)return "";const ok=objMet(pos,N);const b=S.board;let t;
   if(ok){b.trust=clamp(b.trust+20,0,100);b.fails=0;const pr=100+curTier()*150;S.money+=pr;t=`<p><b>Directiva:</b> objetivo cumplido (${OBJ_T[b.obj.type].toLowerCase()}). Prima de ${pr} € y un jamón.</p>`}
@@ -4884,6 +4885,7 @@ const GOAL_THEM=[(o,g,d)=>`Gol de ${o}. ${g} estaba mirando el móvil.`,(o,g,d)=
 const SHOUTS=["¡Que corráis, que esto no es el Imserso!","¡Al que marque le pago un mollete!","¡Presión alta! ¡O media! ¡La que podáis!","¡Me estoy jugando el PER, señores!","¡Ese balón es tuyo! ¡TUYO!","¡Pensad en vuestras madres!"];
 const cutre=()=>M.ours?(S.embargo?0:(S.field||0)):(S.comp.tier>=4?3:S.comp.tier>=2?2:S.comp.tier);
 const WEIRD=[
+ {id:"oso",w:.35,c:()=>M.min>8&&!M.online,t:"",e:()=>bearEvent()},
  {id:"fuego",ours:1,c:()=>!has("campamento"),w:1.4,t:"Un vagabundo ha comenzado a quemar el césped. Bueno, la tierra. Bueno, un neumático.",e:()=>{M.mod*=.94;M.omod*=.94;for(let i=0;i<6;i++)M.fires.push({x:rnd(30,130),y:rnd(15,85)})}},
  {id:"balones",c:()=>M.ours?!has("balones"):cutre()<2,w:.3,end:1,t:"No quedan balones inflados. El partido ha terminado."},
  {id:"vecina",c:()=>cutre()<1,w:.2,end:1,t:"El último balón cae en el patio de la vecina. Dice que este año ya van once y no lo devuelve. Partido terminado."},
@@ -4956,11 +4958,39 @@ function chance(){withVis(()=>{const P=myPower(),O=M.oppStr*M.omod*styK();const 
   const our=Math.pow((P.a+P.d)/2*mid,.85),them=Math.pow(O,.85);if(onList().length&&Math.random()<our/(our+them))return shot(false);
   // contraataques: si el rival es ofensivo o de contra y tú vas con pocos atrás, te pillan más
   theirChance((M.oppStyle==="ataque"||M.oppStyle==="patadon")&&fs.nDf<4?1.18:1)})}
+/* ---------- el oso ---------- */
+const BEAR_CURRO=["Eso es un oso pardo. O un perro muy gordo. Yo de animales no sé.","Tranquilos, que dicen que los osos no comen en ayunas. Bueno, creo que sí.","En mi pueblo esto se arreglaba con una escopeta y un pan con aceite.","Ha sido falta del oso, señor colegiado. Clarísima.","Me recuerda a mi suegra en las rebajas del Corte Inglés.","Se lo ha comido como yo me como un montadito de pringá: sin respirar.","¿El oso cuenta como cambio? Pregunto.","Yo no lo vi entrar. Creo que ha pagado entrada.","Ese oso tiene mejor colocación que nuestro central."];
+const BEAR_RUBIO=["Que no cunda el pánico: el médico dice que es solo una lesión de una semana.","Lo han escupido entero. Un poco babeado, pero entero.","Según el parte médico, mordisco leve y mucho susto.","El oso se va por donde vino. Nadie se atreve a sacarle tarjeta."];
+function bearEvent(){const ours=Math.random()<.55;const sp=castStyle()==="paleto"?["Curro","El Rubio"]:castNames();
+  let victim=null,vname="",sprite=null;
+  if(ours){const L=onList().filter(x=>x.role!=="POR"&&!x.p.real);if(!L.length)return;const x=pick(L);victim=x.p;vname=short(x.p)}
+  else{const ro=(S.comp.teams[M.opp].roster||[]).filter(r=>r.pos!=="POR");const r=ro.length?pick(ro):{n:"un rival"};vname=r.n}
+  const V=M.vis;if(V){const team=ours?V.us:V.them;sprite=ours?team.find(p=>p.id===victim.id):(team.find(p=>p.full===vname)||team.find(p=>p.role!=="POR"));
+    if(sprite){const now=performance.now();V.bear={t0:now,tx:sprite.x,ty:sprite.y,sx:sprite.x<52?-6:110,sy:-4,sp:sprite,ours};M.busyUntil=Math.max(M.busyUntil||0,now+6500);setLabel("¡HAY UN OSO EN EL CAMPO!",2500)}}
+  addLog(M.min,`¡Un oso ha saltado la valla y se ha metido en el campo! Va directo a por ${vname}…`,"bad");
+  const c1=pick(BEAR_CURRO);addLog(M.min,`${sp[0]}: «${c1}»`,"ev");
+  setTimeout(()=>{if(!M||M.ended)return;addLog(M.min,`El oso se ha comido a ${vname}. ${sp[1]}: «${pick(BEAR_RUBIO)}»`,"goal");addLog(M.min,`${sp[0]}: «${pick(BEAR_CURRO.filter(x=>x!==c1&&!/pardo/.test(x)))}»`,"ev");
+    if(ours){const i=M.slots.indexOf(victim.id);const pp=pById(victim.id);if(pp)pp.injured=Math.max(pp.injured||0,2);if(i>=0)removeAt(i,"oso",`${vname} se va al hospital con mordiscos de oso. Solo es una lesión de una semana.`)}
+    else{M.omod*=.95;addLog(M.min,`${vname} se va en ambulancia. Solo es una lesión de una semana. Entra un suplente con cara de susto.`,"ev")}},M.skipping?0:2600)}
+function bearDraw(c,V,P){const B=V.bear;if(!B)return;const t=(performance.now()-B.t0)/1000;if(t>6.2){if(B.sp)B.sp.eaten=false;V.bear=null;return}
+  let x,y,run=true;if(t<2.2){const k=t/2.2;x=B.sx+(B.tx-B.sx)*k;y=B.sy+(B.ty-B.sy)*k}else if(t<3.8){x=B.tx;y=B.ty;run=false;if(B.sp)B.sp.eaten=true}else{const k=(t-3.8)/2.2;x=B.tx+(B.sx-B.tx)*k;y=B.ty+(B.sy-B.ty)*k}
+  const q=P(x,y),s=q.s*3,dir=(t<2.2?B.tx-B.sx:t>=3.8?B.sx-B.tx:1)>=0?1:-1;const lg=run?Math.sin(t*18):0;c.save();c.translate(q.x,q.y);c.scale(dir,1);
+  c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(0,0,10*s,2.6*s,0,0,7);c.fill();
+  c.fillStyle="#5a3a1e";[[-6,1],[-3,-1],[4,1],[7,-1]].forEach(([lx,ph],i)=>{c.fillRect((lx-1.3)*s,-6*s+lg*ph*1.2*s,2.6*s,6*s)});
+  c.fillStyle="#6b4423";c.beginPath();c.ellipse(0,-9*s,10*s,6*s,0,0,7);c.fill();c.fillStyle="#7a5030";c.beginPath();c.ellipse(-2,-11*s,7*s,3*s,0,0,7);c.fill();
+  const hy=-12*s+(run?Math.abs(lg)*s:Math.sin(t*20)*1.4*s);c.fillStyle="#6b4423";c.beginPath();c.arc(9*s,hy,4.6*s,0,7);c.fill();c.beginPath();c.arc(7*s,hy-4.2*s,1.7*s,0,7);c.arc(11.5*s,hy-4*s,1.7*s,0,7);c.fill();
+  c.fillStyle="#c8a070";c.beginPath();c.ellipse(13*s,hy+1*s,2.6*s,1.9*s,0,0,7);c.fill();c.fillStyle="#111";c.beginPath();c.arc(14.8*s,hy+.3*s,.9*s,0,7);c.arc(10*s,hy-1.4*s,.7*s,0,7);c.fill();
+  if(!run||t>=3.8){c.fillStyle="#fff";c.beginPath();c.moveTo(11*s,hy+2.2*s);c.lineTo(12*s,hy+3.6*s);c.lineTo(13*s,hy+2.2*s);c.lineTo(14*s,hy+3.6*s);c.lineTo(15*s,hy+2.2*s);c.fill()}
+  if(t>=3.8&&B.sp){c.fillStyle=B.ours?(ourKit().sh||"#222"):"#333";c.fillRect(14*s,hy+2*s,1.6*s,4*s);c.fillRect(16*s,hy+1.6*s,1.6*s,4*s);c.fillStyle="#111";c.fillRect(14*s,hy+5.6*s,2.2*s,1.2*s);c.fillRect(16*s,hy+5.2*s,2.2*s,1.2*s)}
+  c.restore();
+  if(t>=2.2&&t<3.8){const k=(t-2.2)/1.6;c.save();c.globalAlpha=.9;for(let i=0;i<9;i++){const a=i/9*Math.PI*2+t*5,r=(6+Math.sin(t*14+i)*2)*s;c.fillStyle=i%2?"#e8e2d8":"#cfc6b8";c.beginPath();c.arc(q.x+Math.cos(a)*r*1.4,q.y-10*s+Math.sin(a)*r*.8,4*s,0,7);c.fill()}
+    c.fillStyle="#ffd23f";for(let i=0;i<5;i++){const a=t*6+i*1.3;c.font=`${Math.round(6*s)}px sans-serif`;c.fillText("★",q.x+Math.cos(a)*12*s,q.y-14*s+Math.sin(a)*6*s)}
+    c.font=`bold ${Math.round(8*s)}px Bungee, Impact, sans-serif`;c.textAlign="center";c.lineWidth=3;c.strokeStyle="#000";c.strokeText("¡ÑAM!",q.x,q.y-24*s);c.fillStyle="#fff";c.fillText("¡ÑAM!",q.x,q.y-24*s);c.restore()}}
 function weird(){
   const list=WEIRD.filter(w=>!(M.online&&!M.online.solo&&(w.end||w.id==="portero"))&&!M.used.has(w.id)&&(!w.ours||M.ours)&&(!w.c||w.c())&&(!w.end||M.min>20));
   if(!list.length)return false;
   const w=wpick(list,x=>x.w||1);M.used.add(w.id);
-  addLog(M.min,w.t,w.end?"bad":"ev");if(w.e)w.e();
+  if(w.t)addLog(M.min,w.t,w.end?"bad":"ev");if(w.e)w.e();
   if(w.end){M.early=w.t;endMatch(false);return true}
   return false;
 }
@@ -5288,7 +5318,7 @@ function compEnd(){
   if(S.comp&&S.comp.type==="friendly")return friendlyEnd();
   if(S.cup&&!S.cup.done){S.cup.out=S.cup.out||!S.cup.rounds[S.cup.r].some(m=>m.a===0||m.b===0);let g=0;while(!S.cup.done&&g++<10)simCupRound(S.cup)}
   const c=S.comp;const N=c.teams.length;const order=sortIdx(c,[...Array(N).keys()]);const pos=order.indexOf(0)+1;const champ=c.teams[order[0]].n;
-  const up=pos<=2&&c.tier<TIERS.length-1,down=pos>=N-1&&c.tier>0;S.adapt=up?8:0;
+  const up=pos<=PROMO&&c.tier<TIERS.length-1,down=pos>=N-PROMO+1&&c.tier>0;S.adapt=up?8:0;
   const nextTier=up?c.tier+1:down?c.tier-1:c.tier;
   S.euroNext=c.type==="league"&&c.tier===TIERS.length-1?(pos<=4?"ucl":pos<=6?"uel":pos===7?"uecl":null):null;
   const prize=nice(((N-pos+1)*(10+c.tier*12)+(pos===1?100+c.tier*150:0))*EK[c.tier]);S.money+=prize;
@@ -5878,7 +5908,7 @@ function visUpdate(dt){
 function fitText(c,t,w,max,min){let fs=max;c.font=`bold ${fs}px VT323, monospace`;const tw=c.measureText(t).width;if(tw>w&&tw>0)fs=Math.max(min||8,Math.floor(fs*w/tw));c.font=`bold ${fs}px VT323, monospace`}
 function drawMatchView(cv){
   const c=cv.getContext("2d"),W=cv.width,H=cv.height,V=M.vis,T=performance.now();c.imageSmoothingEnabled=true;
-  V.cam+=(clamp(V.ball.x,27,78)-V.cam)*.06;
+  V.cam+=(clamp(V.bear&&performance.now()-V.bear.t0<4200?V.bear.tx:V.ball.x,27,78)-V.cam)*.06;
   c.save();if(V.shakeUntil>T)c.translate((Math.random()-.5)*7,(Math.random()-.5)*7);
   const ZW=W/(V.span||56),FY=92,NY=H-40;
   const P=(x,y,z)=>{const d=y/PH,s=.64+.36*d;return{x:W/2+(x-V.cam)*ZW*s,y:FY+(NY-FY)*d-(z||0)*ZW*s*.85,s}};
@@ -5932,8 +5962,8 @@ function drawMatchView(cv){
   V.them.forEach(p=>ents.push({y:p.y,p,col:p.role==="POR"?"#222":M.col,sh:"#1a1a1a"}));ents.push({y:V.ball.y,ball:1});if(V.refp&&!V.replaying)ents.push({y:V.refp.y,ref:1});
   ents.sort((a,b)=>a.y-b.y).forEach(e=>{
     if(e.ref){drawRef(c,P,T);return}
-    if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);beamDraw(c,V,P,q);armsDraw(c,V,P);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
-    const p=e.p,q=P(p.x,p.y),s=q.s*1.5*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
+    if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);beamDraw(c,V,P,q);armsDraw(c,V,P);bearDraw(c,V,P);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
+    const p=e.p;if(p.eaten)return;const q=P(p.x,p.y),s=q.s*1.5*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
     c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(q.x,q.y,6*s*(p.bw||1),2*s,0,0,7);c.fill();
     c.fillStyle="#1d1d1d";c.fillRect(q.x-3*s+lg*1.5*s,q.y-8*s,2.4*s,8*s);c.fillRect(q.x+.6*s-lg*1.5*s,q.y-8*s,2.4*s,8*s);
     const gb=p.shirtOff?4:(p.garb||0),sk=p.look.skin;
@@ -5972,7 +6002,7 @@ function drawMatchView(cv){
 }
 function drawFieldView(cv){
   const c=cv.getContext("2d"),W=cv.width,H=cv.height,V=M.vis,T=performance.now();c.imageSmoothingEnabled=true;
-  V.cam+=(clamp(V.ball.x,27,78)-V.cam)*.06;
+  V.cam+=(clamp(V.bear&&performance.now()-V.bear.t0<4200?V.bear.tx:V.ball.x,27,78)-V.cam)*.06;
   const ZW=W/(V.span||56),FY=V.fy||92,NY=H-(V.ny||40);
   const P=(x,y,z)=>{const d=y/PH,s=.64+.36*d;return{x:W/2+(x-V.cam)*ZW*s,y:FY+(NY-FY)*d-(z||0)*ZW*s*.85,s}};
   const ours=M.ours,lvl=ours?(S.field||0):(S.comp.tier>=7?3:S.comp.tier>=3?2:1),grass=ours?has("cesped"):S.comp.tier>=2,lines=!ours||has("cal"),nets=!ours||has("porterias");
@@ -6015,8 +6045,8 @@ function drawFieldView(cv){
   const ents=[];V.us.forEach(p=>ents.push({y:p.y,p,col:p.role==="POR"?"#2f7d32":ourKit().c1,c2:p.role==="POR"?null:ourKit().c2,pat:p.role==="POR"?0:ourKit().pat,sh:p.role==="POR"?"#163d18":ourKit().sh}));
   V.them.forEach(p=>ents.push({y:p.y,p,col:p.role==="POR"?"#222":M.col,sh:"#1a1a1a"}));ents.push({y:V.ball.y,ball:1});
   ents.sort((a,b)=>a.y-b.y).forEach(e=>{
-    if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);beamDraw(c,V,P,q);armsDraw(c,V,P);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
-    const p=e.p,q=P(p.x,p.y),s=q.s*1.5*(V.ps||1)*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
+    if(e.ball){const b=V.ball,g=P(b.x,b.y),q=P(b.x,b.y,b.z);beamDraw(c,V,P,q);armsDraw(c,V,P);bearDraw(c,V,P);c.fillStyle="rgba(0,0,0,.35)";c.beginPath();c.ellipse(g.x,g.y,3.2*g.s,1.3*g.s,0,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle="#111";c.lineWidth=1;c.beginPath();c.arc(q.x,q.y-2.6*q.s,2.8*q.s,0,7);c.fill();c.stroke();return}
+    const p=e.p;if(p.eaten)return;const q=P(p.x,p.y),s=q.s*1.5*(V.ps||1)*(p.hs||1),lg=p.run?Math.sin(T/70+p.ph):0;
     c.globalAlpha=p.ghost?.45:1;c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(q.x,q.y,6*s*(p.bw||1),2*s,0,0,7);c.fill();
     c.fillStyle="#1d1d1d";c.fillRect(q.x-3*s+lg*1.5*s,q.y-8*s,2.4*s,8*s);c.fillRect(q.x+.6*s-lg*1.5*s,q.y-8*s,2.4*s,8*s);
     const gb=p.garb||0,sk=p.look.skin;
@@ -6092,7 +6122,7 @@ if(S&&!S.mafiaFix){S.mafiaFix=1;if(S.debt>0||S.embargo||S.mafiaStrikes){S.debt=0
 render();requestAnimationFrame(loop);
 setTimeout(()=>{try{olStart()}catch(e){}},1500);
 document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olOn())olPublish(true)}catch(e){}});
-window.PCDBG=()=>({drawRadar,drawFace,cardHTML,drawScene,cineSquad,lookOf,bodyOf,faceCanvas,natMaybeStart,weeklyLines,wageFor,fieldCap,EK,FIELDS,STANDS,TICKET,FANS_CAP,TVW,mktVal,nice,ovr,TIER_Q,wInit,wToPlayer,wRealNames,wSeason,wRealize,wInit,S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop,power,formStruct,FORMS});
+window.PCDBG=()=>({drawRadar,drawFace,cardHTML,drawScene,cineSquad,lookOf,bodyOf,faceCanvas,natMaybeStart,weeklyLines,wageFor,fieldCap,EK,FIELDS,STANDS,TICKET,FANS_CAP,TVW,mktVal,nice,ovr,TIER_Q,wInit,wToPlayer,wRealNames,wSeason,wRealize,wInit,S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop,power,formStruct,FORMS,bearEvent});
 })();
 </script>
 </body></html>
