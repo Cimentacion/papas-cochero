@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="17.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="17.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -859,9 +859,11 @@ function genPlayer(place,boost,lvl){
 }
 const diffK=(hard,easy)=>[easy,1,hard][S&&S.diff!=null?S.diff:1];
 function wageFor(o,tier){return Math.max(1,nice((o*.2-1+Math.max(0,o-TIER_Q[Math.max(0,tier-1)])*.25*(1+tier*.15))*EK[tier||0]))}
+/* más de 2 metros: cada centímetro extra es cada vez más raro */
+function giantAlt(a,pos,r){const pg=pos==="POR"?.03:pos==="DEF"||pos==="DEL"?.01:.004;const x=r();if(x<pg){let h=200;while(r()<.8&&h<232)h++;return h}if(x>1-.012)return 158+Math.floor(r()*8);return a}
 function xattr(p){if(p.foot&&p.alt&&p.spd!=null&&p.build)return p;const r=seeded((p.seed||hashStr(p.n||fullName(p)||String(p.id)))+911);
   if(!p.foot){const x=r();p.foot=x<.7?"D":x<.92?"I":"A"}
-  if(!p.alt)p.alt=Math.round((p.pos==="POR"?183:p.pos==="DEF"?179:p.pos==="DEL"?177:174)+(r()*16-8)-(p.female?9:0));
+  if(!p.alt){p.alt=Math.round((p.pos==="POR"?183:p.pos==="DEF"?179:p.pos==="DEL"?177:174)+(r()*16-8)-(p.female?9:0));p.alt=giantAlt(p.alt,p.pos,r)}
   if(!p.build){let bl=false;try{bl=p.first?lookOf(p).belly:r()<.3}catch(e){}p.build=bl?"gordo":p.trait==="cachas"?"fuerte":r()<.3?"delgado":"normal"}
   if(p.spd==null){const f=p.fis!=null?p.fis:(p.q||30);p.spd=clamp(Math.round(f*.7+r()*30-(p.age>35?(p.age-35)*1.2:0)-(p.build==="gordo"?12:0)+(p.build==="delgado"?5:0)),1,99)}return p}
 const FOOTN={D:"Diestro",I:"Zurdo",A:"Ambidiestro"},BUILDN={delgado:"Delgado",normal:"Normal",fuerte:"Fuerte",gordo:"Gordo"};
@@ -973,7 +975,7 @@ function wName(R,t){const f=MALE[Math.floor(R()*MALE.length)];let s=SUR[Math.flo
 function wPlayer(R,t,pos,boost){const pro=t>=4;const age=pro?18+Math.floor(R()*16):17+Math.floor(R()*(t<=1?40:25));
   const q=Math.max(4,Math.round(TIER_Q[t]+(boost||0)+(R()*12-6)-(age>33&&!pro?Math.max(0,age-40)*.3:0)));
   const pot=Math.min(95,q+Math.max(0,Math.round((age<21?14:age<25?8:age<29?3:0)*(.4+R()))));const x=R();const o={n:wName(R,t),pos,age,q,pot,foot:x<.7?"D":x<.92?"I":"A"};
-  if(t>=4&&R()<.12+(t-4)*.05){const code=wpick(PRO_FOREIGN,c=>c[1])[0];const nm=natNames(code,R);o.n=`${nm.first} ${nm.sur}`;o.orig=code}o.alt=Math.round((pos==="POR"?183:pos==="DEF"?179:177)+R()*16-8);o.build=R()<.15&&t<4?"gordo":R()<.3?"delgado":"normal";o.spd=clamp(Math.round(q*.6+R()*35-(age>33?(age-33)*1.5:0)-(o.build==="gordo"?12:0)),1,99);return o}
+  if(t>=4&&R()<.12+(t-4)*.05){const code=wpick(PRO_FOREIGN,c=>c[1])[0];const nm=natNames(code,R);o.n=`${nm.first} ${nm.sur}`;o.orig=code}o.alt=Math.round((pos==="POR"?183:pos==="DEF"?179:177)+R()*16-8);o.alt=giantAlt(o.alt,pos,R);o.build=R()<.15&&t<4?"gordo":R()<.3?"delgado":"normal";o.spd=clamp(Math.round(q*.6+R()*35-(age>33?(age-33)*1.5:0)-(o.build==="gordo"?12:0)),1,99);return o}
 function wSquad(n,t){const R=seeded(hashStr(n)+t*7);return W_SHAPE.map(pos=>wPlayer(R,t,pos,-3))}
 function wXI(ps,form){const roles=FORMS[form]||FORMS["4-4-2"];const pool=ps.slice().sort((a,b)=>b.q-a.q);const xi=[];
   roles.forEach(r=>{let i=pool.findIndex(p=>p.pos===r);if(i<0)i=pool.findIndex(p=>(p.pos==="POR")===(r==="POR"));if(i<0)i=0;if(pool[i]){xi.push(Object.assign({},pool[i],{role:r,q:pool[i].pos===r?pool[i].q:pool[i].q*.85}));pool.splice(i,1)}});return xi}
@@ -1353,7 +1355,9 @@ function drawFace(cv,L){
   if(L.glasses){c.strokeStyle="#1a1a1a";c.lineWidth=1.8;c.fillStyle="rgba(200,230,255,.18)";[41,59].forEach(x=>{c.beginPath();c.roundRect?c.roundRect(x-7,44.5,14,9.5,3):c.rect(x-7,44.5,14,9.5);c.fill();c.stroke()});c.beginPath();c.moveTo(48,48);c.lineTo(52,48);c.moveTo(34,48);c.lineTo(50-hw,47);c.moveTo(66,48);c.lineTo(50+hw,47);c.stroke()}
   c.restore();
 }
-function lookOf(p,mood){
+function lookOf(p,mood){const L=lookOf0(p,mood);if(p.depr&&p.depr.lvl){const v=p.depr.lvl;L.belly=true;L.tired=true;if(!p.female)L.stubble=true;if(L.mood!=="happy"&&L.mood!=="surp")L.mood="sad";
+    if(v>=2&&!L.hijab&&[4,5,6,8,9,10,11,12,13,14,15,16,17].includes(L.hair))L.hair=v>=3?2:3;L.age=(L.age||30)+v*8;L.grey=true}return L}
+function lookOf0(p,mood){
   if(p.nat&&NAT[p.nat])return natLook(p,mood);
   {const rl=realLook(p);if(rl){const reg=regOf(p);const L=regLook(p,mood,reg==="gitano"?"iber":reg);return Object.assign(L,rl)}}
   {const reg=regOf(p);if(reg!=="iber"||hijabOf(p,reg)){const L=regLook(p,mood,reg==="iber"?"magr":reg);if(p.trait==="noche"&&!REGF[reg])L.hc=["#e9c46a","#7a1f2b","#111111"][hashStr(fullName(p))%3];return L}}
@@ -1773,7 +1777,7 @@ function formWarn(form){const s=formStruct(form);const w=[];if(!s.nP)w.push("Sin
 function power(list,form,o){
   const roles=FORMS[form];const sA=roles.reduce((s,r)=>s+WA[r],0),sD=roles.reduce((s,r)=>s+WD[r],0);
   let A=0,D=0;
-  list.forEach(({p,role,sub})=>{const f=fit(p,role)*subFit(p,sub)*attrK(p,role,sub)*(.5+p.mE/200)*(p.drunk?.72:1)*(p.hang>0?.86:1)*(p.knock>0?.9:1)*(role==="POR"?1+.06*stf("porteros"):1);const sp=specs(p);A+=(p.atk*.7+p.fis*.15+p.cab*.15)*f*WA[role]*(sp.includes("Killer")?1.05:1);D+=(p.def*.65+p.fis*.15+p.cab*.2)*f*WD[role]*(sp.includes("Muro")?1.05:1)});
+  list.forEach(({p,role,sub})=>{const f=fit(p,role)*subFit(p,sub)*attrK(p,role,sub)*(p.depr?1-.08*p.depr.lvl:1)*(.5+p.mE/200)*(p.drunk?.72:1)*(p.hang>0?.86:1)*(p.knock>0?.9:1)*(role==="POR"?1+.06*stf("porteros"):1);const sp=specs(p);A+=(p.atk*.7+p.fis*.15+p.cab*.15)*f*WA[role]*(sp.includes("Killer")?1.05:1);D+=(p.def*.65+p.fis*.15+p.cab*.2)*f*WD[role]*(sp.includes("Muro")?1.05:1)});
   A=A/sA*Math.sqrt(sA/SA0);D=D/sD*Math.sqrt(sD/SD0);
   {const sk=formStruct(form);A*=sk.a;D*=sk.d}
   const t=TACT[o.tactic||"normal"];const ta=o.tactic==="patadon"?.7+Math.random()*.7:t.a;
@@ -1910,7 +1914,7 @@ function viewClub(){
 function prow(p,mode){
   const t=tr(p.trait);
   const right=mode==="squad"
-   ?`${p.injured?`<small class="tag bad">${p.gravLock?"En la cámara de gravedad":`Lesionado ${p.injured} sem.`}</small>`:""}<small>${p.wage} €/sem · ${p.goals} goles</small><button class="btn mini" data-act="fire" data-id="${p.id}">${pendingFire===p.id?"¿Seguro?":"Echar"}</button>`
+   ?`${p.depr?`<small class="tag bad">😞 Depresión ${p.depr.lvl}/3 (−${p.depr.lvl*8} %)</small>`:""}${p.injured?`<small class="tag bad">${p.gravLock?"En la cámara de gravedad":`Lesionado ${p.injured} sem.`}</small>`:""}<small>${p.wage} €/sem · ${p.goals} goles</small><button class="btn mini" data-act="fire" data-id="${p.id}">${pendingFire===p.id?"¿Seguro?":"Echar"}</button>`
    :`${p.special?`<small class="tag pos" title="${esc(SPECIAL[p.special])}">${esc(SPECIAL[p.special].split(":")[0])}</small>`:""}<small><b>${p.cost?p.cost+" €":"Gratis"}</b></small><small>${p.loan?"sueldo: su club":p.wage+" €/sem"}</small>${p.scout&&mode==="report"?`<small>${esc(p.scout)}</small>`:p.scout?`<small>🔎 ${esc(p.scout.split(" ").slice(-1)[0])}</small>`:""}<button class="btn mini primary" data-act="${mode==="report"?"hirerep":"hire"}" data-id="${p.id}">Fichar</button>`;
   return `<div class="prow ${p.injured?"inj":""}">
    <div class="pfc"><canvas class="face" data-face="${p.id}" width="128" height="128"></canvas><div class="ppos ${p.known?"":"unk"}">${posLabel(p)}</div></div>
@@ -4944,6 +4948,7 @@ function theirChance(boost){
   else{const og=L.find(x=>x.p.trait==="dislexico");
     if(og&&Math.random()<.05){M.them++;M.lastChance={side:"them",name:rp.n,res:"goal",own:short(og.p)};M.own.push(short(og.p));M.ballT={x:6,y:50};M.net={side:0,until:performance.now()+1500};addLog(M.min,`Gol en propia de ${short(og.p)}. Dice que las porterías estaban al revés.`,"bad")}
     else{M.lastChance={side:"them",name:rp.n,res:Math.random()<.5?"save":"wide",pow:tCanon};
+      if(M.lastChance.res==="save"&&gkS&&gkS.role==="POR"&&(gkS.p.alt||0)>=200&&Math.random()<.18){const sp=castStyle()==="paleto"?["Curro","El Rubio"]:castNames();addLog(M.min,`${sp[0]}: «${pick(GIANT_L)(short(gkS.p),gkS.p.alt)}»`,"ev")}
       if(tCanon&&M.lastChance.res==="save"&&gkS&&gkS.role==="POR"&&!gkS.p.real&&Math.random()<.1){const i=M.slots.indexOf(gkS.p.id);const pp=pById(gkS.p.id);M.lastChance.arms=short(gkS.p);if(pp)pp.injured=Math.max(pp.injured||0,2);
         if(i>=0)removeAt(i,"brazos",`¡CAÑONAZO de ${rp.n}! ${short(gkS.p)} lo para… y ha perdido los brazos, pero tardará una semana en recuperarse.`)}if(offV2){if(M.lastChance.res==="save")M.st.on.them++;M.st.sxy.push({side:"them",x:rnd(7,27),y:rnd(18,50),res:M.lastChance.res})}addLog(M.min,pick(MISS_THEM)(rp.n,g,dn))}}
 }
@@ -4986,6 +4991,15 @@ function bearDraw(c,V,P){const B=V.bear;if(!B)return;const t=(performance.now()-
   if(t>=2.2&&t<3.8){const k=(t-2.2)/1.6;c.save();c.globalAlpha=.9;for(let i=0;i<9;i++){const a=i/9*Math.PI*2+t*5,r=(6+Math.sin(t*14+i)*2)*s;c.fillStyle=i%2?"#e8e2d8":"#cfc6b8";c.beginPath();c.arc(q.x+Math.cos(a)*r*1.4,q.y-10*s+Math.sin(a)*r*.8,4*s,0,7);c.fill()}
     c.fillStyle="#ffd23f";for(let i=0;i<5;i++){const a=t*6+i*1.3;c.font=`${Math.round(6*s)}px sans-serif`;c.fillText("★",q.x+Math.cos(a)*12*s,q.y-14*s+Math.sin(a)*6*s)}
     c.font=`bold ${Math.round(8*s)}px Bungee, Impact, sans-serif`;c.textAlign="center";c.lineWidth=3;c.strokeStyle="#000";c.strokeText("¡ÑAM!",q.x,q.y-24*s);c.fillStyle="#fff";c.fillText("¡ÑAM!",q.x,q.y-24*s);c.restore()}}
+const GIANT_L=[(n,a)=>`Mira, Rubio: ese para varear olivos sale rentable. ${(a/100).toFixed(2).replace(".",",")} metros de portero.`,(n,a)=>`${n} no se tira, se tumba y ya tapa la portería entera.`,(n,a)=>`A ${n} le han hecho la camiseta con dos toldos del Mercadona.`,(n,a)=>`Para meterle un gol a ${n} hay que tirar por debajo de las piernas o pedir permiso.`,(n,a)=>`${n} saluda a las gaviotas desde el área pequeña.`];
+const TINY_L=[(n,a)=>`${n} mide ${(a/100).toFixed(2).replace(".",",")}. No llega al larguero ni subido a una silla.`,(n,a)=>`Rubio, ¿el portero es ${n} o es el recogepelotas?`,(n,a)=>`A ${n} le pasan los balones por encima como los aviones.`];
+function deprTick(res){S.lstreak=res==="L"?(S.lstreak||0)+1:res==="W"?0:(S.lstreak||0);const out=[];
+  S.players.forEach(p=>{if(p.real)return;const d=p.depr;
+    if(res==="W"&&d){d.lvl--;if(d.lvl<=0){p.depr=null;out.push(`${short(p)} sale de la depresión: vuelve a sonreír, se apunta al gimnasio y deja los Phoskitos.`)}else out.push(`${short(p)} va levantando cabeza con la victoria.`)}
+    else if(res==="L"&&S.lstreak>=3){const k=.05*(S.lstreak-2)*(1-.25*stf("psico"))*((p.conf||50)<30?1.5:1);
+      if(!d&&Math.random()<k){p.depr={lvl:1};out.push(`${short(p)} ha entrado en depresión tras tantas derrotas: no sale de casa y se come las magdalenas a pares.`)}
+      else if(d&&d.lvl<3&&Math.random()<.35){d.lvl++;out.push(d.lvl===2?`${short(p)} va a peor: está engordando y se le cae el pelo.`:`${short(p)} está hecho polvo: parece diez años más viejo. Solo una racha de victorias lo arreglará.`)}}});
+  out.forEach(t=>addNews(t));if(out.length&&M)M.deprLines=out}
 function weird(){
   const list=WEIRD.filter(w=>!(M.online&&!M.online.solo&&(w.end||w.id==="portero"))&&!M.used.has(w.id)&&(!w.ours||M.ours)&&(!w.c||w.c())&&(!w.end||M.min>20));
   if(!list.length)return false;
@@ -5186,6 +5200,8 @@ function startMatch(olo){
   addLog(0,`Arbitra ${M.ref.n} (${REF_T[M.ref.t].toLowerCase()}).${M.weather!=="sol"?" "+WEATHER_LOG[M.weather]:""}`,"ev");
   if(P.informe)addLog(0,`Salís como dijo el ojeador: ${S.formation} y «${TACN[M.tactic]}».`,"ev");
   addLog(0,`Pitido inicial en ${v.n}. ${T.n} sale con un ${of}.${FORM_NOTE[of]?" "+FORM_NOTE[of]:""}`,"ev");
+  {const M0=M;setTimeout(()=>{if(M!==M0||!M||M.ended)return;const gk=onList().find(x=>x.role==="POR");const sp=castStyle()==="paleto"?["Curro","El Rubio"]:castNames();if(gk){xattr(gk.p);const a=gk.p.alt||180;
+    if(a>=200)addLog(M.min,`${sp[0]}: «${pick(GIANT_L)(short(gk.p),a)}»`,"ev");else if(a<=166)addLog(M.min,`${sp[0]}: «${pick(TINY_L)(short(gk.p),a)}»`,"ev")}},2500)}
   filled.forEach(p=>addLog(0,`Sale de inicio ${short(p)}, porque no hay otro.`));
   sq.filter(p=>p.drunk).forEach(p=>addLog(0,pick([`${short(p)} llega con una lata en la mano. Va contento.`,`${short(p)} huele a Cruzcampo desde el córner.`,`${short(p)} saluda al árbitro con un abrazo muy largo.`,`${short(p)} se ha calentado con tres latas en el aparcamiento.`]),"bad"));
   sq.filter(p=>!p.drunk&&p.hang>0).forEach(p=>addLog(0,`${short(p)} tiene una resaca que no ve la pelota.`,"bad"));
@@ -5222,7 +5238,7 @@ function endMatch(normal){
   const r=record(c,m.a,m.b,ga,gb,ko);m.win=r.win;m.ga=ga;m.gb=gb;m.pens=r.pens;{const ot=c.teams[M.opp];ot.gl=ot.gl||{};M.rivScorers.forEach(n=>{ot.gl[n]=(ot.gl[n]||0)+1})}
   if(r.pens){const our=m.a===0?r.pens[0]:r.pens[1],their=m.a===0?r.pens[1]:r.pens[0];addLog(M.min,`Penaltis: ${our}-${their}. ${r.win===0?"¡Pasáis!":"Fuera."}`,r.win===0?"goal":"bad")}
   if(c.type==="cup")cupRoundRest(c);else simRoundRest(c,true);
-  const co=S.coach;const res=M.us>M.them?"W":M.us===M.them?"D":"L";
+  const co=S.coach;const res=M.us>M.them?"W":M.us===M.them?"D":"L";try{deprTick(res)}catch(e){}
   co.gf+=M.us;co.ga+=M.them;
   if(res==="W"){co.w++;co.moral=clamp(co.moral+12,0,100)}else if(res==="D"){co.d++;co.moral=clamp(co.moral+2,0,100)}else{co.l++;co.moral=clamp(co.moral-10,0,100)}
   const reveal=[],inj=[];
@@ -5696,7 +5712,7 @@ document.addEventListener("input",e=>{
 const PW=105,PH=68;
 function visOn(){return !!M&&!M.skipping&&!M.ended&&!$("#match").hidden}
 function dorsal(id){const i=S.players.findIndex(p=>p.id===id);return i<0?99:i+1}
-function bodyOf(x){xattr(x);const bw=x.build==="gordo"?1.5:x.build==="fuerte"?1.16:x.build==="delgado"?.84:1;return{hs:clamp(1+((x.alt||178)-178)/120,.84,1.2),bw,spd:clamp(.72+(x.spd!=null?x.spd:50)/100*.55,.72,1.27)*(x.build==="gordo"?.9:1)}}
+function bodyOf(x){xattr(x);const bw=(x.build==="gordo"?1.5:x.build==="fuerte"?1.16:x.build==="delgado"?.84:1)*(x.depr?1+.12*x.depr.lvl:1);return{hs:clamp(1+((x.alt||178)-178)/120+Math.max(0,(x.alt||178)-200)*.024,.8,1.95),bw,spd:clamp(.72+(x.spd!=null?x.spd:50)/100*.55,.72,1.27)*(x.build==="gordo"?.9:1)}}
 function rivSource(n){const T=S.comp&&M&&S.comp.teams[M.opp];if(!T)return null;const W=S.world&&S.world.clubs[T.n];if(W){const w=W.ps.find(x=>x.n===n);if(w)return w}
   for(const k in NATTMP){const v=NATTMP[k];if(v&&v.ps){const f=v.ps.find(x=>fullName(x)===n);if(f)return f}}return null}
 function spriteLook(seedStr,p){if(p){const L=lookOf(p);return{skin:L.skin,hair:L.hijab||(L.hair===0?null:L.hc)}}
