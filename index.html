@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="17.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="17.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -939,13 +939,25 @@ function newComp(tier,ed){
 }
 function sortIdx(c,list){return list.slice().sort((x,y)=>{const a=c.teams[x],b=c.teams[y];return b.pts-a.pts||(b.gf-b.gc)-(a.gf-a.gc)||b.gf-a.gf})}
 function ourFixture(){const c=S.comp;if(!c||c.done)return null;const r=c.rounds[c.r];if(!r)return null;return r.find(m=>m.a===0||m.b===0)||null}
+/* ---------- estadios ---------- */
+const STAD_REAL={"Real Madrid":"Santiago Bernabéu","FC Barcelona":"Spotify Camp Nou","Atlético de Madrid":"Riyadh Air Metropolitano","Sevilla FC":"Ramón Sánchez-Pizjuán","Real Betis":"Benito Villamarín","Athletic Club":"San Mamés","Real Sociedad":"Reale Arena","Villarreal CF":"Estadio de la Cerámica","Valencia CF":"Mestalla","RC Celta":"Abanca-Balaídos","CA Osasuna":"El Sadar","Getafe CF":"Coliseum","Rayo Vallecano":"Estadio de Vallecas","RCD Mallorca":"Son Moix","Girona FC":"Montilivi","Deportivo Alavés":"Mendizorroza","RCD Espanyol":"RCDE Stadium","UD Las Palmas":"Estadio de Gran Canaria","CD Leganés":"Butarque","Málaga CF":"La Rosaleda","Córdoba CF":"Nuevo Arcángel","Granada CF":"Nuevo Los Cármenes","UD Almería":"Estadio de los Juegos Mediterráneos","Cádiz CF":"Nuevo Mirandilla","Real Zaragoza":"La Romareda","Sporting de Gijón":"El Molinón","Real Oviedo":"Carlos Tartiere","Racing de Santander":"El Sardinero","Deportivo de La Coruña":"Riazor","SD Eibar":"Ipurua","CD Tenerife":"Heliodoro Rodríguez López","Elche CF":"Martínez Valero","Burgos CF":"El Plantío","Albacete Balompié":"Carlos Belmonte","CD Castellón":"Castalia","SD Huesca":"El Alcoraz","Racing de Ferrol":"A Malata","FC Cartagena":"Cartagonova","Real Valladolid":"José Zorrilla","Levante UD":"Ciutat de València","CD Mirandés":"Anduva"};
+const STAD_CUTRE=["Descampado de los tubos de cemento","Polígono de Écija","Autovía A-92 (en el arcén)","Sándwich Mixto Campo de Fútbol Adolfo Suárez","Solar de detrás del Mercadona","Era de la Cooperativa","Explanada del tanatorio","Patio del colegio público","Rotonda de la entrada del pueblo","Parking del Lidl","Huerta del tío Paco","Pista de tierra junto a la depuradora","Estadio Municipal Fosa Séptica","Ciudad Deportiva El Pinchazo","Campo de la Feria (sin quitar las casetas)","Antiguo vertedero municipal","Cancha del cortijo de Los Melones","Estadio Chatarrería Hermanos Ruiz"];
+const STAD_BRANDS=["Andamios Manolo","Pollos Asados Antonio","Desatascos Paco","Churrería La Grasa","Préstamos Sin Preguntas","Mataratas El Fulminante","Funeraria La Última Parada","Neumáticos El Concho","Pienso Guau Barato","Tanatorio El Reposo","Autoescuela El Suspenso","Sándwich Mixto","Habichuelas La Abuela","Bar Manolo","Crecepelo Milagro","Pañales SecoSeco"];
+function stadCore(n){const w=String(n).replace(/^(Estadio|Estadi|Spotify|Riyadh Air|Reale|Abanca-|Nuevo|RCDE)\s*/,"").split(/\s+/);const last=w[w.length-1];if(w.length>=2&&/^(San|El|La|Los|Camp|de|Son|A)$/i.test(w[w.length-2]))return w.slice(-2).join(" ");return last.length>3?last:w.slice(-2).join(" ")}
+function stadRename(cl){const b=pick(STAD_BRANDS);if(STAD_REAL[cl.n]&&cl.stad0===STAD_REAL[cl.n])return `${b} ${stadCore(cl.stad0)}`;const m=/^Estadio Municipal de (.+)$/.exec(cl.stad0);if(m)return `${b} Arena de ${m[1]}`;return `${b} ${cl.stad0}`}
+function stadOf(n,town,t){const W=S&&S.world;const cl=W&&W.clubs[n];
+  if(cl){if(!cl.stad){cl.stad0=STAD_REAL[n]||(cl.t>=4?`Estadio Municipal de ${cl.town||town||n}`:STAD_CUTRE[hashStr(n)%STAD_CUTRE.length]);cl.stad=cl.stad0}return cl.stad}
+  if(STAD_REAL[n])return STAD_REAL[n];return (t||0)>=4&&town?`Estadio Municipal de ${town}`:STAD_CUTRE[hashStr(String(n))%STAD_CUTRE.length]}
+function stadSeason(lines,nt){const W=S.world;if(!W)return;Object.values(W.clubs).forEach(cl=>{if(!cl.stad)stadOf(cl.n,cl.town,cl.t);const renamed=cl.stad!==cl.stad0;
+  if(!renamed&&Math.random()<(cl.t>=6?.08:.04)){cl.stad=stadRename(cl);if((cl.t>=7||Math.abs(cl.t-nt)<=1)&&lines.length<18)lines.push(`El ${cl.n} vende el nombre de su estadio. Desde hoy se llama «${cl.stad}».`)}
+  else if(renamed&&Math.random()<.25){const old=cl.stad;if(Math.random()<.5){cl.stad=cl.stad0;if((cl.t>=7||Math.abs(cl.t-nt)<=1)&&lines.length<18)lines.push(`Se acaba el patrocinio: «${old}» vuelve a llamarse ${cl.stad0}.`)}else{cl.stad=stadRename(cl);if((cl.t>=7||Math.abs(cl.t-nt)<=1)&&lines.length<18)lines.push(`El estadio del ${cl.n} cambia otra vez de dueño: ahora es el «${cl.stad}».`)}}})}
 function venueOf(m){
   const c=S.comp;
   if(m.a===0)return{n:S.embargo?curField().n:(S.club&&S.club.stadium)||curField().n,d:.8,ours:true,town:HOME,home:true};
   const opp=c.teams[m.b===0?m.a:m.b];
-  if(c.type==="online")return{n:opp.stad||`Campo de ${opp.n}`,d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
+  if(c.type==="online")return{n:opp.stad||stadOf(opp.n,opp.town,opp.tierOf),d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
   if(c.tier===0&&c.type!=="cup"){const v=VENUES[opp.venue||1];return{n:v.n,d:v.d,ours:false,town:HOME,home:false}}
-  return{n:`Campo municipal de ${opp.town}`,d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
+  return{n:stadOf(opp.n,opp.town,opp.tierOf!=null?opp.tierOf:c.tier),d:kmS(stop(HOME),stop(opp.town)),ours:false,town:opp.town,home:false};
 }
 function record(c,a,b,ga,gb){
   const A=c.teams[a],B=c.teams[b];
@@ -1099,6 +1111,7 @@ function wSeason(c,ourPos){
       if(t===nt&&np.q>=TIER_Q[t]+6&&lines.length<10)lines.push(`El ${cl.n} ficha a ${np.n} (${POSN[np.pos]}, media ${np.q}).`);
       if(buys>8)break}
     if(cl.ps.length>20)cl.ps=cl.ps.sort((a,b)=>b.q-a.q).slice(0,20)});
+  try{stadSeason(lines0,nt)}catch(e){}
   const mv=[];if(nt>=0){W.tiers[nt].forEach(n=>{const cl=W.clubs[n];if(cl&&cl.tag)mv.push(`${cl.n} ${cl.tag==="↑"?"sube":"baja"} a ${TIERS[nt].n}.`)})}
   {W.glories=(W.glories||[]).filter(g=>{g.age++;if(g.real)return g.age<60;const pd=g.age>=100?1:g.age>=60?(g.age-58)*.012:.002;if(Math.random()<pd){if(g.t>=5&&lines.length<16)lines.push(`Muere ${g.n} a los ${g.age} años, leyenda del ${g.club}. Los fans le lloran en la puerta del estadio.`);return false}return true}).sort((a,b)=>b.pk+b.t*4-a.pk-a.t*4).slice(0,30)}
   return mv.concat(lines)}
@@ -1146,7 +1159,7 @@ function tOfferAnswer(yes){const o=S.tOffer;S.tOffer=null;closeModal();if(!o)ret
 function rivalClubBox(n){const cl=S.world&&S.world.clubs[n];if(!cl)return;const xi=wXI(cl.ps,cl.form);
   const rows=cl.ps.slice().sort((a,b)=>"PORDEFMEDDEL".indexOf(a.pos)-"PORDEFMEDDEL".indexOf(b.pos)||b.q-a.q).map(p=>`<tr><td>${p.pos}</td><td class="t"><a class="wlink" data-act="wpcard" data-v="${esc(cl.n)}|${cl.ps.indexOf(p)}">${esc(p.n)}</a>${xi.some(x=>x.n===p.n)?" ●":""}</td><td>${p.age}</td><td><b>${p.q}</b></td></tr>`).join("");
   const k=wCoachOf(cl);
-  modal(cl.n,`<p class="hint">Toca un jugador para ver su ficha completa y, si quieres, intentar cazarlo.</p><div class="offer"><div><b>Entrenador: ${esc(coachName(k))}</b><small>${k.age} años · ${k.exp} temporada${k.exp===1?"":"s"} de experiencia · en el club desde la T${k.since} · estilo ${esc(k.st)} · prestigio ${k.rep}/100</small>${k.car.length?`<small>Trayectoria: ${k.car.slice(-4).map(esc).join(" · ")}</small>`:""}</div></div><p>${esc(cl.town)} · ${esc(TIERS[cl.t].n)} · fuerza <b>${wStr(cl)}</b> · juega ${cl.form}${cl.tag?` · ${cl.tag==="↑"?"recién ascendido":"recién descendido"}`:""}</p><p class="hint">Caja del club: ${cl.money.toLocaleString("es-ES")} €. Con eso fichan en verano. ● = titular.</p><div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th></tr></thead><tbody>${rows}</tbody></table></div><button class="btn play" data-act="close">Cerrar</button>`)}
+  modal(cl.n,`<p><b>🏟 ${esc(stadOf(cl.n,cl.town,cl.t))}</b>${cl.stad&&cl.stad0&&cl.stad!==cl.stad0?` <small>(antes ${esc(cl.stad0)})</small>`:""}</p><p class="hint">Toca un jugador para ver su ficha completa y, si quieres, intentar cazarlo.</p><div class="offer"><div><b>Entrenador: ${esc(coachName(k))}</b><small>${k.age} años · ${k.exp} temporada${k.exp===1?"":"s"} de experiencia · en el club desde la T${k.since} · estilo ${esc(k.st)} · prestigio ${k.rep}/100</small>${k.car.length?`<small>Trayectoria: ${k.car.slice(-4).map(esc).join(" · ")}</small>`:""}</div></div><p>${esc(cl.town)} · ${esc(TIERS[cl.t].n)} · fuerza <b>${wStr(cl)}</b> · juega ${cl.form}${cl.tag?` · ${cl.tag==="↑"?"recién ascendido":"recién descendido"}`:""}</p><p class="hint">Caja del club: ${cl.money.toLocaleString("es-ES")} €. Con eso fichan en verano. ● = titular.</p><div class="tblw"><table class="tbl sqt"><thead><tr><th>Pos</th><th class="t">Jugador</th><th>Edad</th><th>Media</th></tr></thead><tbody>${rows}</tbody></table></div><button class="btn play" data-act="close">Cerrar</button>`)}
 
 /* ================= viajes ================= */
 const stop=n=>{const g=GEO[n]||GEOFAR[n];return{n,lat:g[0],lon:g[1]}};
