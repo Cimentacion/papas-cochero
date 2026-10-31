@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="17.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="17.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -392,6 +392,8 @@ nav.tabs button.sel{background:var(--desk2);color:var(--gold);border-color:#000 
 body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frlast{background:#262b62;color:#e9eaf7}body.fm .chat{background:#141838}body.fm .msg.them .cb{background:#2c3170;color:#fff}body.fm .chday{color:#ccd;background:#ffffff1a}body.fm .chathead{border-color:#fff2}
 .pchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.pchip{font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:12px}.pchip.up{background:#d6f5df;color:#14612f}.pchip.dn{background:#fbdada;color:#8a1f2a}
 .legcrest{width:96px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:44px;color:#e7b923;background:linear-gradient(#fff,#dfe8f5);border-radius:6px;box-shadow:0 4px 12px #0005;text-shadow:0 2px 0 #8a6a00}
+.cardnav{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin:-4px 0 8px;position:sticky;top:-4px;z-index:3;background:inherit;padding:4px 0}.cardnav span{text-align:center;font-weight:700;font-size:15px;line-height:1.1}.cardnav small{display:block;font-weight:400;font-size:11px;opacity:.6}.cardnav .btn{min-width:46px}
+.pcard.navr{animation:navr .22s ease-out}.pcard.navl{animation:navl .22s ease-out}@keyframes navr{from{transform:translateX(40px);opacity:.3}to{transform:none;opacity:1}}@keyframes navl{from{transform:translateX(-40px);opacity:.3}to{transform:none;opacity:1}}
 .offer.fr{flex-wrap:wrap}.offer.fr>div:first-child{flex:1 1 100%}.offer.fr>.row{width:100%;flex-wrap:wrap;gap:6px;margin-top:6px}
 .pdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#888;vertical-align:middle}.pdot.on{background:#2fbf6a}.pdot.live{background:#ff4d4d;box-shadow:0 0 6px #ff4d4d;animation:trophy 1s infinite}
 .wsb{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;background:#0b1f3a;color:#fff;border-radius:8px;padding:10px}.wsb span{font-family:var(--f-mono);font-size:30px;color:#ffd23f}.wlog{font-family:var(--f-mono);font-size:14px;background:#000;color:#ffd23f;padding:6px;border-radius:6px;margin-top:6px}.wlog div{padding:2px 0;border-bottom:1px solid #ffffff14}.olquick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
@@ -5685,7 +5687,21 @@ const A={
   sell:()=>{const p=S.scout&&pById(S.scout.id);if(!p)return;S.money+=S.scout.v;S.players=S.players.filter(x=>x.id!==p.id);S.lineup=S.lineup.map(x=>x===p.id?null:x);addNews(`${fullName(p)} se va a un club de Sevilla por ${S.scout.v} €. Lloran en el bar.`);S.scout=null;save();renderOffers()},
   "offers-done":()=>{closeModal();S.offers=null;S.scout=null;save();render();toast(`Pretemporada. Cuando quieras, a por el ${TIERS[S.tierNext].n}.`)}
 };
-document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const f=A[el.dataset.act];if(!f)return;if(el.tagName!=="LABEL")e.preventDefault();f(el.dataset.v,el)});
+/* pasar de una ficha a otra deslizando, con (n/total) arriba */
+const NAV_ACTS=["card","wpcard","olcard"];let NAV=null;
+function navDecorate(){if(!NAV||$("#modal").hidden)return;const n=NAV.vals.length;if(n<2)return;const t=$("#mod-t");if(!/\(\d+\/\d+\)$/.test(t.textContent))t.textContent+=` (${NAV.i+1}/${n})`;
+  const b=$("#mod-b");if(b.querySelector(".cardnav"))return;const bar=document.createElement("div");bar.className="cardnav";
+  bar.innerHTML=`<button class="btn mini" data-act="navp" ${NAV.i===0?"disabled":""}>◀</button><span>${NAV.i+1} / ${n}<small>desliza para cambiar</small></span><button class="btn mini" data-act="navn" ${NAV.i===n-1?"disabled":""}>▶</button>`;b.prepend(bar)}
+function navGo(d){if(!NAV)return;const j=NAV.i+d;if(j<0||j>=NAV.vals.length){toast(j<0?"Es el primero.":"Es el último de la lista.");return}NAV.i=j;const v=NAV.vals[j];const f=A[NAV.act];if(!f)return;const N=NAV;f(v,{dataset:{id:v,v}});NAV=N;navDecorate();
+  const pc=$("#mod-b .pcard");if(pc){pc.classList.remove("navl","navr");void pc.offsetWidth;pc.classList.add(d>0?"navr":"navl")}}
+(()=>{let x0=null,y0=null;const mb=()=>$("#mod-b");document.addEventListener("touchstart",e=>{if(!NAV||$("#modal").hidden||!e.target.closest("#mod-b"))return;const t=e.touches[0];x0=t.clientX;y0=t.clientY},{passive:true});
+  document.addEventListener("touchend",e=>{if(x0==null||!NAV)return;const t=e.changedTouches[0];const dx=t.clientX-x0,dy=t.clientY-y0;x0=null;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)navGo(dx<0?1:-1)},{passive:true});
+  document.addEventListener("keydown",e=>{if(!NAV||$("#modal").hidden)return;if(e.key==="ArrowRight")navGo(1);else if(e.key==="ArrowLeft")navGo(-1)})})();
+document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const act=el.dataset.act;const f=A[act];if(!f)return;if(el.tagName!=="LABEL")e.preventDefault();
+  if(act==="navp"||act==="navn"){navGo(act==="navn"?1:-1);return}
+  if(NAV_ACTS.includes(act)){const scope=el.closest("#mod-b")||document.querySelector("#view")||document.body;const key=x=>act==="card"?x.dataset.id:x.dataset.v;const vals=[];scope.querySelectorAll(`[data-act="${act}"]`).forEach(x=>{const k=key(x);if(k!=null&&!vals.includes(k))vals.push(k)});
+    const cur=key(el);f(el.dataset.v,el);NAV={act,vals,i:Math.max(0,vals.indexOf(cur))};navDecorate();return}
+  NAV=null;f(el.dataset.v,el)});
 document.addEventListener("change",e=>{
   const t=e.target;
   if(t.id==="sc-pick"){if(S.prep)S.prep.scPick=t.value;S.lastScPick=t.value;save();return}
