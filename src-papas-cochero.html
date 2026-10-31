@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="17.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="17.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -661,10 +661,10 @@ const DRILLS=[
  {id:"recup",req:"sauna",rep:["siesta"],n:"Sauna y estiramientos",d:"Recupera mucha energía y quita dependencia de las latas.",stat:null,en:40,dep:5,cine:"sauna"},
  {id:"reposo",req:"piscina",rep:["siesta","recup"],n:"Retiro en el planeta verde",d:"Recuperación total, cabeza despejada (a veces +CAB) y adiós a la dependencia.",stat:"cab",en:60,dep:8,mult:.4,cine:"planeta"},
  {id:"tecnica",req:"academia",n:"Clase con exprofesionales",d:"Sube ATQ o DEF y enseña rasgos nuevos: Killer, Muro, Pulmón.",stat:"mix",en:-6,mult:1.3,traits:["Killer","Muro","Pulmón"],tch:.08,cine:"charla"},
- {id:"elite",req:"ciudad",rep:["partidillo"],n:"Sesión de élite",d:"Sube dos cosas a la vez, descubre posiciones y puede dar cualquier rasgo.",stat:"any2",en:-10,mult:1.5,disc:1,traits:"all",tch:.05,cine:"elite"},
+ {id:"elite",req:"ciudad",rep:["partidillo"],n:"Sesión de élite",d:"Sube dos cosas a la vez, descubre posiciones y puede dar cualquier rasgo (rarísimo: Cañonero).",stat:"any2",en:-10,mult:1.5,disc:1,traits:"all",tch:.05,cine:"elite"},
  {id:"gravedad",req:"gravedad",grav:1,n:"Cámara de gravedad",d:"Un jugador pasa la semana dentro: su límite sube hasta +3. Una vez por jugador.",stat:null,en:0,cine:"grav"}
 ];
-const XTRAITS=["Killer","Muro","Pulmón","Líder","Cabezazo","Lanzador de faltas","Mente fría"];
+const XTRAITS=["Killer","Muro","Pulmón","Líder","Cabezazo","Lanzador de faltas","Mente fría"];/* «Cañonero» solo se aprende con la sesión de élite, y es rarísimo */
 function drillsAvail(){const on=DRILLS.filter(t=>!t.req||has(t.req));return on.filter(t=>!on.some(x=>x.rep&&x.rep.includes(t.id)))}
 const DAYS=["Lunes","Miércoles","Viernes"];
 const JOBS=[
@@ -866,6 +866,10 @@ function xattr(p){if(p.foot&&p.alt&&p.spd!=null&&p.build)return p;const r=seeded
 const FOOTN={D:"Diestro",I:"Zurdo",A:"Ambidiestro"},BUILDN={delgado:"Delgado",normal:"Normal",fuerte:"Fuerte",gordo:"Gordo"};
 const spdN=v=>v>=75?"Una bala":v>=60?"Rápido":v>=40?"Normal":v>=25?"Lento":"Tortuga";
 function powOf(p){if(p.pow==null){const r=seeded((p.seed||hashStr(fullName(p)||String(p.id)))+433);xattr(p);p.pow=clamp(Math.round((p.atk||20)*.45+(p.fis||20)*.35+(p.build==="fuerte"?14:p.build==="gordo"?8:p.build==="delgado"?-6:0)+((p.alt||178)-178)*.4+r()*30-12+(p.trait==="cachas"?10:0)),1,99)}return p.pow}
+/* cañonero: cualidad especial de unos pocos, no depende solo de la potencia */
+const CANON_REAL=["F. Valverde","K. Mbappé","Raphinha","Ferenc Puskás","Bobby Charlton","Eusébio","Gerd Müller","Shun «Shinkansen» Aoki","Long «Dragón» Ma","Ha-joon «K-Pop» Lee"];
+function isCanon(p){if(!p)return false;if((p.xspec||[]).includes("Cañonero"))return true;if(p.canon==null){const nm=p.wid||fullName(p);if(CANON_REAL.includes(nm))p.canon=1;else{const r=seeded((p.seed||hashStr(nm||String(p.id)))+977)();const pw=powOf(p);p.canon=r<(pw>=82?.22:pw>=68?.05:.012)?1:0}}return !!p.canon}
+const rivCanon=n=>CANON_REAL.includes(n)||hashStr(String(n))%23===0;
 function attrK(p,role,sub){xattr(p);let k=1;const side=sub?(/^(LI|MI|EI)$/.test(sub)?"L":/^(LD|MD|ED)$/.test(sub)?"R":"C"):"C";
   if(side==="L")k*=p.foot==="I"?1.05:p.foot==="A"?1.03:.95;else if(side==="R")k*=p.foot==="D"?1.02:p.foot==="A"?1.03:.95;
   if(role==="DEL"||role==="MED")k*=1+(p.spd-50)/300;else if(role==="DEF")k*=1+(p.spd-50)/450;
@@ -2501,8 +2505,8 @@ function tacBox(){
   </div></section>`;
 }
 /* ---------- especialidades y química ---------- */
-function specs(p){const o=[];if(p.atk>=45)o.push("Killer");if(p.def>=45)o.push("Muro");if(p.fis>=45)o.push("Pulmón");if(p.cab>=45)o.push("Líder");if(p.cab>=35&&p.atk>=35)o.push("Cabezazo");if(p.atk>=30&&p.cab>=30&&p.fis>=30)o.push("Lanzador de faltas");(p.xspec||[]).forEach(x=>{if(!o.includes(x))o.push(x)});return o}
-const SPEC_D={Killer:"+5 % de ataque.",Muro:"+5 % de defensa.",Pulmón:"Se cansa mucho menos.",Líder:"+2 % a todo el equipo si juega.",Cabezazo:"Más goles a balón parado.","Mente fría":"Mete muchos más penaltis en las tandas.","Lanzador de faltas":"Las faltas se convierten en ocasiones."};
+function specs(p){const o=[];if(p.atk>=45)o.push("Killer");if(p.def>=45)o.push("Muro");if(p.fis>=45)o.push("Pulmón");if(p.cab>=45)o.push("Líder");if(p.cab>=35&&p.atk>=35)o.push("Cabezazo");if(p.atk>=30&&p.cab>=30&&p.fis>=30)o.push("Lanzador de faltas");(p.xspec||[]).forEach(x=>{if(!o.includes(x))o.push(x)});if(!o.includes("Cañonero")&&isCanon(p))o.push("Cañonero");return o}
+const SPEC_D={Killer:"+5 % de ataque.",Muro:"+5 % de defensa.",Pulmón:"Se cansa mucho menos.",Líder:"+2 % a todo el equipo si juega.",Cabezazo:"Más goles a balón parado.","Mente fría":"Mete muchos más penaltis en las tandas.","Cañonero":"Cualidad especial: a veces suelta un CAÑONAZO con estela de energía que casi siempre entra.","Lanzador de faltas":"Las faltas se convierten en ocasiones."};
 function chem(list){if(!list.length)return 0;const t=list.reduce((s,x)=>s+Math.min(3,x.p.tenure||0),0)/list.length;return t}
 function feudPen(list){const ids=new Set(list.map(x=>x.p.id));return (S.feuds||[]).some(f=>ids.has(f[0])&&ids.has(f[1]))?.95:1}
 /* ---------- directiva ---------- */
@@ -4672,7 +4676,7 @@ function runDrill(id,pid){
     if(p.injured)return;p.energy=clamp(p.energy+t.en,20,100);who.push(p);
     if(t.dep)p.dep=clamp((p.dep||0)-t.dep,0,100);
     if(t.disc&&!p.known&&Math.random()<.35){p.known=true;out.push(`${short(p)} resulta que es ${subVisible(p)?SUBN[subOf(p)]:POSN[p.pos]}.`)}
-    if(t.traits&&(p.xspec||[]).length<2){const have=specs(p);const pool=(t.traits==="all"?XTRAITS:t.traits).filter(x=>!have.includes(x));if(pool.length&&Math.random()<t.tch*(p.age>32?.6:1)){const x=pick(pool);p.xspec=(p.xspec||[]).concat(x);out.push(`★ ${short(p)} aprende un rasgo nuevo: ${x}.`)}}
+    if(t.traits&&(p.xspec||[]).length<2){const have=specs(p);const pool=(t.traits==="all"?XTRAITS.concat(Math.random()<.08?["Cañonero"]:[]):t.traits).filter(x=>!have.includes(x));if(pool.length&&Math.random()<t.tch*(p.age>32?.6:1)){const x=pick(pool);p.xspec=(p.xspec||[]).concat(x);out.push(`★ ${short(p)} aprende un rasgo nuevo: ${x}.`)}}
     if(!t.stat)return;
     if(p.hang>0&&Math.random()<.5)return;
     const A4=["atk","def","fis","cab"];
@@ -4920,7 +4924,7 @@ function shot(special){
   const att=L.filter(x=>x.role!=="POR");const sh=wpick(att.length?att:L,x=>(x.p.atk+1)*(WA[x.role]+.2)).p;
   if(!special&&sh.trait==="dislexico"&&Math.random()<.3){addLog(M.min,`${short(sh)} se gira, se confunde de portería y se la pasa al delantero rival.`,"bad");M.ballT={x:30,y:50};return theirChance(1.3)}
   let pg=special?.55:P.a/(P.a+O*1.2)*.33;const pw=powOf(sh);let canon=false;
-  if(!special){pg*=1+(pw-50)/260;if(pw>=78&&Math.random()<.18+(pw-78)*.012){canon=true;pg=Math.min(.75,pg*1.6);addLog(M.min,`¡${short(sh)} arma la pierna! ${pick(["Va a reventar el balón.","Se oye desde el bar.","El portero reza."])}`,"ev")}
+  if(!special){pg*=1+(pw-50)/260;if(isCanon(sh)&&Math.random()<.3){canon=true;pg=Math.min(.75,pg*1.6);addLog(M.min,`¡${short(sh)} arma la pierna! ${pick(["Va a reventar el balón.","Se oye desde el bar.","El portero reza."])}`,"ev")}
     else if((sh.alt||178)>=188&&Math.random()<.2){pg*=1.15;addLog(M.min,`${short(sh)} gana por arriba con sus ${((sh.alt||188)/100).toFixed(2).replace(".",",")} m.`,"ev")}}
   const offV=!visOn()&&M.st;if(offV){M.st.shots.us++}
   if(Math.random()<pg){if(offV){M.st.on.us++;M.st.sxy.push({side:"us",x:rnd(84,99),y:rnd(24,44),res:"goal"})}M.us++;M.lastChance={side:"us",id:sh.id,res:"goal",pow:canon};if(canon)addLog(M.min,`¡CAÑONAZO de ${short(sh)}! El balón deja una estela y el portero ni la ve.`,"goal");M.goals[sh.id]=(M.goals[sh.id]||0)+1;{const al=onList().map(x=>x.p).filter(x=>x.id!==sh.id);if(al.length&&Math.random()<.65){const a=wpick(al,x=>x.atk+5);M.ast=M.ast||{};M.ast[a.id]=(M.ast[a.id]||0)+1}}M.scorers.push(`${short(sh)} ${M.min}'`);M.ballT={x:154,y:50+rnd(-6,6)};M.net={side:1,until:performance.now()+1500};addLog(M.min,pick(GOAL_US)(short(sh)),"goal");goalCine(sh)}
@@ -4930,9 +4934,9 @@ function theirChance(boost){
   const L=onList();const P=myPower(),O=M.oppStr*M.omod*styK()*M.oA*(boost||1);
   let pg=Math.min(.85,O/(O+P.d*1.2)*(.33+.45*(1-onList().length/11)));
   {const defs=L.filter(x=>x.role==="DEF");if(defs.length){const sp=defs.reduce((a,x)=>a+(xattr(x.p),x.p.spd||50),0)/defs.length;pg*=1-(sp-50)/420}}
-  const tCanon=Math.random()<.06+Math.max(0,(O-30))/400;if(tCanon)pg=Math.min(.8,pg*1.45);
+  const rp0=rivPlayer();const tCanon=rivCanon(rp0.n)&&Math.random()<.3;if(tCanon){pg=Math.min(.8,pg*1.45);addLog(M.min,`¡${rp0.n} arma la pierna! Es de los que revientan el balón.`,"ev")}
   const gkS=L.find(x=>x.role==="POR")||L.find(x=>x.role==="DEF");const d=L.length?pick(L).p:null;
-  const g=gkS?short(gkS.p):"Nadie",dn=d?short(d):"el aire";const rp=rivPlayer();
+  const g=gkS?short(gkS.p):"Nadie",dn=d?short(d):"el aire";const rp=rp0;
   const offV2=!visOn()&&M.st;if(offV2)M.st.shots.them++;
   if(Math.random()<pg){if(offV2){M.st.on.them++;M.st.sxy.push({side:"them",x:rnd(6,21),y:rnd(24,44),res:"goal"})}M.them++;M.lastChance={side:"them",name:rp.n,res:"goal",pow:tCanon};M.rivScorers.push(rp.n);M.ballT={x:6,y:50+rnd(-6,6)};M.net={side:0,until:performance.now()+1500};addLog(M.min,pick(GOAL_THEM)(rp.n,g,dn),"bad")}
   else{const og=L.find(x=>x.p.trait==="dislexico");
