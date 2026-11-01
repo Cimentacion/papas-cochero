@@ -1,11 +1,18 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Papas Cochero"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Los Papas Cochero</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="18.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="18.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Papas Cochero">
+<meta name="theme-color" content="#5a3415">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Los Papas Cochero</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -5897,7 +5904,7 @@ const A={
   olready:()=>{const P=S.prep;if(!P||!P.ol)return;P.ol.ready=1;const ol=S.comp.ol;fbq(`l/${ol.lid}/live/${ol.k}/${ol.home?"h":"g"}r`,"PUT",1);save();render();olPrepTick()},
   olkickbot:()=>{OL.kickBot=true},olpost:()=>olPost(),olafter:()=>olAfter(),
   skin:()=>{let k="pc";try{k=localStorage.getItem("papascochero_skin")||"pc"}catch(e){}k=k==="fm"?"pc":"fm";try{localStorage.setItem("papascochero_skin",k)}catch(e){}if(!document.body.classList.contains("fm")!==(k==="fm")){}document.body.classList.toggle("fm",k==="fm");applySkin();render();toast(k==="fm"?"Aspecto Football Manager.":"Aspecto PC Fútbol de saldo.")},
-  doupdate:()=>{closeModal();save();if(location.href.indexOf(window.PC_REMOTE)===0)location.reload();else location.reload()},
+  doupdate:()=>{closeModal();save();try{location.replace(location.pathname+"?v="+Date.now())}catch(e){location.reload()}},
   updcheck:()=>checkUpdates(true),
   vtest:v=>{const k=+v;S.voiceA=$("#vA").value||null;S.voiceB=$("#vB").value||null;const was=S.comm;S.comm=true;lastSpk=0;speak(k?"Qué barbaridad, Manolo. Esto es fútbol de verdad.":"Buenas tardes desde el estadio. Aquí Manolo, con el partido.",true,k);S.comm=was},
   vsave:()=>{S.voiceA=$("#vA").value||null;S.voiceB=$("#vB").value||null;save();toast("Voces guardadas.")},

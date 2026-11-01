@@ -4,7 +4,8 @@ Juego de gestión de fútbol cutre (HTML de un solo archivo) + APK Android que l
 
 ## Archivos
 - `src-papas-cochero.html`: código fuente del juego (lo que se edita).
-- `index.html`: lo publicado en GitHub Pages = `<!doctype html><html lang="es"><head><meta charset="utf-8"></head><body>` + fuente + `</body></html>`.
+- `index.html`: lo publicado en GitHub Pages = cabecera (doctype + head con charset, viewport, metas de iPhone `apple-mobile-web-app-*`, `apple-touch-icon` icon-180.png, `manifest.webmanifest`, title) + `<body>` + fuente + `</body></html>`. Copiar la cabecera tal cual está en el index.html actual (todo hasta `<body>`).
+- `icon-180.png`, `icon-192.png`, `icon-512.png`, `manifest.webmanifest`: para instalarlo en iPhone/Android desde el navegador.
 - `version.json`: `{"v":"X.Y","notes":[...]}`. La app compara con `window.PC_VERSION` (en la fuente) y se actualiza sola.
 - `PapasCochero.apk`: APK descargable. `apk/apkproj`: proyecto apktool (smali con WebView, puente de voz `AndroidTTS` y `AndroidBridge.open(url)`).
 - `tests/run.js`: partida automática con jsdom (`npm i jsdom@24`), debe acabar con `errors []`.
