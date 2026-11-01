@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="18.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="18.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -5132,25 +5132,25 @@ function deprTick(res){S.lstreak=res==="L"?(S.lstreak||0)+1:res==="W"?0:(S.lstre
   out.forEach(t=>addNews(t));if(out.length&&M)M.deprLines=out}
 /* ---------- el médico del callejón (dopaje) ---------- */
 const DOCS=[
- {k:"pill",i:"💊",n:"Pastillas del primo",d:"Una semana a tope: +10 % de rendimiento.",c:60,risk:.03,mul:1.10},
- {k:"iny",i:"💉",n:"Inyección de caballo",d:"+33 % una semana. La semana siguiente, hecho polvo (−30 %).",c:250,risk:.08,mul:1.33},
- {k:"jarabe",i:"🍯",n:"Jarabe de la abuela",d:"Energía al 100 % y se le quita la resaca. Sabe a rayos.",c:40,risk:0},
- {k:"pomada",i:"🫙",n:"Pomada de burro",d:"Para lesionados: se cura 2 semanas antes. Huele a cuadra.",c:150,risk:0},
- {k:"toro",i:"🥤",n:"Batido de toro bravo",d:"+4 de físico para siempre. Solo una vez por jugador. Algo raro pasa en el pecho.",c:600,risk:.12},
- {k:"exp",i:"☠️",n:"La Dosis Perfecta (experimental)",d:"Mil pastillas e inyecciones. Se convierte en una mole de 3 metros: +200 % en el próximo partido. Después del partido muere. Una vez por temporada.",c:4000,risk:0,mul:3}];
+ {k:"pill",i:"💊",n:"Pastillas del primo",d:"«Para que corra un poquito más. Lo que tomaba mi primo.»",c:60,risk:.03,mul:1.10},
+ {k:"iny",i:"💉",n:"Inyección de caballo",d:"«Esto es de caballo. Literalmente. Luego pasa factura.»",c:250,risk:.08,mul:1.33},
+ {k:"jarabe",i:"🍯",n:"Jarabe de la abuela",d:"«Lo hacía mi abuela. Levanta a un muerto.»",c:40,risk:0},
+ {k:"pomada",i:"🫙",n:"Pomada de burro",d:"«Para los cojos. No preguntes de dónde sale.»",c:150,risk:0},
+ {k:"toro",i:"🥤",n:"Batido de toro bravo",d:"«Del toro. Lo que te sale, te sale para siempre.»",c:600,risk:.12},
+ {k:"exp",i:"☠️",n:"La Dosis Perfecta (experimental)",d:"«Lo gordo. Mil pastillas y mil pinchazos. No tiene vuelta atrás.»",c:4000,risk:0,mul:3}];
 const DOC_UNL=800;
 const docFee=d=>nice(d.c*EK[curTier()]);
 const dopeOn=p=>p.dope&&p.dope.w===S.week;
 const giantOn=p=>p.giant&&p.giant.w===S.week;
 function dopeK(p){return (dopeOn(p)?p.dope.mul||1:1)*(p.weak===S.week?.7:1)*(giantOn(p)?3:1)}
-function dopeTag(p){return giantOn(p)?`<small class="tag bad">🧪 Mole de 3 m (+200 %) · muere tras el partido</small>`:dopeOn(p)?`<small class="tag">${p.dope.k==="iny"?"💉 +33 %":"💊 +10 %"} esta semana</small>`:p.weak===S.week?`<small class="tag bad">🥴 Debilitado −30 %</small>`:""}
+function dopeTag(p){return giantOn(p)?`<small class="tag bad">🧪 Transformado · no sobrevivirá al partido</small>`:dopeOn(p)?`<small class="tag">${p.dope.k==="iny"?"💉 Pinchado":p.dope.k==="toro"?"🥤 Batido de toro":"💊 Con pastillas"} esta semana</small>`:p.weak===S.week?`<small class="tag bad">🥴 Hecho polvo</small>`:""}
 function docWhy(d,p){if(d.k==="pomada")return p.injured&&!p.suspW&&!p.gravLock?"":"No está lesionado";if(d.k==="jarabe")return "";
   if(p.injured)return p.suspW?"Está sancionado":"Está lesionado";if(dopeOn(p)||giantOn(p))return "Ya va puesto esta semana";if(p.weak===S.week)return "Está debilitado";
   if(d.k==="toro"&&p.toro)return "Ya se tomó uno";if(d.k==="exp"){if(p.real)return "«A ese lo conoce todo el mundo. No me la juego.»";if(!S.comp)return "Solo en temporada";if(S.giantS===S.season)return "Ya lo usaste esta temporada"}return ""}
 function docBox(){const own=!!S.doc;
   return `<section class="win"><div class="bar">Médico <small>el del callejón</small></div><div class="body">
    <p>Un señor con gabardina y sombrero que no es médico, pero tiene de todo. Pastillas, inyecciones y cosas que mejor no preguntar.</p>
-   <p class="hint">Si un jugador dopado juega, puede dar positivo en el control antidoping: 3 partidos de sanción.</p>
+   <p class="hint">Lo que hace cada cosa no te lo explica: lo descubres probando. Ojo con el control antidoping.</p>
    ${own?`<button class="btn play" data-act="docopen">💉 Hablar con el médico</button>`:`<div class="offer"><div><b>Conseguir su número</b><small>Te lo pasa el del bar a cambio de una propina.</small></div><button class="btn mini primary" data-act="docbuy" ${S.money<DOC_UNL?"disabled":""}>${DOC_UNL} €</button></div>`}
   </div></section>`}
 function docPrepHTML(P,c){if(!S.doc||P.ol)return "";const on=S.players.filter(p=>dopeOn(p)||giantOn(p)||p.weak===S.week);
@@ -5161,7 +5161,7 @@ function docClose(){const o=$("#docfull");if(o){o.hidden=true;o.innerHTML=""}DOC
 function docShow(){const o=$("#docfull");if(!o||!DOCU)return;const U=DOCU;
   let low="";
   if(U.st==="talk")low=`<div class="docsay"><b>El médico:</b> «${pick(["Psst. Aquí. ¿Qué te pongo?","No he visto a nadie y nadie me ha visto a mí. ¿Qué necesitas?","Tengo cosas nuevas. Algunas son hasta legales.","El que pregunta no se dopa. Elige."])}»</div>
-   <div class="doclist">${DOCS.map((d,i)=>`<button class="docopt" data-act="docpick" data-v="${i}" ${S.money<docFee(d)?"disabled":""}><i>${d.i}</i><div><b>${esc(d.n)}</b><small>${esc(d.d)}${d.risk?` Riesgo de positivo: ${Math.round(d.risk*100)} %.`:""}</small></div><em>${docFee(d).toLocaleString("es-ES")} €</em></button>`).join("")}</div>`;
+   <div class="doclist">${DOCS.map((d,i)=>`<button class="docopt" data-act="docpick" data-v="${i}" ${S.money<docFee(d)?"disabled":""}><i>${d.i}</i><div><b>${esc(d.n)}</b><small>${esc(d.d)}</small></div><em>${docFee(d).toLocaleString("es-ES")} €</em></button>`).join("")}</div>`;
   else if(U.st==="pick"){const d=U.d;const ps=S.players.slice().sort((a,b)=>ovr(b)-ovr(a));
     low=`<div class="docsay"><b>El médico:</b> «${d.k==="exp"?"Esto no tiene vuelta atrás. ¿A quién se lo damos?":"¿Para quién es?"}» <small>(${esc(d.n)} · ${docFee(d).toLocaleString("es-ES")} €)</small></div>
      <div class="doclist">${ps.map(p=>{const w=docWhy(d,p);return `<button class="docopt" data-act="docgive" data-v="${p.id}" ${w?"disabled":""}><i>${p.pos}</i><div><b>${esc(fullName(p))}</b><small>media ${ovr(p)} · ${p.age} años${w?` · ${esc(w)}`:""}</small></div></button>`}).join("")}
@@ -5169,42 +5169,80 @@ function docShow(){const o=$("#docfull");if(!o||!DOCU)return;const U=DOCU;
   else if(U.st==="anim")low=`<div class="docsay" id="docres">&nbsp;</div><div class="doclist"><button class="btn play" data-act="docback" id="docnext" style="visibility:hidden">Volver al callejón</button><button class="btn" data-act="docclose">Salir</button></div>`;
   o.innerHTML=`<div class="doctop"><b>🌙 El callejón</b><span>${S.money.toLocaleString("es-ES")} €</span><button class="btn mini" data-act="docclose">✕</button></div><canvas id="doccv" width="640" height="400"></canvas>${low}`;
   const cv=$("#doccv");let g=null;try{g=cv.getContext("2d")}catch(e){}if(!g)return;
-  const loop=now=>{if(!document.body.contains(cv)||DOCU!==U)return;const t=Math.max(0,(now-U.t0)/1000);try{if(U.st==="anim")drawDocTake(g,t,U);else drawDocAlley(g,t)}catch(e){return}
-    if(U.st==="anim"&&!U.shown&&t>(U.d.k==="exp"?7.2:4.4)){U.shown=1;const r=$("#docres");if(r)r.innerHTML=U.msg;const b=$("#docnext");if(b)b.style.visibility="visible"}
+  const loop=()=>{if(!document.body.contains(cv)||DOCU!==U)return;const t=Math.max(0,(performance.now()-U.t0)/1000);try{if(U.st==="anim")drawDocTake(g,t,U);else drawDocAlley(g,t)}catch(e){try{console.log("DOCERR",e.message)}catch(_){}}
+    if(U.st==="anim"&&!U.shown&&t>(U.d.k==="exp"?7.4:4.6)){U.shown=1;const r=$("#docres");if(r)r.innerHTML=U.msg;const b=$("#docnext");if(b)b.style.visibility="visible"}
     requestAnimationFrame(loop)};requestAnimationFrame(loop)}
+function docStats(p){xattr(p);return{Ataque:p.atk,Defensa:p.def,"Físico":p.fis,Cabeza:p.cab,Velocidad:p.spd!=null?p.spd:50,Media:ovr(p)}}
 function docGive(id){const U=DOCU;if(!U||!U.d)return;const d=U.d,p=pById(+id);if(!p||docWhy(d,p))return;const fee=docFee(d);if(S.money<fee){toast("No te llega.");return}
-  ledSync();S.money-=fee;led(`El del callejón (${d.n})`,-fee);let msg="";
+  ledSync();S.money-=fee;led(`El del callejón (${d.n})`,-fee);let msg="";const st0=docStats(p),e0=p.energy,i0=p.injured;
   if(d.k==="pill"){p.dope={k:"pill",w:S.week,mul:d.mul,risk:d.risk};msg=`<b>${esc(short(p))}</b> se toma las pastillas con un vaso de agua del grifo. <b>+10 %</b> esta semana.`}
   else if(d.k==="iny"){p.dope={k:"iny",w:S.week,mul:d.mul,risk:d.risk};p.weak=S.week+1;msg=`Pinchazo en el brazo a <b>${esc(short(p))}</b>. <b>+33 %</b> esta semana. La que viene estará <b>debilitado (−30 %)</b>.`}
   else if(d.k==="jarabe"){p.energy=100;p.hang=0;msg=`<b>${esc(short(p))}</b> se toma dos cucharadas de jarabe. Pone una cara horrible, pero está como nuevo: energía al 100 %.`}
   else if(d.k==="pomada"){p.injured=Math.max(0,p.injured-2);if(!p.injured)p.gravLock=0;msg=`Le untan la pomada de burro a <b>${esc(short(p))}</b>. ${p.injured?`Le quedan ${p.injured} semanas.`:"¡Curado! Ya puede jugar."}`}
   else if(d.k==="toro"){p.toro=1;p.fis=Math.min(99,p.fis+4);p.dope={k:"toro",w:S.week,mul:1,risk:d.risk};msg=`<b>${esc(short(p))}</b> se bebe el batido de toro: <b>+4 de físico</b> para siempre. ${pick(["Le ha salido pelo en la espalda.","Ahora muge cuando se ríe.","Le ha cambiado la voz.","Dice que ve en rojo."])}`}
-  else if(d.k==="exp"){p.giant={w:S.week};S.giantS=S.season;msg=`<b>${esc(fullName(p))}</b> mide ahora <b>3 metros</b> y echa vapor por todo el cuerpo: <b>+200 %</b> en el próximo partido. El médico ya se ha ido. Después del partido, su cuerpo no aguantará.`;addNews(`Nadie sabe qué le ha pasado a ${fullName(p)}. Mide tres metros y no cabe en el vestuario.`)}
+  else if(d.k==="exp"){p.giant={w:S.week};S.giantS=S.season;msg="";addNews(`Nadie sabe qué le ha pasado a ${fullName(p)}. Ha doblado su tamaño y no cabe en el vestuario.`)}
+  {const st1=docStats(p);const m=d.mul||1;let L=[];
+    if(d.k==="pill"||d.k==="iny"||d.k==="exp")L=Object.keys(st0).map(k=>[k,st0[k],Math.round(st0[k]*m)]);
+    else if(d.k==="toro")L=[["Físico",st0["Físico"],st1["Físico"]],["Media",st0.Media,st1.Media]];
+    else if(d.k==="jarabe")L=[["Energía",e0,p.energy]];
+    else if(d.k==="pomada")L=[["Semanas de baja",i0,p.injured]];
+    if(d.k==="iny")L.push(["Después",100,70]);U.stats=L}
+  msg=d.k==="exp"?`<b>${esc(fullName(p))}</b> ya no es el mismo. El médico ha desaparecido.`:`<b>${esc(short(p))}</b> ${pick(["se queda mirando al infinito.","dice que se nota algo raro.","pide otra.","no quiere hablar del tema."])}`;
   U.p=p;U.st="anim";U.t0=performance.now();U.shown=0;U.msg=msg;U.face=faceCanvas(lookOf(p));U.face2=faceCanvas(lookOf(p,d.k==="exp"||d.k==="iny"||d.k==="jarabe"?"surp":"happy"));
   if(d.k==="exp")U.face3=faceCanvas(Object.assign(lookOf(p,"surp"),{skin:"#d8695f"}));save();docShow()}
 /* callejón: paredes azules, fondo oscuro, el médico con túnica */
 function drawDocAlley(c,t){const W=640,H=400;c.fillStyle="#04060b";c.fillRect(0,0,W,H);
-  const VX=330,VY=150;// punto de fuga
-  // cielo / fondo del callejón
-  const sky=c.createLinearGradient(0,0,0,VY+40);sky.addColorStop(0,"#0a1430");sky.addColorStop(1,"#1b2c55");c.fillStyle=sky;c.fillRect(250,0,160,VY+60);
-  // paredes de ladrillo en perspectiva (izquierda azulada, derecha cálida por la farola)
+  const VX=330,VY=150;
+  const sky=c.createLinearGradient(0,0,0,VY+40);sky.addColorStop(0,"#070d22");sky.addColorStop(1,"#1b2c55");c.fillStyle=sky;c.fillRect(250,0,160,VY+60);
+  // edificios del fondo con ventanitas
+  c.fillStyle="#0b1224";c.fillRect(270,40,40,VY+30);c.fillRect(345,20,50,VY+50);c.fillStyle="#1a1f2e";c.fillRect(310,70,35,VY);
+  for(let i=0;i<14;i++){const on=((i*7+Math.floor(t/3))%5)>1;c.fillStyle=on?"rgba(255,210,130,.75)":"rgba(40,50,70,.8)";c.fillRect(276+(i%3)*11+(i>8?72:0),50+Math.floor(i/3)*16,6,8)}
   const wall=(xo,xi,warm)=>{c.save();c.beginPath();c.moveTo(xo,0);c.lineTo(xi,VY-120);c.lineTo(xi,VY+70);c.lineTo(xo,H);c.closePath();c.clip();
     const g=c.createLinearGradient(xo,0,xi,0);g.addColorStop(0,warm?"#2a1a12":"#0d1a33");g.addColorStop(1,warm?"#7a4a2a":"#284a8a");c.fillStyle=g;c.fillRect(Math.min(xo,xi),0,Math.abs(xi-xo),H);
-    c.strokeStyle="rgba(0,0,0,.4)";c.lineWidth=1.5;
+    c.strokeStyle="rgba(0,0,0,.42)";c.lineWidth=1.5;
     for(let i=0;i<22;i++){const k=i/22;const y0=k*H,y1=(VY-120)+k*190;c.beginPath();c.moveTo(xo,y0);c.lineTo(xi,y1);c.stroke();
       for(let j=0;j<9;j++){const u=(j+(i%2)*.5)/9;const x=xo+(xi-xo)*u;const ya=y0+(y1-y0)*u,yb=ya+(H/22)*(1-u*.55);c.beginPath();c.moveTo(x,ya);c.lineTo(x,yb);c.stroke()}}
+    // manchas de humedad
+    for(let i=0;i<5;i++){const x=xo+(xi-xo)*(.15+i*.17),y=120+((i*53)%140);c.fillStyle="rgba(0,0,0,.18)";c.beginPath();c.ellipse(x,y,22,40,0,0,7);c.fill()}
     c.restore()};
   wall(0,265,false);wall(W,395,true);
-  // ventanas y una puerta
-  c.fillStyle="#f2c27a";c.globalAlpha=.55+.1*Math.sin(t*.7);c.beginPath();c.moveTo(560,60);c.lineTo(600,40);c.lineTo(600,110);c.lineTo(560,120);c.fill();c.globalAlpha=1;
-  c.fillStyle="#0a0d14";c.beginPath();c.moveTo(70,130);c.lineTo(150,150);c.lineTo(150,330);c.lineTo(70,370);c.fill();
-  // suelo de adoquines mojados
+  // ---- pared izquierda: puerta, carteles, grafiti ----
+  c.fillStyle="#0a0d14";c.beginPath();c.moveTo(150,150);c.lineTo(205,160);c.lineTo(205,300);c.lineTo(150,322);c.fill();c.fillStyle="rgba(120,150,200,.25)";c.fillRect(196,226,4,8);
+  c.fillStyle="rgba(255,190,90,.9)";c.beginPath();c.arc(178,146,3,0,7);c.fill();const dl=c.createRadialGradient(178,150,2,178,170,60);dl.addColorStop(0,"rgba(255,190,90,.35)");dl.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=dl;c.fillRect(110,120,140,140);
+  [["#e8e0c8",30,80,-.1,"SE BUSCA"],["#d9a43a",80,96,.06,"FERIA"],["#c8233a",40,150,.12,"CONCIERTO"]].forEach(([col,x,y,r,tx])=>{c.save();c.translate(x,y);c.transform(1,.12,0,1,0,0);c.rotate(r);c.fillStyle=col;c.fillRect(0,0,40,52);c.fillStyle="rgba(0,0,0,.6)";c.font="bold 8px sans-serif";c.textAlign="center";c.fillText(tx,20,12);c.fillRect(8,18,24,22);c.restore()});
+  c.save();c.translate(20,262);c.transform(1,.2,0,1,0,0);c.rotate(-.08);c.font="bold 40px Bungee, Impact, sans-serif";c.lineWidth=6;c.strokeStyle="#111";c.strokeText("PAPAS",0,0);c.fillStyle="#ff4fa3";c.fillText("PAPAS",0,0);c.font="bold 18px Bungee, Impact, sans-serif";c.fillStyle="#7dff6a";c.fillText("RUBIO ♥ CURRO",6,26);c.restore();
+  // tubería bajante
+  c.strokeStyle="#3a4256";c.lineWidth=7;c.beginPath();c.moveTo(232,0);c.lineTo(232,290);c.stroke();c.strokeStyle="#59617a";c.lineWidth=2;c.beginPath();c.moveTo(230,0);c.lineTo(230,290);c.stroke();
+  // ---- pared derecha: escalera de incendios, letrero de neón, ventana ----
+  c.strokeStyle="#151515";c.lineWidth=3;for(let f=0;f<3;f++){const y=40+f*80,x0=460,x1=590;c.beginPath();c.moveTo(x0,y+f*6);c.lineTo(x1,y-22+f*6);c.stroke();c.lineWidth=1.5;for(let i=0;i<=8;i++){const x=x0+(x1-x0)*i/8,yy=y+f*6+(-22)*i/8;c.beginPath();c.moveTo(x,yy);c.lineTo(x,yy-16);c.stroke()}c.beginPath();c.moveTo(x0,y+f*6-16);c.lineTo(x1,y-38+f*6);c.stroke();c.lineWidth=2.5;c.beginPath();c.moveTo(x0+20,y+f*6);c.lineTo(x1-20,y+58-f*0);c.stroke();c.lineWidth=3}
+  c.fillStyle="#f2c27a";c.globalAlpha=.55+.1*Math.sin(t*.7);c.beginPath();c.moveTo(560,150);c.lineTo(600,140);c.lineTo(600,205);c.lineTo(560,212);c.fill();c.globalAlpha=1;c.fillStyle="#2a1a12";c.fillRect(578,140,3,70);
+  {const on=Math.sin(t*13)>-.75&&!(t%4>3.6&&t%4<3.75);const nx=420,ny=70;c.save();c.translate(nx,ny);c.transform(1,-.12,0,1,0,0);c.fillStyle="#1a0d14";c.fillRect(-4,-6,30,132);
+    c.font="bold 18px Bungee, Impact, sans-serif";c.textAlign="center";"PENSIÓN".split("").forEach((ch,i)=>{c.fillStyle=on?"#ff3d7f":"#4a1426";if(on){c.shadowColor="#ff3d7f";c.shadowBlur=14}c.fillText(ch,11,12+i*17);c.shadowBlur=0});c.restore();
+    if(on){const ng=c.createRadialGradient(432,130,5,432,130,140);ng.addColorStop(0,"rgba(255,60,130,.22)");ng.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=ng;c.fillRect(280,0,360,320)}}
+  // aire acondicionado goteando
+  c.fillStyle="#8c8f96";c.fillRect(470,190,38,26);c.fillStyle="#5d6068";for(let i=0;i<5;i++)c.fillRect(474+i*7,194,3,18);const dp=(t*1.3)%1;c.fillStyle="rgba(170,200,255,.8)";c.fillRect(489,216+dp*120,2,5);
+  // cables y ropa tendida
+  c.strokeStyle="#0a0a0a";c.lineWidth=1.5;[[0,30,640,10,40],[60,0,600,60,30],[150,70,520,40,22]].forEach(([x0,y0,x1,y1,sg])=>{c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo((x0+x1)/2,(y0+y1)/2+sg,x1,y1);c.stroke()});
+  [["#c8233a",220],["#f2f2f2",270],["#2a5bd7",330],["#e8c53a",380]].forEach(([col,x],i)=>{const y=74+Math.sin((x-150)/370*Math.PI)*20,sw=Math.sin(t*1.5+i)*3;c.fillStyle=col;c.beginPath();c.moveTo(x-8,y);c.lineTo(x+8,y);c.lineTo(x+7+sw,y+18);c.lineTo(x-7+sw,y+18);c.fill()});
+  // ---- suelo: adoquines mojados, charcos con reflejos, alcantarilla con vapor ----
   c.save();c.beginPath();c.moveTo(0,H);c.lineTo(265,VY+70);c.lineTo(395,VY+70);c.lineTo(W,H);c.closePath();c.clip();
   const fg=c.createLinearGradient(0,VY+70,0,H);fg.addColorStop(0,"#1a2232");fg.addColorStop(1,"#0b0f18");c.fillStyle=fg;c.fillRect(0,VY+60,W,H);
   c.strokeStyle="rgba(140,170,220,.18)";c.lineWidth=1;
   for(let i=1;i<16;i++){const y=VY+70+Math.pow(i/16,1.8)*(H-VY-70);c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke()}
   for(let j=-12;j<=12;j++){c.beginPath();c.moveTo(VX+j*8,VY+70);c.lineTo(VX+j*60,H);c.stroke()}
+  [[170,372,80,10],[470,345,60,8],[320,262,40,5]].forEach(([x,y,rx,ry],i)=>{c.fillStyle="rgba(20,30,55,.85)";c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.fill();
+    c.save();c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.clip();c.fillStyle="rgba(255,60,130,.35)";c.fillRect(x-rx*.2+Math.sin(t*2+i)*3,y-ry,8,ry*2);c.fillStyle="rgba(255,200,130,.3)";c.fillRect(x+rx*.3,y-ry,5,ry*2);c.restore();
+    const rp=(t*1.7+i*.4)%1;c.strokeStyle=`rgba(200,220,255,${.5*(1-rp)})`;c.lineWidth=1;c.beginPath();c.ellipse(x-rx*.4+i*9,y,rp*14,rp*3,0,0,7);c.stroke()});
+  c.fillStyle="#111";c.beginPath();c.ellipse(470,300,34,8,0,0,7);c.fill();c.strokeStyle="#333";c.lineWidth=1.5;for(let i=-3;i<=3;i++){c.beginPath();c.moveTo(470+i*8,294);c.lineTo(470+i*8,306);c.stroke()}
   const rf=c.createRadialGradient(390,330,5,390,330,160);rf.addColorStop(0,"rgba(255,190,110,.22)");rf.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=rf;c.fillRect(0,0,W,H);c.restore();
+  for(let i=0;i<9;i++){const ph=((t*.25+i*.11)%1);c.fillStyle=`rgba(210,215,230,${.22*(1-ph)})`;c.beginPath();c.arc(470+Math.sin(ph*5+i)*14,300-ph*170,10+ph*28,0,7);c.fill()}
+  // ---- contenedor, bolsas, cajas y el gato ----
+  c.fillStyle="#1f4a2c";c.beginPath();c.moveTo(20,262);c.lineTo(140,276);c.lineTo(140,350);c.lineTo(20,350);c.fill();c.fillStyle="#173a22";c.beginPath();c.moveTo(14,252);c.lineTo(146,266);c.lineTo(146,280);c.lineTo(14,266);c.fill();
+  c.fillStyle="#0e2416";c.fillRect(30,296,96,4);c.fillRect(30,318,96,4);c.fillStyle="#d9d2bf";c.font="bold 10px sans-serif";c.fillText("AYTO. FUENTES",36,312);
+  c.fillStyle="#111";[[40,360,26,18],[80,368,30,16],[150,358,22,14]].forEach(([x,y,rx,ry])=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,7);c.fill()});c.fillStyle="rgba(255,255,255,.12)";c.beginPath();c.ellipse(72,360,8,3,0,0,7);c.fill();
+  c.fillStyle="#6b4a2b";c.fillRect(560,310,60,46);c.fillStyle="#7a5733";c.fillRect(574,280,44,32);c.strokeStyle="#4a3220";c.lineWidth=1.5;c.strokeRect(560,310,60,46);c.strokeRect(574,280,44,32);c.fillStyle="#2a1a12";c.font="bold 9px sans-serif";c.fillText("FRÁGIL",572,336);
+  {const bl=(t%5)>4.85;c.fillStyle="#000";c.beginPath();c.moveTo(96,250);c.lineTo(104,238);c.lineTo(108,250);c.lineTo(116,238);c.lineTo(122,252);c.quadraticCurveTo(110,268,96,252);c.fill();c.fillRect(112,250,30,14);c.strokeStyle="#000";c.lineWidth=3;c.beginPath();c.moveTo(142,256);c.quadraticCurveTo(156,250+Math.sin(t*2)*6,150,236);c.stroke();
+    if(!bl){c.fillStyle="#d8ff4a";c.shadowColor="#d8ff4a";c.shadowBlur=6;c.fillRect(101,249,4,2.5);c.fillRect(111,249,4,2.5);c.shadowBlur=0}}
   // farola del fondo
   const fl=.85+.15*Math.sin(t*9)*Math.sin(t*2.3);const lg=c.createRadialGradient(352,92,2,352,92,200);lg.addColorStop(0,`rgba(255,200,130,${.55*fl})`);lg.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=lg;c.fillRect(0,0,W,H);
   c.fillStyle="#ffe2b0";c.beginPath();c.arc(352,92,4,0,7);c.fill();
@@ -5255,6 +5293,9 @@ function drawDocAlley(c,t){const W=640,H=400;c.fillStyle="#04060b";c.fillRect(0,
   // cigarro
   c.strokeStyle="#ddd";c.lineWidth=3;c.beginPath();c.moveTo(bx+8,top-12);c.lineTo(bx+24,top-8);c.stroke();const cg=.6+.4*Math.sin(t*2.2);c.fillStyle=`rgba(255,${90+60*cg},40,${cg})`;c.beginPath();c.arc(bx+25,top-8,2.5,0,7);c.fill();
   for(let i=0;i<5;i++){const ph=((t*.35+i*.2)%1);c.fillStyle=`rgba(200,200,210,${.25*(1-ph)})`;c.beginPath();c.arc(bx+26+Math.sin(ph*6+i)*8,top-12-ph*70,4+ph*10,0,7);c.fill()}
+  // lluvia
+  c.strokeStyle="rgba(170,190,230,.35)";c.lineWidth=1;c.beginPath();for(let i=0;i<110;i++){const x=((i*73.3+t*60)%720)-40,y=((i*151.7+t*620)%460)-40;c.moveTo(x,y);c.lineTo(x-4,y+16)}c.stroke();
+  for(let i=0;i<14;i++){const ph=((t*2.2+i*.37)%1);const x=(i*97)%640,y=300+((i*41)%95);c.strokeStyle=`rgba(200,220,255,${.5*(1-ph)})`;c.beginPath();c.ellipse(x,y,ph*7,ph*2,0,0,7);c.stroke()}
   // niebla y viñeta
   for(let i=0;i<6;i++){const x=((i*137+t*14)%760)-60;c.fillStyle="rgba(150,170,220,.05)";c.beginPath();c.ellipse(x,340+i*8,120,20,0,0,7);c.fill()}
   const vg=c.createRadialGradient(330,230,110,330,230,420);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.7)");c.fillStyle=vg;c.fillRect(0,0,W,H)}
@@ -5301,32 +5342,35 @@ function drawDocTake(c,t,U){const W=640,H=400,d=U.d,k=d.k,p=U.p;const sk=(lookOf
     else if(k==="pomada"){c.fillStyle=sk;rrect(c,200,330,240,80,30);c.fill();c.fillStyle="#2b5ea8";c.fillRect(200,330,240,22);const r=T*8;hand(c,320+Math.cos(r)*40,372+Math.sin(r)*10,0,1.2,sk);c.fillStyle="rgba(200,230,170,.7)";c.beginPath();c.ellipse(320,372,50,14,0,0,7);c.fill();if(T<2)drawDocItem(c,"pomada",520,330,.9,T);
       if(T>.6){c.fillStyle="rgba(140,160,70,.5)";for(let i=0;i<4;i++){const y=330-((T*60+i*40)%140);c.beginPath();c.moveTo(300+i*20,y);c.quadraticCurveTo(310+i*20,y-20,300+i*20,y-40);c.lineWidth=4;c.strokeStyle="rgba(120,150,60,.5)";c.stroke()}}}
     if(after){const k2=T-2.4;for(let i=0;i<12;i++){const a=i*.52+k2*2;const rr=150+k2*40;c.fillStyle=`rgba(255,230,120,${Math.max(0,1-k2*.6)})`;c.font="20px sans-serif";c.textAlign="center";c.fillText("✦",320+Math.cos(a)*rr,230+Math.sin(a)*rr*.7)}
-      c.fillStyle=k==="iny"?"#7fd36b":"#ffd23f";c.font="40px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText(k==="pill"?"+10 %":k==="iny"?"+33 %":k==="toro"?"+4 FÍSICO":k==="jarabe"?"100 % ENERGÍA":"¡A CURARSE!",320,70)}
+      docStatPanel(c,U.stats,k2-.2)}
     return}
   // ---- la dosis perfecta ----
-  if(T<1.4){c.drawImage(U.face,190,100,260,260);const up=clamp(T/.4,0,1);c.save();c.translate(320,430-up*170);drawDocItem(c,"exp",0,0,.45,T);c.restore();
+  if(T<1.4){c.drawImage(U.face,225,206,190,190);const up=clamp(T/.4,0,1);c.save();c.translate(320,430-up*170);drawDocItem(c,"exp",0,0,.45,T);c.restore();
     for(let i=0;i<Math.floor(T*6);i++){const a=i*1.9;c.save();c.translate(190+((i*97)%260),300+((i*53)%60));c.rotate(a);c.fillStyle="#dfefff";c.fillRect(-4,-26,8,30);c.fillStyle="#b6f";c.fillRect(-3,-20,6,18);c.restore()}return}
   const G=T-1.4;// agonía y transformación
   const ag=clamp(G/1.8,0,1),grow=clamp((G-1.8)/2,0,1),sh=G<3.8?(2+ag*10)*(1-grow*.6):2;const jx=(Math.random()-.5)*sh,jy=(Math.random()-.5)*sh;
   if(G<1.8&&Math.floor(G*7)%3===0){c.fillStyle="rgba(255,255,255,.55)";c.fillRect(0,0,W,H)}
   if(G>1.6){c.fillStyle=`rgba(180,40,40,${.25*Math.min(1,G-1.6)})`;c.fillRect(0,0,W,H)}
-  const sc=1+grow*.62;const fw=260*sc;const fx=320-fw/2+jx,fy=375-fw*.98+jy;
-  if(grow>0){c.strokeStyle="rgba(255,255,255,.7)";c.lineWidth=2;c.fillStyle="#fff";c.font="14px Archivo Narrow, sans-serif";c.textAlign="left";for(let i=0;i<=10;i++){const y=390-i*36;c.beginPath();c.moveTo(14,y);c.lineTo(i%5?26:38,y);c.stroke();if(i%5===0)c.fillText((2+i/10).toFixed(2).replace(".",",")+" m",42,y+5)}
-    const hy=390-clamp(grow*1.15,0,1)*360;c.fillStyle="#ff5b3a";c.beginPath();c.moveTo(14,hy);c.lineTo(4,hy-7);c.lineTo(4,hy+7);c.fill()}
+  const sc=1+grow*.85;const fw=190*sc;const fx=320-fw/2+jx,fy=392-fw*.98+jy;
+  
   c.save();c.globalAlpha=1;c.drawImage(G>.9?U.face3:U.face2,fx,fy,fw,fw);c.restore();
   if(G<2.4){// manos en la cabeza
     hand(c,fx+fw*.14,fy+fw*.42,.5,1.5*sc,G>.9?"#d8695f":sk);hand(c,fx+fw*.86,fy+fw*.42,-.5+Math.PI,1.5*sc,G>.9?"#d8695f":sk)}
   // rayos de dolor
-  if(G<2.6){c.strokeStyle="rgba(255,240,180,.8)";c.lineWidth=3;for(let i=0;i<10;i++){const a=i*.63+G*4;c.beginPath();c.moveTo(320+Math.cos(a)*170,220+Math.sin(a)*150);c.lineTo(320+Math.cos(a)*240,220+Math.sin(a)*200);c.stroke()}
+  if(G<2.6){c.strokeStyle="rgba(255,240,180,.8)";c.lineWidth=3;for(let i=0;i<10;i++){const a=i*.63+G*4;c.beginPath();c.moveTo(320+Math.cos(a)*170,260+Math.sin(a)*120);c.lineTo(320+Math.cos(a)*240,260+Math.sin(a)*170);c.stroke()}
     c.fillStyle="#fff";c.font="34px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText("¡AAAAAARGH!",320+jx,60+jy)}
   // vapor
   if(G>1.2){for(let i=0;i<28;i++){const ph=((G*.9+i*.137)%1);const bx=320+Math.sin(i*2.3)*fw*.45,by=360-fw*(.15+.6*((i*.31)%1))-ph*180;const r=14+ph*40;c.fillStyle=`rgba(240,240,250,${.55*(1-ph)})`;c.beginPath();c.arc(bx+Math.sin(G*2+i)*10,by,r,0,7);c.fill()}}
   // suelo que se agrieta
   if(grow>0){c.strokeStyle="#000";c.lineWidth=3;for(let i=0;i<6;i++){c.beginPath();c.moveTo(320,398);c.lineTo(320+(i-2.5)*60*grow,398-10*grow);c.lineTo(320+(i-2.5)*110*grow,400);c.stroke()}}
-  if(G>4){c.fillStyle="rgba(0,0,0,.45)";c.fillRect(0,0,W,96);c.fillStyle="#ff5b3a";c.font="40px Bungee, Impact, sans-serif";c.textAlign="center";c.fillText("3,00 METROS",320,52);c.fillStyle="#ffd23f";c.font="24px Bungee, Impact, sans-serif";c.fillText("+200 %",320,84)}}
+  if(G>4.1)docStatPanel(c,U.stats,G-4.1)}
+function docStatPanel(c,L,k){if(!L||!L.length||k<0)return;const n=L.length,rh=26,h=n*rh+18,w=220,x=640-w-12,y=Math.max(8,200-h/2);
+  c.fillStyle="rgba(5,8,16,.82)";rrect(c,x,y,w,h,10);c.fill();c.strokeStyle="#ffd23f";c.lineWidth=2;rrect(c,x,y,w,h,10);c.stroke();
+  L.forEach(([lb,a,b],i)=>{const e=clamp(k*3-i*.35,0,1);if(e<=0)return;const yy=y+16+i*rh+12;c.globalAlpha=e;c.font="bold 17px Archivo Narrow, Arial Narrow, sans-serif";c.textAlign="left";c.fillStyle="#dfe8ff";c.fillText(lb,x+16,yy);
+    c.textAlign="right";c.fillStyle="#9fb0d6";c.fillText(String(a),x+w-82,yy);c.fillStyle="#fff";c.fillText("→",x+w-58,yy);const v=Math.round(a+(b-a)*clamp(k*2-i*.3,0,1));c.fillStyle=b>a?"#7dff6a":b<a?(lb==="Semanas de baja"?"#7dff6a":"#ff5b5b"):"#fff";c.font="bold 20px Bungee, Impact, sans-serif";c.fillText(String(v),x+w-16,yy+1)});c.globalAlpha=1}
 /* después del partido: control antidoping y la mole */
 function dopeAfter(inj,played){const lines=[];
-  S.players.forEach(p=>{if(giantOn(p)){if(!p.real){M.dead.push(p.id);lines.push(`${short(p)}: su cuerpo no aguanta la Dosis Perfecta. Se desinfla en el vestuario y no se levanta.`);addNews(`${fullName(p)} muere tras el partido. Medía tres metros. Nadie sabe nada del médico.`)}p.giant=null;return}
+  S.players.forEach(p=>{if(giantOn(p)){if(!p.real){M.dead.push(p.id);lines.push(`${short(p)}: su cuerpo no aguanta la Dosis Perfecta. Se desinfla en el vestuario y no se levanta.`);addNews(`${fullName(p)} muere tras el partido. Había doblado su tamaño. Nadie sabe nada del médico.`)}p.giant=null;return}
     if(dopeOn(p)&&played.has(p.id)&&Math.random()<(p.dope.risk||0)){const g=3;p.injured=Math.max(p.injured||0,g+1);p.suspW=1;lines.push(`${short(p)}: positivo en el control antidoping. ${g} partidos de sanción.`);addNews(`Control antidoping: ${fullName(p)} da positivo. Dice que fue un jarabe para la tos.`)}});
   lines.forEach(x=>inj.push(x))}
 function dopeWeek(){S.players=S.players.filter(p=>{if(p.giant&&p.giant.w<S.week){p.giant=null;if(!p.real){S.memorial.push(`${fullName(p)} (${p.age})`);addNews(`${fullName(p)} se queda sin partido y la Dosis Perfecta se lo lleva igual. Funeral el martes.`);try{legendCheck(p)}catch(e){}S.lineup=S.lineup.map(x=>x===p.id?null:x);return false}}return true})}
@@ -5536,7 +5580,7 @@ function startMatch(olo){
   addLog(0,`Pitido inicial en ${v.n}. ${T.n} sale con un ${of}.${FORM_NOTE[of]?" "+FORM_NOTE[of]:""}`,"ev");
   {const M0=M;setTimeout(()=>{if(M!==M0||!M||M.ended)return;const gk=onList().find(x=>x.role==="POR");const sp=castStyle()==="paleto"?["Curro","El Rubio"]:castNames();if(gk){xattr(gk.p);const a=gk.p.alt||180;
     if(a>=200)addLog(M.min,`${sp[0]}: «${pick(GIANT_L)(short(gk.p),a)}»`,"ev");else if(a<=166)addLog(M.min,`${sp[0]}: «${pick(TINY_L)(short(gk.p),a)}»`,"ev")}
-    onList().filter(x=>x.p.giant&&x.p.giant.w===S.week).forEach(x=>{addLog(M.min,`${sp[0]}: «¿Pero qué es eso, ${sp[1]}? ${short(x.p)} mide tres metros y echa vapor por las orejas. Eso no es de comer sano.»`,"ev");addLog(M.min,`${sp[1]}: «Yo a ese no le pido ni la hora.»`,"ev")})},2500)}
+    onList().filter(x=>x.p.giant&&x.p.giant.w===S.week).forEach(x=>{addLog(M.min,`${sp[0]}: «¿Pero qué es eso, ${sp[1]}? ${short(x.p)} ha doblado su tamaño y echa vapor por las orejas. Eso no es de comer sano.»`,"ev");addLog(M.min,`${sp[1]}: «Yo a ese no le pido ni la hora.»`,"ev")})},2500)}
   filled.forEach(p=>addLog(0,`Sale de inicio ${short(p)}, porque no hay otro.`));
   sq.filter(p=>p.drunk).forEach(p=>addLog(0,pick([`${short(p)} llega con una lata en la mano. Va contento.`,`${short(p)} huele a Cruzcampo desde el córner.`,`${short(p)} saluda al árbitro con un abrazo muy largo.`,`${short(p)} se ha calentado con tres latas en el aparcamiento.`]),"bad"));
   sq.filter(p=>!p.drunk&&p.hang>0).forEach(p=>addLog(0,`${short(p)} tiene una resaca que no ve la pelota.`,"bad"));
@@ -6070,7 +6114,7 @@ document.addEventListener("input",e=>{
 const PW=105,PH=68;
 function visOn(){return !!M&&!M.skipping&&!M.ended&&!$("#match").hidden}
 function dorsal(id){const i=S.players.findIndex(p=>p.id===id);return i<0?99:i+1}
-function bodyOf(x){xattr(x);const GI=!!(x.giant&&S&&x.giant.w===S.week);const bw=(x.build==="gordo"?1.5:x.build==="fuerte"?1.16:x.build==="delgado"?.84:1)*(x.depr?1+.12*x.depr.lvl:1)*(GI?1.7:1);return{hs:GI?2.5:clamp(1+((x.alt||178)-178)/120+Math.max(0,(x.alt||178)-200)*.024,.8,1.95),bw,spd:clamp(.72+(x.spd!=null?x.spd:50)/100*.55,.72,1.27)*(x.build==="gordo"?.9:1)}}
+function bodyOf(x){xattr(x);const GI=!!(x.giant&&S&&x.giant.w===S.week);const bw=(x.build==="gordo"?1.5:x.build==="fuerte"?1.16:x.build==="delgado"?.84:1)*(x.depr?1+.12*x.depr.lvl:1)*(GI?1.7:1);return{hs:GI?2.1:clamp(1+((x.alt||178)-178)/120+Math.max(0,(x.alt||178)-200)*.024,.8,1.95),bw,spd:clamp(.72+(x.spd!=null?x.spd:50)/100*.55,.72,1.27)*(x.build==="gordo"?.9:1)}}
 function rivSource(n){const T=S.comp&&M&&S.comp.teams[M.opp];if(!T)return null;const W=S.world&&S.world.clubs[T.n];if(W){const w=W.ps.find(x=>x.n===n);if(w)return w}
   for(const k in NATTMP){const v=NATTMP[k];if(v&&v.ps){const f=v.ps.find(x=>fullName(x)===n);if(f)return f}}return null}
 function spriteLook(seedStr,p){if(p){const L=lookOf(p);return{skin:L.skin,hair:L.hijab||(L.hair===0?null:L.hc)}}
