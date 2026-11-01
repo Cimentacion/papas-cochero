@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="18.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="18.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -4492,6 +4492,8 @@ function olCine(L,pos,money){
     requestAnimationFrame(draw)};requestAnimationFrame(draw)}
 /* ---------- vista ---------- */
 function olFmtLeft(ms){if(ms<=0)return "ya";const s=Math.round(ms/1000);if(s<60)return s+" s";if(s<3600)return Math.round(s/60)+" min";if(s<86400)return Math.round(s/3600)+" h";return Math.round(s/86400)+" d"}
+function safeView(f,k){try{return f()}catch(e){try{console.error(e)}catch(_){}const st=String(e&&e.stack||"").split("\n").slice(0,3).join(" · ");S.lastErr=`${k}/${S.sub&&S.sub[k]||""}: ${e&&e.message} · ${st}`;
+  return `<section class="win"><div class="bar">Algo ha fallado <small>${esc(k)}</small></div><div class="body"><p>Esta pantalla no se ha podido abrir. Haz una captura de este recuadro y mándasela a Claude:</p><p class="hint" style="word-break:break-all;font-family:monospace;font-size:11px">v${esc(window.PC_VERSION)} · ${esc(S.lastErr)}</p>${TABSUB[k]?`<div class="pc-act">${TABSUB[k].map(([kk,n])=>`<button class="btn mini" data-act="sub" data-v="${kk}">${esc(n)}</button>`).join("")}</div>`:""}</div></section>`}}
 function viewOnline(){
   if(!olEnabled())return `<section class="win"><div class="bar">Liga online</div><div class="body"><p>Actívala en Míster › Configuración › «Habilitar modos online».</p></div></section>`;
   const k=sub("online");const err=OL.err?`<p class="hint" style="color:#c8233a">Sin conexión con el servidor ahora mismo (${esc(OL.err)}). Se reintenta solo.</p>`:"";
@@ -4513,7 +4515,7 @@ function viewOnline(){
      <button class="btn play" data-act="olcreate">Enviar invitaciones</button>${err}</div></section>`}
   // ligas
   const inv=Object.entries((OL.me&&OL.me.in)||{});
-  const ids=Object.keys(OL.lg).filter(l=>OL.lg[l].st!=="off");const sel=OL.sel&&OL.lg[OL.sel]?OL.sel:ids[0];
+  Object.keys(OL.lg).forEach(l=>{if(!OL.lg[l]||typeof OL.lg[l]!=="object")delete OL.lg[l]});const ids=Object.keys(OL.lg).filter(l=>OL.lg[l].st&&OL.lg[l].n&&OL.lg[l].st!=="off");const sel=OL.sel&&OL.lg[OL.sel]?OL.sel:ids[0];
   let h=inv.length?`<section class="win"><div class="bar">Invitaciones</div><div class="body">${inv.map(([lid,v])=>`<div class="offer"><div><b>${esc(v.n)}</b><small>Te invita ${esc(v.from)}</small></div><div class="row"><button class="btn mini primary" data-act="olyes" data-v="${lid}">Aceptar</button><button class="btn mini" data-act="olno" data-v="${lid}">No</button></div></div>`).join("")}</div></section>`:"";
   if(!ids.length)return h+`<section class="win"><div class="bar">Tus ligas online</div><div class="body"><p class="hint">No estás en ninguna liga. Organiza una en «Organizar liga» o espera una invitación.</p><p class="hint">Tu código: <b>${olMe()}</b></p>${err}</div></section>`;
   h+=ids.length>1?`<div class="subtabs">${ids.map((l,i)=>{const L=OL.lg[l];const dup=ids.some(o=>o!==l&&OL.lg[o].n===L.n);return `<button class="${l===sel?"sel":""}" data-act="olsel" data-v="${l}">${esc(L.n)}${dup?` (${i+1})`:""}${olMyMatch(l,L)?" ⚽":""}</button>`}).join("")}</div>`:"";
@@ -4723,7 +4725,7 @@ function render(){
   if(S.tab==="pueblo"){S.tab="squad";sub("squad");S.sub.squad="fichar"}if(S.tab==="datos"){S.tab="comp";sub("comp");S.sub.comp="datos"}
   const VIEWS={club:viewClub,squad:viewSquad,comp:()=>{const k=sub("comp");return k==="europa"?euBox():k==="historia"?historyBox():k==="datos"?viewDatos():k==="copa"?(S.cup?cupSection():`<section class="win"><div class="bar">Copa del Rey</div><div class="body"><p class="hint">La copa se sortea al empezar la temporada.</p></div></section>`):viewComp()},
     online:viewOnline,
-    campo:()=>{const k=sub("campo");return k==="redes"?redesBox():k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="arbitros"?refBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};
+    campo:()=>{const k=sub("campo");return k==="redes"?redesBox():k==="sede"?houseBox():k==="escudo"?clubBox():k==="directiva"?boardBox():k==="staff"?staffBox():k==="arbitros"?refBox():k==="tienda"?merchBox():viewCampo()},mister:viewMister,prep:viewPrep};Object.keys(VIEWS).forEach(k=>{const f=VIEWS[k];VIEWS[k]=()=>safeView(f,k)});
   v.innerHTML=(S.tab==="club"&&euBlocksClub()?`<div class="natban" style="background:linear-gradient(90deg,#04103a,#1b4fd8)">⭐<span>Toca partido europeo.</span><button class="btn mini" data-act="eugo">Ir a Europa</button></div>`:"")+(S.tab==="club"&&natBlocksClub()?`<div class="natban">${flagSVG(ME,40,"wave")}<span>Ahora toca partido de España.</span><button class="btn mini" data-act="natview" data-v="nat">Ir a España</button></div>`:"")+(S.tab!=="prep"?subBar(S.tab):"")+(VIEWS[S.tab]||viewClub)();
   paintFaces(v);paintCrests(v);olBanner();bgSync();natHeader();
   const fc=$("#fieldcv");if(fc)drawCampo(fc);
