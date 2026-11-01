@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="18.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="18.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2050,12 +2050,12 @@ function autoLineup(){
 function cleanLineup(){S.lineup=S.lineup.map(id=>id&&pById(id)&&!pById(id).injured?id:null)}
 function viewSquad(){
   const ps=[...S.players].sort((a,b)=>shownOvr(b)-shownOvr(a));
-  {const k=sub("squad");if(k==="estrellas")return starsBox();if(k==="cantera")return canteraBox();if(k==="once")return lineupSection()+tacBox();if(k==="fichar")return starDeckBox()+viewPueblo()}
+  {const k=sub("squad");if(k==="estrellas")return starsBox();if(k==="cantera")return canteraBox()+loansBox();if(k==="once")return lineupSection()+tacBox();if(k==="fichar")return starDeckBox()+viewPueblo()}
   return `
   <section class="win"><div class="bar">Plantilla <small>${S.players.length}/22</small></div><div class="body">
    <div class="pcount"><b>${S.players.length}</b> jugadores · ${["POR","DEF","MED","DEL"].map(r=>`${S.players.filter(p=>p.known&&p.pos===r).length} ${r}`).join(" · ")}${S.players.some(p=>!p.known)?` · ${S.players.filter(p=>!p.known).length} ???`:""}${S.players.some(p=>p.injured)?` · ${S.players.filter(p=>p.injured).length} lesionados`:""}</div>
    ${S.memorial.length?`<p class="hint">En memoria de: ${S.memorial.map(esc).join(", ")}.</p>`:""}
-   <div class="list">${ps.length?ps.map(p=>prow(p,"squad")).join(""):`<p class="hint">No tienes a nadie. Ve al pueblo.</p>`}</div></div></section>`;
+   <div class="list">${ps.length?ps.map(p=>prow(p,"squad")).join(""):`<p class="hint">No tienes a nadie. Ve al pueblo.</p>`}</div></div></section>${loansBox()}`;
 }
 let STAD=null;
 function drawStadium(cv,us){
@@ -2192,6 +2192,7 @@ function cardHTML(p){
    <div class="pc-act">
     <button class="btn primary" data-act="sellp" data-id="${p.id}">Vender a ${esc(of.club)} por ${of.v} €</button>
     <button class="btn" data-act="tradep">Buscar un cambio</button>
+    ${!p.loan&&!p.glory&&S.players.includes(p)?`<button class="btn" data-act="cedep" data-v="${p.id}|0">Ceder una temporada</button>`:""}
     <button class="btn" data-act="firep" data-id="${p.id}">Echarlo</button>
     <button class="btn" data-act="close">Cerrar</button>
    </div></div>`;
@@ -2714,6 +2715,37 @@ function youthWeek(){
   if(!unl("cantera")||!(S.academy>0))return;S.youth=S.youth||[];
   S.youth.forEach(p=>{const room=potOf(p)-ovr(p);if(room>0&&Math.random()<.25+.1*S.academy){const k=pick(["atk","def","fis","cab"]);p[k]=Math.min(99,p[k]+1)}});
 }
+/* ---------- cesiones: tus jugadores se van un año a otro club y vuelven mejores ---------- */
+const LROLE={tit:{n:"Titular",pj:.9,k:1.25},rot:{n:"Rotación",pj:.55,k:.85},ban:{n:"Banquillo",pj:.2,k:.35}};
+function loanRole(p,t){const o=ovr(p),q=TIER_Q[t];return o>=q+3?"tit":o>=q-6?"rot":"ban"}
+function loanClubs(p){const W=S.world;if(!W)return[];const T=curTier(),out=[],seen=new Set();const ts=[];for(let t=Math.max(0,T-2);t<=Math.min(TIER_Q.length-1,T+1);t++)if(W.tiers[t])ts.push(t);
+  for(let k=0;k<60&&out.length<4;k++){const t=pick(ts);const n=pick(W.tiers[t].filter(x=>x!=="__us"));if(!n||seen.has(n)||!W.clubs[n])continue;seen.add(n);out.push({n,t,role:loanRole(p,t)})}
+  return out.sort((a,b)=>b.t-a.t)}
+function loanDesc(o,T){const r=LROLE[o.role];return `${TIERS[o.t].n}${o.t>T?" (más nivel que vosotros)":o.t<T?" (menos nivel)":""} · jugaría de <b>${r.n.toLowerCase()}</b>`}
+function cedeOpen(v){const[id,y]=v.split("|");const fromY=y==="1";const p=fromY?(S.youth||[]).find(x=>x.id===+id):pById(+id);if(!p)return;
+  if(!S.world){toast("Todavía no hay más clubes a los que cederlo.");return}
+  const T=curTier();const L=loanClubs(p);S.loanOpts={id:p.id,y:fromY,L};
+  modal(`Ceder a ${fullName(p)}`,`<p class="hint">Se va al club que elijas hasta final de temporada. Ellos pagan su sueldo. Si juega mucho, vuelve mejor (sobre todo los jóvenes con techo). En un club de más nivel aprende más, pero puede que no juegue.</p>
+   <p>Media ${ovr(p)} · techo ${potOf(p)} · ${p.age} años</p>
+   <div class="list">${L.map((o,i)=>`<div class="offer"><div><b>${esc(o.n)}</b><small>${loanDesc(o,T)}</small></div><button class="btn mini primary" data-act="cedeto" data-v="${i}">Ceder</button></div>`).join("")||`<p class="hint">Nadie lo quiere ahora mismo.</p>`}</div>
+   <div class="pc-act"><button class="btn" data-act="close">Mejor no</button></div>`)}
+function cedeTo(i){const o=S.loanOpts;if(!o)return;const c=o.L[+i];if(!c)return;const p=o.y?(S.youth||[]).find(x=>x.id===o.id):pById(o.id);if(!p)return;
+  if(o.y)S.youth=S.youth.filter(x=>x!==p);else{S.players=S.players.filter(x=>x!==p);S.lineup=S.lineup.map(x=>x===p.id?null:x)}
+  S.loansOut=(S.loansOut||[]).concat([{p,club:c.n,t:c.t,role:c.role,y:o.y,o0:ovr(p),pj:0,g:0}]);S.loanOpts=null;
+  addNews(`${fullName(p)} se va cedido al ${c.n} hasta final de temporada. Se lleva el táper de su madre.`);closeModal();save();render();toast(`${short(p)} cedido al ${c.n}.`)}
+function loanWeek(){if(!S.comp||!(S.loansOut||[]).length)return;const T=curTier();
+  S.loansOut.forEach(L=>{const p=L.p,r=LROLE[L.role];if(Math.random()>r.pj)return;L.pj++;
+    if(Math.random()<({DEL:.32,MED:.14,DEF:.05,POR:0}[p.pos]||.1))L.g++;
+    const room=potOf(p)-ovr(p);if(room<=0)return;const ageK=p.age<=19?1.3:p.age<=22?1.1:p.age<=25?.8:p.age<=29?.35:.1;const up=L.t>T?1.25:L.t<T-1?.85:1;
+    if(Math.random()<.4*r.k*ageK*up){const k=pick(p.pos==="POR"?["def","cab","fis"]:p.pos==="DEF"?["def","fis","cab"]:p.pos==="MED"?["atk","def","fis"]:["atk","fis","cab"]);p[k]=Math.min(99,p[k]+1)}
+    if(L.role==="ban"&&Math.random()<.02)p.conf=Math.max(0,(p.conf||50)-3);else if(L.role==="tit")p.conf=Math.min(100,(p.conf||50)+1)})}
+function loanReturn(ev){const L0=S.loansOut||[];if(!L0.length)return;S.loansOut=[];
+  L0.forEach(L=>{const p=L.p;p.age++;p.goals=0;p.injured=0;p.energy=100;const d=ovr(p)-L.o0;
+    const txt=`${fullName(p)} vuelve de su cesión en el ${L.club}: ${L.pj} partido${L.pj===1?"":"s"}, ${L.g} gol${L.g===1?"":"es"} y ${d>0?`+${d} de media (ahora ${ovr(p)})`:"la misma media de antes"}.`;
+    if(L.y&&p.age<19){S.youth=(S.youth||[]).concat([p]);ev.push(txt+" Vuelve a la cantera.")}
+    else{if(L.y)p.origen="Canterano";S.players.push(p);ev.push(txt+(L.y?" Ya tiene edad: sube al primer equipo.":""))}})}
+function loansBox(){const L=S.loansOut||[];if(!L.length)return "";
+  return `<section class="win"><div class="bar">Cedidos <small>${L.length}</small></div><div class="body"><div class="list">${L.map(x=>`<div class="offer"><div><b>${esc(fullName(x.p))}</b><small>En el ${esc(x.club)} (${esc(TIERS[x.t].n)}) · ${LROLE[x.role].n} · ${x.pj} PJ · ${x.g} goles · media ${x.o0}${ovr(x.p)>x.o0?` → <b style="color:#2f7d32">${ovr(x.p)}</b>`:""}</small></div></div>`).join("")}</div><p class="hint">Vuelven al acabar la temporada.</p></div></section>`}
 function youthSeason(){
   if(!unl("cantera")||!(S.academy>0))return [];S.youth=S.youth||[];const ev=[];
   S.youth=S.youth.filter(p=>{p.age++;if(p.age>=19){ev.push(`${fullName(p)} cumple 19 sin subir al primer equipo y se va a jugar al pueblo de al lado.`);return false}return true});
@@ -2722,7 +2754,7 @@ function youthSeason(){
 function canteraBox(){
   if(!unl("cantera"))return lockedBox("Cantera","cantera");
   const lv=S.academy||0,nx=ACAD[lv+1];S.youth=S.youth||[];
-  const rows=S.youth.map(p=>`<div class="offer"><div><b>${esc(fullName(p))}</b><small>${p.age<=16?"Cadete":"Juvenil"} · ${p.age} años · ${p.known?p.pos:"???"} · media ${ovr(p)} · techo ${potOf(p)}</small></div><div class="row"><button class="btn mini primary" data-act="promote" data-id="${p.id}">Subir</button><button class="btn mini" data-act="release" data-id="${p.id}">Soltar</button></div></div>`).join("");
+  const rows=S.youth.map(p=>`<div class="offer"><div><b>${esc(fullName(p))}</b><small>${p.age<=16?"Cadete":"Juvenil"} · ${p.age} años · ${p.known?p.pos:"???"} · media ${ovr(p)} · techo ${potOf(p)}</small></div><div class="row"><button class="btn mini primary" data-act="promote" data-id="${p.id}">Subir</button><button class="btn mini" data-act="cedep" data-v="${p.id}|1">Ceder</button><button class="btn mini" data-act="release" data-id="${p.id}">Soltar</button></div></div>`).join("");
   return `<section class="win"><div class="bar">Cantera <small>${esc(ACAD[lv].n)}</small></div><div class="body">
    ${lv?`<p class="hint">${esc(ACAD[lv].d)} Cada verano salen ${1+lv} chavales nuevos. Mejoran solos cada semana. A los 19 o los subes o se van.</p>`:`<p class="hint">Monta una cantera y cada verano saldrán chavales con mucho techo. Tardan, pero son baratos.</p>`}
    ${nx?`<div class="offer"><div><b>${lv?"Mejorar a":"Montar"}: ${esc(nx.n)}</b><small>${esc(nx.d)}</small></div><button class="btn mini primary" data-act="academy">${nx.c} €</button></div>`:""}
@@ -4906,7 +4938,7 @@ function weekTick(){
   ledSync();const L=weeklyLines();const tot=L.reduce((a,x)=>a+x[1],0);S.money+=tot;L.forEach(([n,v])=>led(n,v));
   S.idle=S.comp?0:(S.idle||0)+1;S.week++;
   S.hist=S.hist||{money:[],media:[]};S.hist.money.push(S.money);S.hist.media.push(teamMedia());S.hist.money=S.hist.money.slice(-60);S.hist.media=S.hist.media.slice(-60);
-  S.players.forEach(p=>{if(p.ovr0==null)p.ovr0=ovr(p);p.prog=(p.prog||[]).concat(ovr(p)).slice(-30)});mafiaWeek();wifeWeek();if(stf("psico"))S.coach.moral=clamp(S.coach.moral+stf("psico"),0,100);maybeEvent();S.sessions=Array(sessCount()).fill(null);S.sessLog=[];S.sites=genSites();
+  S.players.forEach(p=>{if(p.ovr0==null)p.ovr0=ovr(p);p.prog=(p.prog||[]).concat(ovr(p)).slice(-30)});mafiaWeek();wifeWeek();try{loanWeek()}catch(e){}if(stf("psico"))S.coach.moral=clamp(S.coach.moral+stf("psico"),0,100);maybeEvent();S.sessions=Array(sessCount()).fill(null);S.sessLog=[];S.sites=genSites();
   S.coach.moral=clamp(S.coach.moral+HOUSES[S.house||0].moral,0,100);
   youthWeek();if(S.mud)S.mud--;S.feuds=(S.feuds||[]).filter(f=>pById(f[0])&&pById(f[1]));
   S.players.forEach(p=>{if(p.knock>0)p.knock--;if(stf("psico")){p.dep=clamp((p.dep||0)-2*stf("psico"),0,100)}if(p.injured){p.injured--;if(!p.injured){p.gravLock=0;p.suspW=0}}p.energy=clamp(p.energy+Math.max(25,45-tierNow()*2.5)+(sst("masajista")?8:0)+(has("aguacaliente")?3:0)+(has("sauna")?4:0)+(has("piscina")?6:0),20,100);if(has("sauna"))p.dep=clamp((p.dep||0)-1,0,100);
@@ -5455,7 +5487,7 @@ function compEnd(){
     if(p.age>=32)p.fis=Math.max(1,p.fis-rnd(1,3));if(p.age>=38){p.atk=Math.max(1,p.atk-rnd(0,2));p.def=Math.max(1,p.def-rnd(0,2))}
     return true});
   before.filter(p=>!S.players.includes(p)).forEach(legendCheck);S.players.forEach(p=>p.tenure=(p.tenure||0)+1);
-  S.players.filter(p=>p.loan).forEach(p=>{ev.push(`${fullName(p)} vuelve a su club: se acabó la cesión.`);S.players=S.players.filter(x=>x!==p)});S.lineup=S.lineup.map(id=>id&&pById(id)?id:null);
+  S.players.filter(p=>p.loan).forEach(p=>{ev.push(`${fullName(p)} vuelve a su club: se acabó la cesión.`);S.players=S.players.filter(x=>x!==p)});try{loanReturn(ev)}catch(e){}S.lineup=S.lineup.map(id=>id&&pById(id)?id:null);
   S.renew=[];S.players.forEach(p=>{if(p.ct==null)p.ct=rnd(1,2);p.ct--;if(p.ct<=0){const o=ovr(p);const base=wageFor(o,nextTier);const star=o>=TIER_Q[nextTier];const ask=Math.max(p.wage+1,Math.round(base*(up?1.35:1)*(star?1.3:1)*(1+Math.min(.4,(p.goals||0)*.03))*diffK(1.15,.85)));S.renew.push({id:p.id,ask})}});
   if(S.renew.length)ev.push(`${S.renew.length} jugador${S.renew.length>1?"es acaban":" acaba"} contrato y ${S.renew.length>1?"piden":"pide"} renovar con más dinero. Decide en Inicio antes de empezar la temporada.`);
   youthSeason().forEach(e=>ev.push(e));
@@ -5693,6 +5725,7 @@ const A={
     addNews(`${fullName(p)} se va a ${of.club} por ${of.v} €. ¿Esclavismo? ¿Venta de humanos? ¿Aún es legal?`);save();render();
     modal("Vendido",`<p>${esc(fullName(p))} se va a ${esc(of.club)} por <b>${of.v} €</b>.</p><p class="quote">${esc(short(p))}: «${esc(pick(TRADE_Q))}»</p><button class="btn play" data-act="close">Hecho</button>`)},
   tradep:()=>{closeModal();S.tab="squad";S.sub=S.sub||{};S.sub.squad="fichar";save();render();setTimeout(()=>{const x=document.querySelector("[id^=sw-]");if(x)x.scrollIntoView({block:"center"})},50);toast("Mercado de intercambios: elige a quién das a cambio.")},
+  cedep:v=>cedeOpen(v),cedeto:v=>cedeTo(v),
   firep:(v,el)=>{const p=pById(+el.dataset.id);if(!p)return;legendCheck(p);S.players=S.players.filter(x=>x.id!==p.id);S.lineup=S.lineup.map(x=>x===p.id?null:x);addNews(`${short(p)} deja el equipo. Se lleva el peto.`);closeModal();save();render();toast(`${short(p)} se va a su casa.`)},
   loan:v=>{const a=+v;if(S.debt&&S.loanP==null)S.loanP=LOAN_MAX;if((S.loanP||0)+a>LOAN_MAX){toast(`Los del polígono no te fían más de ${LOAN_MAX} € en total.`);return}S.loanP=(S.loanP||0)+a;S.money+=a;S.debt=(S.debt||0)+Math.round(a*1.4);addNews(`El míster pide ${a} € a «los del polígono». Le dan el dinero en una bolsa del Mercadona.`);save();render();toast(`+${a} €. Debes ${S.debt} €.`)},
   payall:()=>{if(S.money<S.debt){toast("No te llega.");return}ach("mafia");S.money-=S.debt;S.debt=0;S.loanP=0;save();render();toast("Deuda pagada. Te dan un abrazo que dura demasiado.")},
