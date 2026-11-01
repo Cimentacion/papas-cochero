@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="18.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -541,6 +541,53 @@ body.fm .sw{border-color:#343a7c;border-radius:5px}
 <input type="file" id="photo-in" accept="image/*" hidden>
 <input type="file" id="save-in" accept=".json,.txt,application/json,text/plain" hidden>
 
+<script>
+/* ================= idiomas: traduce lo que se ve (texto de la página, canvas, voz) ================= */
+(function(){
+  var LANGS={es:"Español",en:"English",ro:"Română",ar:"العربية"},I18V="2";
+  var L="es";try{var sv=localStorage.getItem("pc_lang");if(sv&&LANGS[sv])L=sv;else{var nv=String(navigator.language||"es").slice(0,2).toLowerCase();if(LANGS[nv])L=nv}}catch(e){}
+  var D=null,CACHE=new Map(),BUSY=false,OBS=null;
+  var esc=function(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")};
+  function build(src,tr){var s=new Map(),p=[],f=[];
+    for(var i=0;i<src.length;i++){var k=src[i],v=tr[i];if(typeof v!=="string"||!v||v===k)continue;
+      if(/\{\d+\}/.test(k)){var parts=k.split(/\{\d+\}/);var key="";parts.forEach(function(x){if(x.trim().length>key.trim().length)key=x});if(key.trim().length<4)continue;p.push({parts:parts,v:v,k:key.trim(),n:parts.join("").length})}
+      else{s.set(k,v);if(k.length>=8&&/\s/.test(k))f.push([k,v])}}
+    p.sort(function(a,b){return b.n-a.n});f.sort(function(a,b){return b[0].length-a[0].length});return{s:s,p:p,f:f}}
+  function core(t,depth){if(!t||!/[A-Za-zÀ-ÿ]/.test(t))return t;var r=D.s.get(t);if(r!=null)return r;
+    var dot=/[.!?]$/.test(t);r=dot?D.s.get(t.slice(0,-1)):D.s.get(t+".");if(r!=null)return dot?r+t.slice(-1):r.replace(/[.]$/,"");
+    var c0=t.charAt(0);if(c0!==c0.toUpperCase()){r=D.s.get(c0.toUpperCase()+t.slice(1));if(r!=null)return r.charAt(0).toLowerCase()+r.slice(1)}
+    if(depth<3)for(var i=0;i<D.p.length;i++){var P=D.p[i];if(t.indexOf(P.k)<0)continue;if(!P.re){var rx="^"+esc(P.parts[0]);for(var q=1;q<P.parts.length;q++){rx+=(q>1&&/^\s+$/.test(P.parts[q-1])?"(\\S+)":"([\\s\\S]*?)")+esc(P.parts[q])}P.re=new RegExp(rx+"$")}var m=P.re.exec(t);
+      if(m)return P.v.replace(/\{(\d+)\}/g,function(_,n){var g=m[+n];if(g==null)return "";if(/^(s|es|n)$/.test(g))return L==="en"?(g==="n"?"":"s"):"";var a=g.match(/^\s*/)[0],b=g.match(/\s*$/)[0];return a+core(g.trim(),depth+1)+b})}
+    var out=t;if(t.length>=8)for(var j=0;j<D.f.length;j++){var F=D.f[j];if(F[0].length>out.length)continue;if(out.indexOf(F[0])>=0)out=out.split(F[0]).join(F[1])}
+    {var ex=function(x){var r=D.s.get(x);if(r!=null)return r;var c=x.charAt(0).toUpperCase()+x.slice(1);if(c!==x){r=D.s.get(c);if(r!=null)return r.charAt(0).toLowerCase()+r.slice(1)}var l=x.toLowerCase();if(l!==x&&x===x.toUpperCase()){r=D.s.get(l.charAt(0).toUpperCase()+l.slice(1));if(r!=null)return r.toUpperCase()}return null};
+      var pc=out.split(/([^A-Za-zÀ-ÿ¿¡!?\s'«»"]+)/);if(pc.length>1||out.split(" ").length<=3){var ch=false;pc=pc.map(function(x){if(!/[A-Za-zÀ-ÿ]/.test(x))return x;var a=x.match(/^\s*/)[0],b=x.slice(a.length).match(/\s*$/)[0],m=x.trim();var r=ex(m);if(r==null&&m.length>=4&&depth<3){var q=core(m,depth+1);if(q!==m)r=q}if(r!=null){ch=true;return a+r+b}return x});if(ch)out=pc.join("")}}
+    return out}
+  function tr(t){if(!D||t==null)return t;t=String(t);if(!/[A-Za-zÀ-ÿ¿¡]/.test(t))return t;var c=CACHE.get(t);if(c!=null)return c;
+    var a=t.match(/^\s*/)[0],b=t.slice(a.length).match(/\s*$/)[0],mid=t.slice(a.length,t.length-b.length).replace(/\s+/g," ");var r=a+core(mid,0)+b;
+    if(CACHE.size>8000)CACHE.clear();CACHE.set(t,r);return r}
+  var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,NOSCRIPT:1,PLAINTEXT:1};
+  function doNode(n){if(n.nodeType===3){var p=n.parentNode;if(!p||SKIP[p.nodeName]||(p.closest&&p.closest("[data-notr]")))return;if(n.__t===n.data)return;var r=tr(n.data);if(r!==n.data)n.data=r;n.__t=n.data;return}
+    if(n.nodeType!==1||SKIP[n.nodeName]||n.hasAttribute("data-notr"))return;["placeholder","title","aria-label"].forEach(function(a){var v=n.getAttribute(a);if(v){var r=tr(v);if(r!==v)n.setAttribute(a,r)}});
+    var w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT,null),x,list=[];while((x=w.nextNode()))list.push(x);list.forEach(doNode);
+    if(n.querySelectorAll)n.querySelectorAll("[placeholder],[title]").forEach(function(e){["placeholder","title"].forEach(function(a){var v=e.getAttribute(a);if(v){var r=tr(v);if(r!==v)e.setAttribute(a,r)}})})}
+  function all(){if(!D||!document.body)return;BUSY=true;try{doNode(document.body);if(document.title)document.title=tr(document.title)}catch(e){}BUSY=false;if(OBS)OBS.takeRecords()}
+  function observe(){if(OBS||!document.body)return;OBS=new MutationObserver(function(ms){if(BUSY||!D)return;BUSY=true;try{ms.forEach(function(m){if(m.type==="characterData")doNode(m.target);else if(m.type==="attributes")doNode(m.target);else m.addedNodes.forEach(doNode)})}catch(e){}BUSY=false;OBS.takeRecords()});
+    OBS.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["placeholder","title"]})}
+  // canvas
+  try{var C2=CanvasRenderingContext2D.prototype;["fillText","strokeText","measureText"].forEach(function(fn){var o=C2[fn];C2[fn]=function(t){if(D&&typeof t==="string"){var a=[].slice.call(arguments);a[0]=tr(t);return o.apply(this,a)}return o.apply(this,arguments)}})}catch(e){}
+  // diálogos del navegador
+  ["alert","confirm","prompt"].forEach(function(fn){var o=window[fn];if(!o)return;window[fn]=function(m){var a=[].slice.call(arguments);if(typeof m==="string")a[0]=tr(m);return o.apply(window,a)}});
+  function load(){if(L==="es"||typeof fetch!=="function"&&!localStorage.getItem("pc_i18n_"+L))return;var base=(location.href.indexOf(window.PC_REMOTE||"#")===0?"":(window.PC_REMOTE||""))+"i18n/";
+    try{var cv=localStorage.getItem("pc_i18n_v"),cs=localStorage.getItem("pc_i18n_src"),ct=localStorage.getItem("pc_i18n_"+L);if(cv===I18V&&cs&&ct){D=build(JSON.parse(cs),JSON.parse(ct))}}catch(e){}
+    if(!D)Promise.all([fetch(base+"src.json?v="+I18V).then(function(r){return r.text()}),fetch(base+L+".json?v="+I18V).then(function(r){return r.text()})]).then(function(x){try{D=build(JSON.parse(x[0]),JSON.parse(x[1]));try{localStorage.setItem("pc_i18n_v",I18V);localStorage.setItem("pc_i18n_src",x[0]);localStorage.setItem("pc_i18n_"+L,x[1])}catch(e){}all()}catch(e){}}).catch(function(){})}
+  window.PCLANG=L;window.PCLANGS=LANGS;window.PCtr=function(t){return tr(t)};
+  window.PCsetLang=function(l){try{localStorage.setItem("pc_lang",l)}catch(e){}location.reload()};
+  if(L!=="es"){document.documentElement.lang=L;if(L==="ar")document.documentElement.dir="rtl"}
+  load();
+  var start=function(){observe();all()};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+  if(!document.body)document.addEventListener("readystatechange",function(){if(document.body&&!OBS)start()});
+})();
+</script>
 <script>
 (()=>{
 "use strict";
@@ -1457,7 +1504,7 @@ function drawFace(cv,L){
   if(L.glasses){c.strokeStyle="#1a1a1a";c.lineWidth=1.8;c.fillStyle="rgba(200,230,255,.18)";[41,59].forEach(x=>{c.beginPath();c.roundRect?c.roundRect(x-7,44.5,14,9.5,3):c.rect(x-7,44.5,14,9.5);c.fill();c.stroke()});c.beginPath();c.moveTo(48,48);c.lineTo(52,48);c.moveTo(34,48);c.lineTo(50-hw,47);c.moveTo(66,48);c.lineTo(50+hw,47);c.stroke()}
   c.restore();
 }
-function lookOf(p,mood){const L=lookOf0(p,mood);if(p.depr&&p.depr.lvl){const v=p.depr.lvl;L.belly=true;L.tired=true;if(!p.female)L.stubble=true;if(L.mood!=="happy"&&L.mood!=="surp")L.mood="sad";
+function lookOf(p,mood){const L=lookOf0(p,mood);try{dopeLook(p,L)}catch(e){}if(p.depr&&p.depr.lvl){const v=p.depr.lvl;L.belly=true;L.tired=true;if(!p.female)L.stubble=true;if(L.mood!=="happy"&&L.mood!=="surp")L.mood="sad";
     if(v>=2&&!L.hijab&&[4,5,6,8,9,10,11,12,13,14,15,16,17].includes(L.hair))L.hair=v>=3?2:3;L.age=(L.age||30)+v*8;L.grey=true}return L}
 function lookOf0(p,mood){
   if(p.nat&&NAT[p.nat])return natLook(p,mood);
@@ -1791,6 +1838,7 @@ function viewCreator(){
   <div class="opt"><span>Estado civil</span><div class="chips">${[["div","Divorciado"],["div2","Divorciado dos veces"],["comp","Es complicado"]].map(([k,n])=>`<button class="btn mini ${s.civil===k?"sel":""}" data-act="c-civil" data-v="${k}">${n}</button>`).join("")}</div></div>
   <div class="opt"><span>Historial</span><div class="chips">${tg("c-story","per","Cobra el PER",s)}${tg("c-story","madre","Vive con su madre",s)}${tg("c-story","carnet","Sin carnet",s)}${tg("c-story","eso","Repitió 4º tres veces",s)}${tg("c-story","alevin","Lo de la barbacoa",s)}${tg("c-story","bar","Debe dinero en el bar",s)}</div></div>
   <div class="opt"><span>Tu historia</span><div class="bio" id="c-bio">${esc(bio(C))}</div></div>
+  <div class="opt" data-notr><span>🌐</span><div class="chips">${Object.keys(window.PCLANGS||{es:1}).map(k=>`<button class="btn mini ${window.PCLANG===k?"sel":""}" data-act="setlang" data-v="${k}">${window.PCLANGS[k]}</button>`).join("")}</div></div>
   <button class="btn play" data-act="c-sign">Fundar Los Papas Cochero</button>
   </div></section>`;
 }
@@ -2016,14 +2064,14 @@ function viewClub(){
 function prow(p,mode){
   const t=tr(p.trait);
   const right=mode==="squad"
-   ?`${dopeTag(p)}${p.depr?`<small class="tag bad">😞 Depresión ${p.depr.lvl}/3 (−${p.depr.lvl*8} %)</small>`:""}${p.injured?`<small class="tag bad">${p.gravLock?"En la cámara de gravedad":p.suspW?`Sancionado ${p.injured} partido${p.injured>1?"s":""}`:`Lesionado ${p.injured} sem.`}</small>`:""}<small>${p.wage} €/sem · ${p.goals} goles</small><button class="btn mini" data-act="fire" data-id="${p.id}">${pendingFire===p.id?"¿Seguro?":"Echar"}</button>`
+   ?`${giantOn(p)?`<small class="tag bad">🧪</small>`:dopeOn(p)?`<small class="tag">${p.dope.k==="iny"?"💉":p.dope.k==="toro"?"🥤":"💊"}</small>`:p.weak===S.week?`<small class="tag bad">🥴</small>`:""}${p.depr?`<small class="tag bad">😞 Depresión ${p.depr.lvl}/3 (−${p.depr.lvl*8} %)</small>`:""}${p.injured?`<small class="tag bad">${p.gravLock?"En la cámara de gravedad":p.suspW?`Sancionado ${p.injured} partido${p.injured>1?"s":""}`:`Lesionado ${p.injured} sem.`}</small>`:""}<small>${p.wage} €/sem · ${p.goals} goles</small><button class="btn mini" data-act="fire" data-id="${p.id}">${pendingFire===p.id?"¿Seguro?":"Echar"}</button>`
    :`${p.special?`<small class="tag pos" title="${esc(SPECIAL[p.special])}">${esc(SPECIAL[p.special].split(":")[0])}</small>`:""}<small><b>${p.cost?p.cost+" €":"Gratis"}</b></small><small>${p.loan?"sueldo: su club":p.wage+" €/sem"}</small>${p.scout&&mode==="report"?`<small>${esc(p.scout)}</small>`:p.scout?`<small>🔎 ${esc(p.scout.split(" ").slice(-1)[0])}</small>`:""}<button class="btn mini primary" data-act="${mode==="report"?"hirerep":"hire"}" data-id="${p.id}">Fichar</button>`;
   return `<div class="prow ${p.injured?"inj":""}">
    <div class="pfc"><canvas class="face" data-face="${p.id}" width="128" height="128"></canvas><div class="ppos ${p.known?"":"unk"}">${posLabel(p)}</div></div>
    <div class="pi"><div class="pn">${mode==="squad"?`<a class="plink" data-act="card" data-id="${p.id}">${esc(fullName(p))} <small>· ver carta</small></a>`:esc(fullName(p))}</div>
     <div class="pm"><span class="${p.known?"":"unk"}">${posLabel(p)}</span> · ${p.age} años · ${esc(p.origen)}${p.veh?` · ${esc(p.veh.n)} (${p.veh.plazas} plazas)`:""}${p.knock>0?` · <b style="color:#c8233a">TOCADO</b>`:""}${p.star?" · ⭐":""}${specs(p).length?` · <i>${specs(p).join(", ")}</i>`:""}</div>
-    <div class="pt">${t.n}. <span>${t.d}</span></div>
-    <div class="ps"><span>ATQ <b>${p.atk}</b></span><span>DEF <b>${p.def}</b></span><span>FÍS <b>${p.fis}</b></span><span>CAB <b>${p.cab}</b></span></div>
+    <div class="pt">${t.n}. <span>${t.d}</span></div>${mode==="squad"&&dopeLine(p)?`<div class="pt">${dopeLine(p)}</div>`:""}
+    <div class="ps">${(()=>{const k=mode==="squad"?dopeK(p):1;const v=x=>k===1?`<b>${p[x]}</b>`:`<b style="color:${k>1?"#1e8a2a":"#c8233a"}">${Math.round(p[x]*k)}</b>`;return `<span>ATQ ${v("atk")}</span><span>DEF ${v("def")}</span><span>FÍS ${v("fis")}</span><span>CAB ${v("cab")}</span>`})()}</div>
     ${(p.conf||p.dep)?`<div class="pt">Confianza <b>${p.conf||0}</b> · Dependencia <b style="color:${(p.dep||0)>=60?"#c8233a":(p.dep||0)>=40?"#d98a1f":"inherit"}">${p.dep||0}</b>${p.hang>0?" · <b style=\"color:#c8233a\">RESACA</b>":""}${p.mono?" · <b style=\"color:#c8233a\">CON EL MONO</b>":""}</div>`:""}
     ${mode==="squad"?`<div class="en" title="Energía"><i style="width:${p.energy}%;background:${ecol(p.energy)}"></i></div>`:""}
    </div><div class="po"><div class="ovr">${shownOvr(p)}</div>${right}</div></div>`;
@@ -2202,11 +2250,12 @@ function cardHTML(p){
    ${p.rel?`<p class="hint">🔎 Lo encontró ${esc(p.scout||"tu ojeador")}: falta a los partidos un ${Math.round((1-p.rel)*100)} % menos que la gente del montón.</p>`:""}<p class="pc-tr"><b>${esc(t.n)}.</b> ${esc(t.d)}</p>${specs(p).length?`<p class="pc-h">Especialidades</p><ul class="tips">${specs(p).map(x=>`<li><b>${x}:</b> ${SPEC_D[x]}</li>`).join("")}</ul>`:""}${p.tenure?`<p class="hint">${p.tenure} temporada${p.tenure>1?"s":""} en el club · ${p.allGames||0} partidos · ${p.allGoals||0} goles en total.</p>`:""}
    ${probs.length?`<p class="pc-h">Problemas</p><ul class="tips">${probs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
    ${exc?`<p class="pc-h">Últimas excusas</p><ul class="tips">${exc}</ul>`:""}
+   ${p.__dv||dopeLine(pById(p.id)||p)?`<p class="pc-h">Dopaje</p><p>${dopeLine(pById(p.id)||p)}${p.__dv?` <small>(stats de esta semana)</small>`:""}</p>`:""}
    <p class="pc-h">Contrato</p><p>${p.wage} €/semana en bocadillos.${p.veh?` Tiene ${esc(p.veh.n)} (${p.veh.plazas} plazas).`:""}</p>
    <div class="pc-act">
     <button class="btn primary" data-act="sellp" data-id="${p.id}">Vender a ${esc(of.club)} por ${of.v} €</button>
     <button class="btn" data-act="tradep">Buscar un cambio</button>
-    ${!p.loan&&!p.glory&&S.players.includes(p)?`<button class="btn" data-act="cedep" data-v="${p.id}|0">Ceder una temporada</button>`:""}
+    ${!p.loan&&!p.glory&&S.players.some(x=>x.id===p.id)?`<button class="btn" data-act="cedep" data-v="${p.id}|0">Ceder una temporada</button>`:""}
     <button class="btn" data-act="firep" data-id="${p.id}">Echarlo</button>
     <button class="btn" data-act="close">Cerrar</button>
    </div></div>`;
@@ -2227,7 +2276,7 @@ function drawRadar(cv,p){
     const[px,py]=pt(i,a[1]);c.fillStyle="#fff";c.strokeStyle="#c8233a";c.lineWidth=2;c.beginPath();c.arc(px,py,4,0,7);c.fill();c.stroke()});
   c.textAlign="left";c.textBaseline="alphabetic";c.font="15px Archivo Narrow, sans-serif";c.fillStyle="#5a3415";c.fillText("--- equipo",6,H-6);c.fillStyle="#1e6e28";c.textAlign="right";c.fillText("··· techo",W-6,H-6);c.textAlign="left";
 }
-function openCard(id){const p=pById(id)||findAny(id);if(!p)return;modal(fullName(p),cardHTML(p));const b=$("#mod-b");paintFaces(b);if(p.nat)natCardFix(b,p);const r=b.querySelector("#radar");if(r)drawRadar(r,p)}
+function openCard(id){const p0=pById(id)||findAny(id);if(!p0)return;const p=dopeView(p0);modal(fullName(p),cardHTML(p));const b=$("#mod-b");paintFaces(b);if(p.nat)natCardFix(b,p);const r=b.querySelector("#radar");if(r)drawRadar(r,p)}
 function teamMedia(){const ps=S.players.filter(p=>!p.injured).map(ovr).sort((a,b)=>b-a).slice(0,11);return ps.length?Math.round(ps.reduce((a,b)=>a+b,0)/ps.length*10)/10:0}
 function datBar(lbl,v,max,col,extra){const w=Math.max(2,Math.min(100,v/max*100));return `<div class="dbar"><span>${lbl}</span><div><i style="width:${w}%;background:${col}"></i></div><b>${extra!=null?extra:Math.round(v)}</b></div>`}
 function viewDatos(){
@@ -2966,7 +3015,7 @@ const VOX={man:null,base:null,ctx:null,buf:{},q:[],cur:null,busyUntil:0};
 function vslug(t){return String(t).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}
 function voxKeys(){const k=new Set();for(const st in VOL)for(const ev in VOL[st])VOL[st][ev].forEach((_,i)=>k.add(`${st}_${ev}_${i}`));[...MALE,...FEM,...MOTE,...FIRSTC,"el entrenador"].forEach(n=>k.add("n_"+vslug(n)));return k}
 function voxLoad(){VOX.base=(location.href.indexOf(window.PC_REMOTE)===0?"":window.PC_REMOTE)+"audio/";VOX.man=voxKeys();VOX.mode=VOX.mode||"webaudio"}
-const voxReady=()=>!!(VOX.man&&!VOX.dead&&S&&S.voxOff!==true);
+const voxReady=()=>!!(window.PCLANG==="es"&&VOX.man&&!VOX.dead&&S&&S.voxOff!==true);
 function voxInit(){try{if(!VOX.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(AC)VOX.ctx=new AC()}VOX.ctx&&VOX.ctx.resume()}catch(e){}}
 function voxEl(k){return new Promise((res,rej)=>{try{const au=new Audio(VOX.base+k+".mp3?v="+window.PC_VERSION);au.volume=1;au.onended=()=>res();au.onerror=()=>rej(new Error("audio"));VOX.curEl=au;const pr=au.play();if(pr&&pr.catch)pr.catch(rej)}catch(e){rej(e)}})}
 async function voxBuf(k){if(VOX.buf[k])return VOX.buf[k];const r=await fetch(VOX.base+k+".mp3?v="+window.PC_VERSION);const a=await r.arrayBuffer();const b=await new Promise((res,rej)=>VOX.ctx.decodeAudioData(a,res,rej));VOX.buf[k]=b;return b}
@@ -3258,6 +3307,7 @@ function confirmLoad(){return true}
 function configBox(){
   const tg=(act,on,txt)=>`<div class="offer"><div><b>${txt}</b></div><button class="btn mini ${on?"primary":""}" data-act="${act}">${on?"Sí":"No"}</button></div>`;
   return `<section class="win"><div class="bar">Configuración</div><div class="body"><div class="list">
+   <div class="offer" data-notr><div><b>🌐 Idioma · Language · Limba · اللغة</b></div><div class="chips">${Object.keys(window.PCLANGS||{es:1}).map(k=>`<button class="btn mini ${window.PCLANG===k?"sel":""}" data-act="setlang" data-v="${k}">${window.PCLANGS[k]}</button>`).join("")}</div></div>
    ${tg("comm",S.comm!==false,"Comentaristas")}
    ${tg("voxtoggle",S.voxOff!==true,"Voces grabadas de hombre (si no, la voz del móvil)")}
    ${tg("sound",S.sound!==false,"Sonido ambiente del partido (público, silbato, bombo)")}
@@ -5150,6 +5200,12 @@ const docFee=d=>nice(d.c*EK[curTier()]);
 const dopeOn=p=>p.dope&&p.dope.w===S.week;
 const giantOn=p=>p.giant&&p.giant.w===S.week;
 function dopeK(p){return (dopeOn(p)?p.dope.mul||1:1)*(p.weak===S.week?.7:1)*(giantOn(p)?3:1)}
+function dopeLook(p,L){if(!S||!p)return;
+  if(giantOn(p)){L.skin="#d8695f";L.mood=L.mood==="happy"?"happy":"surp";L.tired=false;L.blush=false;L.stubble=true;return}
+  if(dopeOn(p)){if(p.dope.k==="iny"){L.skin=mixC(L.skin,"#9fd08a",.28);L.mood="surp";L.tired=true}else if(p.dope.k==="toro"){L.skin=mixC(L.skin,"#c0533f",.25);L.stubble=true;L.mood="surp"}else{L.blush=true;L.mood=L.mood==="sad"?"sad":"happy"}return}
+  if(p.weak===S.week){L.skin=mixC(L.skin,"#c9c4b5",.35);L.tired=true;L.mood="sad"}}
+function dopeView(p){const k=dopeK(p);if(k===1||!S.players.includes(p))return p;const q=Object.assign(Object.create(Object.getPrototypeOf(p)),p);["atk","def","fis","cab"].forEach(x=>q[x]=Math.min(199,Math.round(p[x]*k)));xattr(p);if(p.spd!=null)q.spd=Math.min(199,Math.round(p.spd*k));q.__dv=k;return q}
+function dopeLine(p){return giantOn(p)?`<b style="color:#c8233a">🧪 Transformado: ha doblado su tamaño. No sobrevivirá al partido.</b>`:dopeOn(p)?`<b style="color:#2f7d32">${p.dope.k==="iny"?"💉 Pinchado esta semana":p.dope.k==="toro"?"🥤 Batido de toro esta semana":"💊 Con pastillas esta semana"}</b>`:p.weak===S.week?`<b style="color:#c8233a">🥴 Hecho polvo esta semana</b>`:""}
 function dopeTag(p){return giantOn(p)?`<small class="tag bad">🧪 Transformado · no sobrevivirá al partido</small>`:dopeOn(p)?`<small class="tag">${p.dope.k==="iny"?"💉 Pinchado":p.dope.k==="toro"?"🥤 Batido de toro":"💊 Con pastillas"} esta semana</small>`:p.weak===S.week?`<small class="tag bad">🥴 Hecho polvo</small>`:""}
 function docWhy(d,p){if(d.k==="pomada")return p.injured&&!p.suspW&&!p.gravLock?"":"No está lesionado";if(d.k==="jarabe")return "";
   if(p.injured)return p.suspW?"Está sancionado":"Está lesionado";if(dopeOn(p)||giantOn(p))return "Ya va puesto esta semana";if(p.weak===S.week)return "Está debilitado";
@@ -5376,11 +5432,43 @@ function docStatPanel(c,L,k){if(!L||!L.length||k<0)return;const n=L.length,rh=26
   L.forEach(([lb,a,b],i)=>{const e=clamp(k*3-i*.35,0,1);if(e<=0)return;const yy=y+16+i*rh+12;c.globalAlpha=e;c.font="bold 17px Archivo Narrow, Arial Narrow, sans-serif";c.textAlign="left";c.fillStyle="#dfe8ff";c.fillText(lb,x+16,yy);
     c.textAlign="right";c.fillStyle="#9fb0d6";c.fillText(String(a),x+w-82,yy);c.fillStyle="#fff";c.fillText("→",x+w-58,yy);const v=Math.round(a+(b-a)*clamp(k*2-i*.3,0,1));c.fillStyle=b>a?"#7dff6a":b<a?(lb==="Semanas de baja"?"#7dff6a":"#ff5b5b"):"#fff";c.font="bold 20px Bungee, Impact, sans-serif";c.fillText(String(v),x+w-16,yy+1)});c.globalAlpha=1}
 /* después del partido: control antidoping y la mole */
+const EPI=["Se fue como jugaba: sin avisar.","Nunca bajó a defender. Ahora ya no tiene que hacerlo.","Su sitio en el banquillo sigue caliente.","Le debía 20 € al del bar.","Ni el VAR lo habría salvado.","Pidió el cambio por última vez."];
+function graveAdd(p,why){S.graves=S.graves||[];const y=(S.yearBase||2026)+S.season-1;S.graves.push({n:fullName(p),b:y-(p.age||30),d:y,e:why||pick(EPI)})}
+function showGrave(){const G=(S.graves||[])[0];if(!G)return false;
+  modal("Descanse en paz",`<canvas class="cinecv" id="gravecv" width="640" height="400"></canvas><p style="text-align:center"><b>${esc(G.n)}</b> (${G.b} – ${G.d})</p><p class="hint" style="text-align:center">«${esc(G.e)}»</p><button class="btn play" data-act="graveok">Descanse en paz</button>`);
+  const cv=$("#gravecv");let g=null;try{g=cv.getContext("2d")}catch(e){}if(!g)return true;const t0=performance.now();
+  const loop=()=>{if(!document.body.contains(cv))return;try{drawGrave(g,(performance.now()-t0)/1000,G)}catch(e){return}requestAnimationFrame(loop)};requestAnimationFrame(loop);return true}
+function drawGrave(c,t,G){const W=640,H=400;const sky=c.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#05070f");sky.addColorStop(1,"#1a2440");c.fillStyle=sky;c.fillRect(0,0,W,H);
+  for(let i=0;i<40;i++){const tw=.5+.5*Math.sin(t*2+i*1.7);c.fillStyle=`rgba(255,255,255,${.25+.5*tw})`;c.fillRect((i*137)%W,(i*71)%170,1.5,1.5)}
+  c.fillStyle="#f3efd9";c.beginPath();c.arc(520,70,30,0,7);c.fill();c.fillStyle="#05070f";c.beginPath();c.arc(508,62,28,0,7);c.fill();
+  // cipreses y tumbas al fondo
+  [[60,1],[600,1.2],[150,.8]].forEach(([x,k])=>{c.fillStyle="#0b1a12";c.beginPath();c.moveTo(x,300);c.quadraticCurveTo(x-22*k,200,x,90+40/k);c.quadraticCurveTo(x+22*k,200,x,300);c.fill()});
+  c.fillStyle="#2a2f3a";[[90,262,26,40],[230,270,22,30],[440,266,24,36],[560,272,20,28]].forEach(([x,y,w,h])=>{c.beginPath();c.moveTo(x-w/2,y+h);c.lineTo(x-w/2,y+w/2);c.arc(x,y+w/2,w/2,Math.PI,0);c.lineTo(x+w/2,y+h);c.fill()});
+  // tierra y césped
+  c.fillStyle="#13261a";c.fillRect(0,300,W,100);c.fillStyle="#3b2a1c";c.beginPath();c.ellipse(320,362,150,26,0,0,7);c.fill();
+  // la lápida
+  const x=320,y=110,w=220,h=230;c.fillStyle="rgba(0,0,0,.4)";c.beginPath();c.ellipse(x+10,y+h,130,14,0,0,7);c.fill();
+  const lg=c.createLinearGradient(x-w/2,0,x+w/2,0);lg.addColorStop(0,"#8d929c");lg.addColorStop(.5,"#b9bdc6");lg.addColorStop(1,"#7a7f89");c.fillStyle=lg;
+  c.beginPath();c.moveTo(x-w/2,y+h);c.lineTo(x-w/2,y+w/2);c.arc(x,y+w/2,w/2,Math.PI,0);c.lineTo(x+w/2,y+h);c.closePath();c.fill();c.strokeStyle="#5d626b";c.lineWidth=3;c.stroke();
+  c.fillStyle="rgba(60,64,72,.5)";for(let i=0;i<5;i++){c.beginPath();c.ellipse(x-80+i*40,y+60+((i*37)%120),6,3,0,0,7);c.fill()}
+  c.fillStyle="#4a4f58";c.fillRect(x-4,y+18,8,34);c.fillRect(x-15,y+28,30,8);
+  c.textAlign="center";c.fillStyle="#2e3138";c.font="bold 18px Georgia, serif";c.fillText("D. E. P.",x,y+76);
+  const nm=G.n.toUpperCase();const ws=nm.split(" ");let L=[nm];if(nm.length>16){const h2=Math.ceil(ws.length/2);L=[ws.slice(0,h2).join(" "),ws.slice(h2).join(" ")]}
+  L.forEach((ln,i)=>{let fs=22;c.font=`bold ${fs}px Georgia, serif`;while(c.measureText(ln).width>w-30&&fs>11){fs--;c.font=`bold ${fs}px Georgia, serif`}c.fillText(ln,x,y+108+i*26)});
+  c.font="20px Georgia, serif";c.fillText(`${G.b} – ${G.d}`,x,y+118+L.length*26);
+  // flores, bufanda del equipo y vela
+  [[x-80,y+h-6,"#c8233a"],[x-62,y+h-2,"#ffd23f"],[x+70,y+h-4,"#f3f3f3"],[x+86,y+h,"#c8233a"]].forEach(([fx,fy,col])=>{c.strokeStyle="#2f6b35";c.lineWidth=2;c.beginPath();c.moveTo(fx,fy+10);c.lineTo(fx,fy-12);c.stroke();c.fillStyle=col;for(let k=0;k<5;k++){c.beginPath();c.arc(fx+Math.cos(k*1.26)*5,fy-14+Math.sin(k*1.26)*5,4,0,7);c.fill()}c.fillStyle="#ffd23f";c.beginPath();c.arc(fx,fy-14,2.5,0,7);c.fill()});
+  const K=(typeof ourKit==="function"?ourKit():null)||{c1:"#e7b923",c2:"#5a3415"};for(let i=0;i<8;i++){c.fillStyle=i%2?K.c2||"#5a3415":K.c1||"#e7b923";c.fillRect(x-60+i*15,y+h-30+Math.sin(i*.8)*3,15,12)}
+  const fl=.8+.2*Math.sin(t*12)*Math.sin(t*5.3);c.fillStyle="#efe6cf";c.fillRect(x+30,y+h-34,10,24);c.fillStyle=`rgba(255,${170+60*fl},60,1)`;c.beginPath();c.ellipse(x+35,y+h-40,4*fl,8*fl,0,0,7);c.fill();
+  const cg=c.createRadialGradient(x+35,y+h-40,2,x+35,y+h-40,80);cg.addColorStop(0,`rgba(255,190,90,${.3*fl})`);cg.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=cg;c.fillRect(x-60,y+h-120,190,160);
+  // niebla
+  for(let i=0;i<5;i++){const fx=((i*157+t*12)%800)-80;c.fillStyle="rgba(170,180,210,.08)";c.beginPath();c.ellipse(fx,330+i*10,140,18,0,0,7);c.fill()}
+  c.fillStyle=`rgba(0,0,0,${Math.max(0,1-t/1.5)})`;c.fillRect(0,0,W,H)}
 function dopeAfter(inj,played){const lines=[];
-  S.players.forEach(p=>{if(giantOn(p)){if(!p.real){M.dead.push(p.id);lines.push(`${short(p)}: su cuerpo no aguanta la Dosis Perfecta. Se desinfla en el vestuario y no se levanta.`);addNews(`${fullName(p)} muere tras el partido. Había doblado su tamaño. Nadie sabe nada del médico.`)}p.giant=null;return}
+  S.players.forEach(p=>{if(giantOn(p)){if(!p.real){M.dead.push(p.id);p.__epi="Dobló su tamaño. La vida no le dio para tanto.";lines.push(`${short(p)}: su cuerpo no aguanta la Dosis Perfecta. Se desinfla en el vestuario y no se levanta.`);addNews(`${fullName(p)} muere tras el partido. Había doblado su tamaño. Nadie sabe nada del médico.`)}p.giant=null;return}
     if(dopeOn(p)&&played.has(p.id)&&Math.random()<(p.dope.risk||0)){const g=3;p.injured=Math.max(p.injured||0,g+1);p.suspW=1;lines.push(`${short(p)}: positivo en el control antidoping. ${g} partidos de sanción.`);addNews(`Control antidoping: ${fullName(p)} da positivo. Dice que fue un jarabe para la tos.`)}});
   lines.forEach(x=>inj.push(x))}
-function dopeWeek(){S.players=S.players.filter(p=>{if(p.giant&&p.giant.w<S.week){p.giant=null;if(!p.real){S.memorial.push(`${fullName(p)} (${p.age})`);addNews(`${fullName(p)} se queda sin partido y la Dosis Perfecta se lo lleva igual. Funeral el martes.`);try{legendCheck(p)}catch(e){}S.lineup=S.lineup.map(x=>x===p.id?null:x);return false}}return true})}
+function dopeWeek(){S.players=S.players.filter(p=>{if(p.giant&&p.giant.w<S.week){p.giant=null;if(!p.real){S.memorial.push(`${fullName(p)} (${p.age})`);addNews(`${fullName(p)} se queda sin partido y la Dosis Perfecta se lo lleva igual. Funeral el martes.`);try{graveAdd(p,"Se transformó para nada. Ni llegó a jugar.")}catch(e){}try{legendCheck(p)}catch(e){}S.lineup=S.lineup.map(x=>x===p.id?null:x);return false}}return true})}
 function weird(){
   const list=WEIRD.filter(w=>!(M.online&&!M.online.solo&&(w.end||w.id==="portero"))&&!M.used.has(w.id)&&(!w.ours||M.ours)&&(!w.c||w.c())&&(!w.end||M.min>20));
   if(!list.length)return false;
@@ -5641,7 +5729,7 @@ function endMatch(normal){
   Object.keys(S.prep.arrive).forEach(id=>{const p=pById(+id);if(p&&!M.sq.some(x=>x.id===p.id))p.energy=clamp(p.energy+S.prep.arrive[id].en,20,100)});
   try{dopeAfter(inj,new Set(M.sq.filter(sp=>M.slots.includes(sp.id)||M.out.has(sp.id)).map(sp=>sp.id)))}catch(e){}
   const dead=M.dead.map(id=>pById(id)).filter(Boolean);
-  dead.forEach(p=>{S.memorial.push(`${fullName(p)} (${p.age})`);S.players=S.players.filter(x=>x.id!==p.id);S.lineup=S.lineup.map(x=>x===p.id?null:x);addNews(`Funeral de ${fullName(p)} el martes. Va todo el equipo con el chándal.`)});
+  dead.forEach(p=>{try{graveAdd(p,p.__epi)}catch(e){}S.memorial.push(`${fullName(p)} (${p.age})`);S.players=S.players.filter(x=>x.id!==p.id);S.lineup=S.lineup.map(x=>x===p.id?null:x);addNews(`Funeral de ${fullName(p)} el martes. Va todo el equipo con el chándal.`)});
   if(dead.length)co.moral=clamp(co.moral-12,0,100);
   dead.forEach(legendCheck);
   M.sq.forEach(sp=>{const p=pById(sp.id);if(p&&p.dem&&p.dem.includes("tit")&&!(M.slots.includes(sp.id)||M.out.has(sp.id)))p.bench=(p.bench||0)+1});
@@ -5948,7 +6036,7 @@ const A={
     addNews(`Fichaje por informe: ${fullName(p)} (${p.pos}).`);save();render();toast(`${short(p)} firma en una servilleta.`)},
   move:v=>{const h=HOUSES[+v];if(!h||+v!==(S.house||0)+1)return;if(h.req>(S.reach||0)){toast("Todavía no os da el nivel para eso.");return}if(S.money<h.c){toast(`Te faltan ${h.c-S.money} €.`);return}
     S.money-=h.c;S.house=+v;while(S.sessions.length<h.sess)S.sessions.push(null);addNews(`Mudanza: la sede del club pasa a ser ${h.n.toLowerCase()}.`);save();render();toast("Mudanza hecha en la furgoneta de la fruta.")},
-  week:()=>{const t=weekTick();save();render();if(S.tOffer&&!S.event&&!S.mafiaMsg){setTimeout(showTOffer,400)}if(S.scoutMsg){const sm=S.scoutMsg;S.scoutMsg=null;setTimeout(()=>toast(sm),3000)}if(!S.mafiaMsg&&S.event){save();render();showEvent();return}if(S.mafiaMsg){const mm=S.mafiaMsg;S.mafiaMsg=null;save();render();modal("Malas noticias",`<p>${esc(mm)}</p><div class="row"><button class="btn primary" data-act="close">Vale</button></div>`)}else toast(`Nueva semana. Cuentas: ${eur(t)}. Hay caras nuevas en el pueblo.`)},
+  week:()=>{const t=weekTick();save();render();if(S.graves&&S.graves.length){setTimeout(showGrave,300);return}if(S.tOffer&&!S.event&&!S.mafiaMsg){setTimeout(showTOffer,400)}if(S.scoutMsg){const sm=S.scoutMsg;S.scoutMsg=null;setTimeout(()=>toast(sm),3000)}if(!S.mafiaMsg&&S.event){save();render();showEvent();return}if(S.mafiaMsg){const mm=S.mafiaMsg;S.mafiaMsg=null;save();render();modal("Malas noticias",`<p>${esc(mm)}</p><div class="row"><button class="btn primary" data-act="close">Vale</button></div>`)}else toast(`Nueva semana. Cuentas: ${eur(t)}. Hay caras nuevas en el pueblo.`)},
   card:(v,el)=>openCard(+el.dataset.id),
   tacset:v=>{const[k,x]=v.split(":");tac()[k]=k==="mark"?x==="1":+x;save();render()},
   hirestaff:v=>{S.staff=S.staff||{};const l=stf(v);if(l>=3)return;if((S.reach||0)<STAFF_REQ[l]){toast("Todavía no.");return}if(S.money<STAFF_COST[l]){toast(`Necesitas ${STAFF_COST[l]} €.`);return}S.money-=STAFF_COST[l];S.staff[v]=l+1;const s=STAFF.find(x=>x.id===v);addNews(`Nuevo en el cuerpo técnico: ${s.lv[l]} (${s.n.toLowerCase()}).`);save();render();toast("Contratado.")},
@@ -6047,6 +6135,7 @@ const A={
   docpick:v=>{if(!DOCU)return;DOCU.d=DOCS[+v];DOCU.st="pick";docShow()},
   docback:()=>{if(!DOCU)return;DOCU.st="talk";DOCU.d=null;DOCU.t0=performance.now();docShow()},
   docgive:v=>docGive(v),
+  graveok:()=>{(S.graves||[]).shift();save();if(!showGrave()){closeModal();render();if(S.event)showEvent();else if(S.tOffer)showTOffer()}},
   bribejail:()=>{closeModal();goToJail(5,"Sobornar a un árbitro",{bribe:1})},
   tac:v=>{if(!M||M.ended)return;M.tactic=v;document.querySelectorAll("[data-act=tac]").forEach(b=>b.classList.toggle("sel",b.dataset.v===v));
     addLog(M.min,{normal:"Táctica normal.",bus:"Os encerráis atrás. Se cansan menos.",arriba:"¡Al ataque! Se cansan más rápido.",patadon:"Patadón y a correr. Sistema clásico de la Campiña."}[v],"ev")},
@@ -6066,6 +6155,7 @@ const A={
   ttstest:()=>ttsTest(),
   sound:()=>{S.sound=S.sound===false;save();render();if(S.sound===false)SFX.stop()},
   comm:()=>{S.comm=S.comm===false;save();render();if(S.comm!==false){voxInit();vo("intro",null,true)}else{try{window.AndroidTTS?AndroidTTS.flush(" "):speechSynthesis.cancel()}catch(e){}}},
+  setlang:v=>{try{save()}catch(e){}window.PCsetLang&&window.PCsetLang(v)},
   voxtoggle:()=>{S.voxOff=!S.voxOff;save();render()},
   speed:()=>{if(!M)return;if(M.online||(S.comp&&S.comp.ol&&S.comp.ol.human)){toast("Contra otro jugador la velocidad es la misma para los dos.");return}M.speed=(M.speed+1)%3;$("#m-speed").textContent=["Lento","Normal","Rápido"][M.speed]},
   pause:()=>{if(!M||M.ended)return;M.paused=!M.paused;if(M.online)setTimeout(()=>olLivePub(true),10);const b=$("#m-pause");b.textContent=M.paused?"Seguir":"Pausa";b.classList.toggle("paused",M.paused);clearTimeout(M.timer);if(M.paused){const t=`Parece que ${clubName()} han pedido tiempo.`;addLog(M.min,t+" Haz los cambios con calma.","ev");vo("pause",null,true)}else M.timer=setTimeout(run,300)},
@@ -6073,7 +6163,7 @@ const A={
   resume:()=>{if(!M||!M.hold)return;M.hold=false;renderSquad();if(!M.paused)M.timer=setTimeout(run,300)},
   mpick:(v,el)=>doPick(el),
   post1:()=>postInterview(),post2:()=>postPizza(),post3:()=>showReport(),
-  after:()=>{closeModal();$("#match").hidden=true;if(S.comp&&S.comp.type==="cup"&&S.league){S.cup=S.comp;S.comp=S.league;S.league=null;save()}const done=S.comp&&S.comp.done;M=null;if(done)compEnd();else{render();window.scrollTo(0,0);if(S.event)showEvent();else if(S.tOffer)showTOffer();else if(UPD.pending){UPD.pending=null;checkUpdates(false)}}},
+  after:()=>{closeModal();$("#match").hidden=true;if(S.comp&&S.comp.type==="cup"&&S.league){S.cup=S.comp;S.comp=S.league;S.league=null;save()}const done=S.comp&&S.comp.done;M=null;if(done)compEnd();else{render();window.scrollTo(0,0);if(S.graves&&S.graves.length)showGrave();else if(S.event)showEvent();else if(S.tOffer)showTOffer();else if(UPD.pending){UPD.pending=null;checkUpdates(false)}}},
   sign:v=>{const o=S.offers&&S.offers[+v];if(!o||S.sponsors.length>=6||S.sponsors.includes(o.n))return;S.sponsors.push(o.n);
     if(o.pay==="dinero")S.sponsorPay[o.n]=o.v;else if(o.pay==="comida")S.perks.comida+=3;else if(o.pay==="obra")S.freeWork=(S.freeWork||0)+1;else if(o.pay==="material"&&!has("balones"))S.upg.push("balones");
     addNews(`Nueva valla en el descampado: ${o.n}.`);save();renderOffers()},
@@ -6152,16 +6242,17 @@ function nearestTo(list,x,y,ex){let b=null,bd=1e9;list.forEach(p=>{if(p===ex)ret
 function setLabel(t,ms){const V=M.vis;V.label=t;V.labelUntil=performance.now()+(ms||1800);commentLabel(t)}
 let lastSpk=0;
 const CASTER=[{n:"Manolo",pitch:.72,rate:1.08},{n:"Paco",pitch:.58,rate:1.0}];
-function voiceList(){try{if(window.AndroidTTS&&AndroidTTS.voices)return AndroidTTS.voices().split("|").filter(Boolean).map(n=>({name:n,lang:"es"}));if(window.speechSynthesis)return speechSynthesis.getVoices().filter(v=>/^es/i.test(v.lang)).map(v=>({name:v.name,lang:v.lang}))}catch(e){}return[]}
-function pickVoice(k){const want=S&&(k?S.voiceB:S.voiceA);if(want&&window.speechSynthesis){const v=speechSynthesis.getVoices().find(x=>x.name===want);if(v)return v}const ss=window.speechSynthesis;if(!ss)return null;const vs=ss.getVoices().filter(x=>/^es/i.test(x.lang));if(!vs.length)return null;
+function voiceList(){try{if(window.AndroidTTS&&AndroidTTS.voices)return AndroidTTS.voices().split("|").filter(Boolean).map(n=>({name:n,lang:"es"}));if(window.speechSynthesis)return speechSynthesis.getVoices().filter(v=>LRX().test(v.lang)).map(v=>({name:v.name,lang:v.lang}))}catch(e){}return[]}
+function pickVoice(k){const want=S&&(k?S.voiceB:S.voiceA);if(want&&window.speechSynthesis){const v=speechSynthesis.getVoices().find(x=>x.name===want);if(v)return v}const ss=window.speechSynthesis;if(!ss)return null;const vs=ss.getVoices().filter(x=>LRX().test(x.lang));if(!vs.length)return null;
   const male=vs.filter(v=>/male|hombre|masc|jorge|pablo|diego|carlos|juan|enrique|antonio|alvaro|álvaro|raul|raúl|x-eed|x-eef|x-eeb|esd|esf/i.test(v.name)&&!/female|mujer|helena|laura|lucia|lucía|monica|mónica|paulina|elvira|sabina|conchita|lupe/i.test(v.name));
   const es=vs.filter(v=>/^es[-_]ES/i.test(v.lang));const pool=male.length?male:(es.length?es:vs);return pool[k%pool.length]}
+const TTSL={es:"es-ES",en:"en-GB",ro:"ro-RO",ar:"ar-SA"};const LRX=()=>new RegExp("^"+(window.PCLANG||"es"),"i");
 function speak(t,important,who){
-  if(!S||S.comm===false||(M&&M.skipping))return;const now=Date.now();if(!important&&now-lastSpk<3500)return;lastSpk=now;
+  if(!S||S.comm===false||(M&&M.skipping))return;if(window.PCLANG&&window.PCLANG!=="es"&&window.PCtr)t=window.PCtr(t);const now=Date.now();if(!important&&now-lastSpk<3500)return;lastSpk=now;
   const k=who==null?0:who,cs=CASTER[k];
-  try{if(window.AndroidTTS){try{const vn=k?S.voiceB:S.voiceA;if(vn&&AndroidTTS.voice)AndroidTTS.voice(vn);AndroidTTS.pitch(vn?1:cs.pitch)}catch(e){}important&&k===0?AndroidTTS.flush(t):AndroidTTS.speak(t);return}
+  try{if(window.AndroidTTS&&!(window.PCLANG!=="es"&&window.speechSynthesis)){try{const vn=k?S.voiceB:S.voiceA;if(vn&&AndroidTTS.voice)AndroidTTS.voice(vn);AndroidTTS.pitch(vn?1:cs.pitch)}catch(e){}important&&k===0?AndroidTTS.flush(t):AndroidTTS.speak(t);return}
     const ss=window.speechSynthesis;if(!ss)return;
-    const go=()=>{const u=new SpeechSynthesisUtterance(t);u.lang="es-ES";const v=pickVoice(k);if(v)u.voice=v;u.rate=cs.rate;u.pitch=cs.pitch;u.volume=1;try{ss.resume()}catch(e){}ss.speak(u)};
+    const go=()=>{const u=new SpeechSynthesisUtterance(t);u.lang=TTSL[window.PCLANG]||"es-ES";const v=pickVoice(k);if(v)u.voice=v;u.rate=cs.rate;u.pitch=cs.pitch;u.volume=1;try{ss.resume()}catch(e){}ss.speak(u)};
     if(important&&k===0&&(ss.speaking||ss.pending)){ss.cancel();setTimeout(go,150)}else go()}catch(e){}
 }
 document.addEventListener("click",e=>{if(e.target&&e.target.id==="mfield"&&M&&M.replay)M.replay=null});
