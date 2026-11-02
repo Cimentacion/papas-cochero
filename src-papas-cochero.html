@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2659,6 +2659,8 @@ function tacBox(){
    <p class="pc-h">Presión</p>${b("press",PRESS,t.press)}<p class="hint">Alta: más balones robados pero se cansan antes. Baja: más sólidos atrás, menos peligro.</p>
    <p class="pc-h">Estilo</p>${b("style",STYLE,t.style)}<p class="hint">Contraataque va bien contra equipos mejores. Posesión necesita cabeza. Por bandas necesita 4 o más medios.</p>
    <div class="forms"><button class="btn mini ${t.mark?"sel":""}" data-act="tacset" data-v="mark:${t.mark?0:1}">Marcaje al hombre a su mejor jugador</button></div>
+   <div class="forms"><button class="btn mini ${t.trap?"sel":""}" data-act="tacset" data-v="trap:${t.trap?0:1}">Trampa del fuera de juego (defensa adelantada)</button></div>
+   <p class="hint">Con la defensa adelantada os anulan más goles al rival, pero si os la cuelan a la espalda es casi gol. Mejor con defensas rápidos.</p>
   </div></section>`;
 }
 /* ---------- especialidades y química ---------- */
@@ -5120,18 +5122,38 @@ function shot(special){
   if(!special){pg*=1+(pw-50)/260;if(isCanon(sh)&&Math.random()<.3){canon=true;pg=Math.min(.75,pg*1.6);addLog(M.min,`¡${short(sh)} arma la pierna! ${pick(["Va a reventar el balón.","Se oye desde el bar.","El portero reza."])}`,"ev")}
     else if((sh.alt||178)>=188&&Math.random()<.2){pg*=1.15;addLog(M.min,`${short(sh)} gana por arriba con sus ${((sh.alt||188)/100).toFixed(2).replace(".",",")} m.`,"ev")}}
   const offV=!visOn()&&M.st;if(offV){M.st.shots.us++}
-  if(Math.random()<pg){if(offV){M.st.on.us++;M.st.sxy.push({side:"us",x:rnd(84,99),y:rnd(24,44),res:"goal"})}M.us++;M.lastChance={side:"us",id:sh.id,res:"goal",pow:canon};if(canon)addLog(M.min,`¡CAÑONAZO de ${short(sh)}! El balón deja una estela y el portero ni la ve.`,"goal");M.goals[sh.id]=(M.goals[sh.id]||0)+1;{const al=onList().map(x=>x.p).filter(x=>x.id!==sh.id);if(al.length&&Math.random()<.65){const a=wpick(al,x=>x.atk+5);M.ast=M.ast||{};M.ast[a.id]=(M.ast[a.id]||0)+1}}M.scorers.push(`${short(sh)} ${M.min}'`);M.ballT={x:154,y:50+rnd(-6,6)};M.net={side:1,until:performance.now()+1500};addLog(M.min,pick(GOAL_US)(short(sh)),"goal");goalCine(sh)}
+  const _gu=Math.random()<pg;if(_gu&&offsideGoal("us",sh.id,short(sh)))return;
+  if(_gu){if(offV){M.st.on.us++;M.st.sxy.push({side:"us",x:rnd(84,99),y:rnd(24,44),res:"goal"})}M.us++;M.lastChance={side:"us",id:sh.id,res:"goal",pow:canon};if(canon)addLog(M.min,`¡CAÑONAZO de ${short(sh)}! El balón deja una estela y el portero ni la ve.`,"goal");M.goals[sh.id]=(M.goals[sh.id]||0)+1;{const al=onList().map(x=>x.p).filter(x=>x.id!==sh.id);if(al.length&&Math.random()<.65){const a=wpick(al,x=>x.atk+5);M.ast=M.ast||{};M.ast[a.id]=(M.ast[a.id]||0)+1}}M.scorers.push(`${short(sh)} ${M.min}'`);M.ballT={x:154,y:50+rnd(-6,6)};M.net={side:1,until:performance.now()+1500};addLog(M.min,pick(GOAL_US)(short(sh)),"goal");goalCine(sh)}
   else{M.lastChance={side:"us",id:sh.id,res:Math.random()<.5?"save":"wide",pow:canon};if(canon&&M.lastChance.res==="save"){if(Math.random()<.1){const gkr=(S.comp.teams[M.opp].roster||[]).find(x=>x.pos==="POR");const gn=gkr?gkr.n:"El portero rival";M.lastChance.arms=gn;M.oppStr*=.94;(M.rOutL=M.rOutL||[]).push({n:gn,g:1,why:"lesionado"});addLog(M.min,`¡${short(sh)} le revienta el balón en las manos al portero! ${gn} ha perdido los brazos, pero tardará una semana en recuperarse. Entra el suplente.`,"goal")}else addLog(M.min,`Cañonazo de ${short(sh)} y el portero la saca con la cara. Le dura la marca una semana.`,"ev")}if(offV){if(M.lastChance.res==="save")M.st.on.us++;M.st.sxy.push({side:"us",x:rnd(78,98),y:rnd(18,50),res:M.lastChance.res})}addLog(M.min,pick(MISS_US)(short(sh)))}
 }
+/* ---------- fuera de juego: goles anulados, trampa del fuera de juego y liniers ---------- */
+const LINS=[{k:"normal",n:"",m:1},{k:"cegato",n:"El linier lleva unas gafas de culo de vaso. Va a pitar lo que le parezca.",m:1.8},{k:"casero",n:"El linier es primo del presidente local. Ya sabéis lo que hay.",m:1},{k:"nuevo",n:"El linier es nuevo y tiene miedo de levantar la bandera.",m:.4}];
+function offTrap(){return !!(S.tac&&S.tac.trap)}
+function offsideGoal(side,id,name){if(!M||M.online||(S.comp&&S.comp.legends))return false;M.lin=M.lin||LINS[0];
+  let p=.06*M.lin.m;
+  if(M.lin.k==="casero")p*=(side==="us")===!!M.home?.35:2.2;
+  if(side==="them"&&offTrap()){const defs=onList().filter(x=>x.role==="DEF");const sp=defs.length?defs.reduce((a,x)=>a+(xattr(x.p),x.p.spd||50),0)/defs.length:50;p+=.12+(sp-50)/600}
+  if(S.prep&&S.prep.bribe)p*=side==="us"?.3:1.8;
+  if(Math.random()>=p)return false;
+  M.offN=(M.offN||0)+1;const sp=castStyle()==="paleto"?["Curro","El Rubio"]:castNames();
+  M.lastChance=side==="us"?{side:"us",id,res:"offside"}:{side:"them",name,res:"offside"};
+  addLog(M.min,side==="us"?`¡Gol de ${name}!… No. ¡ANULADO! El linier tenía la bandera levantada: fuera de juego.`:`¡Gol de ${name}!… ¡ANULADO por fuera de juego! El linier os salva.`,side==="us"?"bad":"goal");
+  addLog(M.min,`${sp[0]}: «${pick(side==="us"?(M.lin.k==="cegato"?OFF_CEGATO:OFF_US):(side==="them"&&offTrap()?OFF_TRAP:OFF_THEM))}»`,"ev");
+  M.ballT={x:side==="us"?70:30,y:50};return true}
+const OFF_US=["¡Pero si estaba en línea, Rubio! ¡En línea con el bar!","El linier ve menos que un gato de escayola.","A ese linier lo conozco: le debe dinero al alcalde del otro pueblo.","Por medio pie. Medio pie del número 44.","Rubio, yo desde aquí lo he visto claro. No sé qué, pero claro."];
+const OFF_THEM=["¡Bendito linier! Esta noche le invitamos a una caña.","Fuera de juego por un pelo. Del bigote.","Estaba más adelantado que el reloj de mi suegra.","Bandera arriba. Respiramos, Rubio, respiramos."];
+const OFF_TRAP=["¡La trampa del fuera de juego! Sale toda la defensa a la vez como en un baile de feria.","Los defensas dan un paso adelante y lo dejan con el culo al aire. Eso se entrena, Rubio.","Trampa del fuera de juego perfecta. Parecen hasta profesionales."];
+const OFF_CEGATO=["El linier ha pitado fuera de juego a una paloma.","Con esas gafas el linier ve dos balones y tres porterías.","Le ha pitado fuera de juego al de la grada que estaba de pie."];
 function theirChance(boost){
   const L=onList();const P=myPower(),O=M.oppStr*M.omod*styK()*M.oA*(boost||1);
   let pg=Math.min(.85,O/(O+P.d*1.2)*(.33+.45*(1-onList().length/11)));
-  {const defs=L.filter(x=>x.role==="DEF");if(defs.length){const sp=defs.reduce((a,x)=>a+(xattr(x.p),x.p.spd||50),0)/defs.length;pg*=1-(sp-50)/420}}
+  {const defs=L.filter(x=>x.role==="DEF");if(defs.length){const sp=defs.reduce((a,x)=>a+(xattr(x.p),x.p.spd||50),0)/defs.length;pg*=1-(sp-50)/420;if(offTrap())pg*=1.14-(sp-50)/500}}
   const rp0=rivPlayer();const tCanon=rivCanon(rp0.n)&&Math.random()<.3;if(tCanon){pg=Math.min(.8,pg*1.45);addLog(M.min,`¡${rp0.n} arma la pierna! Es de los que revientan el balón.`,"ev")}
   const gkS=L.find(x=>x.role==="POR")||L.find(x=>x.role==="DEF");const d=L.length?pick(L).p:null;
   const g=gkS?short(gkS.p):"Nadie",dn=d?short(d):"el aire";const rp=rp0;
   const offV2=!visOn()&&M.st;if(offV2)M.st.shots.them++;
-  if(Math.random()<pg){if(offV2){M.st.on.them++;M.st.sxy.push({side:"them",x:rnd(6,21),y:rnd(24,44),res:"goal"})}M.them++;M.lastChance={side:"them",name:rp.n,res:"goal",pow:tCanon};M.rivScorers.push(rp.n);M.ballT={x:6,y:50+rnd(-6,6)};M.net={side:0,until:performance.now()+1500};addLog(M.min,pick(GOAL_THEM)(rp.n,g,dn),"bad")}
+  const _gt=Math.random()<pg;if(_gt&&offsideGoal("them",null,rp.n))return;
+  if(_gt){if(offV2){M.st.on.them++;M.st.sxy.push({side:"them",x:rnd(6,21),y:rnd(24,44),res:"goal"})}M.them++;M.lastChance={side:"them",name:rp.n,res:"goal",pow:tCanon};M.rivScorers.push(rp.n);M.ballT={x:6,y:50+rnd(-6,6)};M.net={side:0,until:performance.now()+1500};addLog(M.min,pick(GOAL_THEM)(rp.n,g,dn),"bad")}
   else{const og=L.find(x=>x.p.trait==="dislexico");
     if(og&&Math.random()<.05){M.them++;M.lastChance={side:"them",name:rp.n,res:"goal",own:short(og.p)};M.own.push(short(og.p));M.ballT={x:6,y:50};M.net={side:0,until:performance.now()+1500};addLog(M.min,`Gol en propia de ${short(og.p)}. Dice que las porterías estaban al revés.`,"bad")}
     else{M.lastChance={side:"them",name:rp.n,res:Math.random()<.5?"save":"wide",pow:tCanon};
@@ -5684,6 +5706,7 @@ function startMatch(olo){
   visInit();
   {const md=$("#m-done");if(!olo&&S.comp.type!=="online"){md.dataset.act="post1";md.textContent="Rueda de prensa"}}
   if(!olo)M.olBot=S.comp.type==="online";
+  M.lin=Math.random()<.7?LINS[0]:pick(LINS.slice(1));if(M.lin.n)addLog(0,M.lin.n,"ev");if(offTrap())addLog(0,"Tu defensa juega adelantada: trampa del fuera de juego.","ev");
   M.rAbs=rAbs.map(x=>x.n);if(rAbs.length){M.oppStr*=1-Math.min(.12,.035*rAbs.length);addLog(0,`${T.n} llega con bajas: ${rAbs.map(x=>`${x.n} (${x.why})`).join(", ")}.`,"ev")}
   if(!olo&&S.comp.legends){M.oppN=11;addLog(0,"Saltan al campo las Leyendas del Cielo: Yashin, Beckenbauer, Cruyff, Di Stéfano, Maradona, Pelé… El estadio entero se pone en pie.","goal")}
   else if(!olo&&S.comp.gira){const T0=S.comp.teams[M.opp];const st=(T0.roster||[]).filter(x=>/«/.test(x.n));M.oppN=11;addLog(0,`${T0.n} sale con todas sus estrellas: ${st.map(x=>x.n).join(", ")}. El estadio está lleno.`,"goal")}
@@ -6038,7 +6061,7 @@ const A={
     S.money-=h.c;S.house=+v;while(S.sessions.length<h.sess)S.sessions.push(null);addNews(`Mudanza: la sede del club pasa a ser ${h.n.toLowerCase()}.`);save();render();toast("Mudanza hecha en la furgoneta de la fruta.")},
   week:()=>{const t=weekTick();save();render();if(S.graves&&S.graves.length){setTimeout(showGrave,300);return}if(S.tOffer&&!S.event&&!S.mafiaMsg){setTimeout(showTOffer,400)}if(S.scoutMsg){const sm=S.scoutMsg;S.scoutMsg=null;setTimeout(()=>toast(sm),3000)}if(!S.mafiaMsg&&S.event){save();render();showEvent();return}if(S.mafiaMsg){const mm=S.mafiaMsg;S.mafiaMsg=null;save();render();modal("Malas noticias",`<p>${esc(mm)}</p><div class="row"><button class="btn primary" data-act="close">Vale</button></div>`)}else toast(`Nueva semana. Cuentas: ${eur(t)}. Hay caras nuevas en el pueblo.`)},
   card:(v,el)=>openCard(+el.dataset.id),
-  tacset:v=>{const[k,x]=v.split(":");tac()[k]=k==="mark"?x==="1":+x;save();render()},
+  tacset:v=>{const[k,x]=v.split(":");tac()[k]=k==="mark"||k==="trap"?x==="1":+x;save();render()},
   hirestaff:v=>{S.staff=S.staff||{};const l=stf(v);if(l>=3)return;if((S.reach||0)<STAFF_REQ[l]){toast("Todavía no.");return}if(S.money<STAFF_COST[l]){toast(`Necesitas ${STAFF_COST[l]} €.`);return}S.money-=STAFF_COST[l];S.staff[v]=l+1;const s=STAFF.find(x=>x.id===v);addNews(`Nuevo en el cuerpo técnico: ${s.lv[l]} (${s.n.toLowerCase()}).`);save();render();toast("Contratado.")},
   academy:()=>{const lv=S.academy||0,nx=ACAD[lv+1];if(!nx)return;if(S.money<nx.c){toast(`Necesitas ${nx.c} €.`);return}S.money-=nx.c;S.academy=lv+1;S.youth=S.youth||[];if(!S.youth.length)for(let i=0;i<1+S.academy;i++)S.youth.push(genYouth());addNews(`El club monta: ${nx.n}.`);save();render()},
   promote:(v,el)=>{const id=+el.dataset.id;const p=(S.youth||[]).find(x=>x.id===id);if(!p)return;if(S.players.length>=22){toast("Plantilla llena: 22.");return}S.youth=S.youth.filter(x=>x!==p);p.origen="Canterano";p.energy=100;S.players.push(p);S.promoted=(S.promoted||0)+1;if(S.promoted>=3)ach("cantera");addNews(`${fullName(p)} sube de la cantera al primer equipo. Su madre llora en la grada.`);save();render()},
@@ -6270,7 +6293,7 @@ function visIdle(){
   if(!h||!(V.us.includes(h)||V.them.includes(h))){h=V.holder=V.us.find(p=>p.role==="MED")||V.them.find(p=>p.role==="MED")||V.us[0]||V.them[0];if(!h)return}
   const mine=teamOf(h.side),other=teamOf(h.side==="us"?"them":"us"),dir=h.side==="us"?1:-1;
   if(Math.random()<.06){V.q.push({k:"out",x:clamp(h.x+rnd(-4,4),3,PW-3),y:h.y<34?-1.2:PH+1.2,dur:.55,lab:"Fuera de banda"},{k:"throw",side:h.side==="us"?"them":"us"});V.wait=now+300;return}
-  if(Math.random()<.035){const fw=mine.filter(p=>p.role==="DEL").sort((a,c)=>(c.x-a.x)*dir)[0];if(fw&&fw!==h){V.q.push({k:"pass",to:fw,dur:.9,lab:`Balón largo a ${fw.name}`},{k:"offside",side:h.side});V.wait=now+300;return}}
+  if(Math.random()<.035*(h.side==="them"&&offTrap()?2.2:1)*(M.lin&&M.lin.k==="cegato"?1.6:1)){const fw=mine.filter(p=>p.role==="DEL").sort((a,c)=>(c.x-a.x)*dir)[0];if(fw&&fw!==h){V.q.push({k:"pass",to:fw,dur:.9,lab:`Balón largo a ${fw.name}`},{k:"offside",side:h.side});V.wait=now+300;return}}
   if(Math.random()<.17&&other.length){const opp=other.filter(p=>p.role!=="POR");
     if(Math.random()<.5){const t=nearestTo(opp,h.x,h.y)||other[0];V.q.push({k:"tackle",by:t,from:h})}
     else{const cand=mine.filter(p=>p!==h&&p.role!=="POR");const tm=cand.length?pick(cand):null;if(tm){const mx=(h.x+tm.x)/2,my=(h.y+tm.y)/2;const t=nearestTo(opp,mx,my)||other[0];t.ov={x:mx,y:my};V.q.push({k:"wait",ms:250},{k:"pass",to:t,dur:.5,lab:`¡Corta ${t.name}!`,after:()=>{t.ov=null}})}}}
@@ -6312,7 +6335,7 @@ function visChance(lc,logs){
   V.q.push({k:"shot",who:sh,res:lc.res,own:lc.own,logs,pow:!!lc.pow,arms:lc.arms||null});
   if(Math.random()<.22&&V.q.length>=2){const tk=team.find(p=>p!==sh&&p.role!=="POR")||sh;const shotA=V.q[V.q.length-1];V.q=[{k:"out",x:us?PW+1.5:-1.5,y:rnd(18,50),dur:.6,lab:"Despejan a córner"},{k:"corner",side:lc.side,taker:tk,dur:1.1},{k:"cross",from:tk,to:sh,dur:1.1},shotA]}
   M.pendLogs=logs;
-  const est=V.q.reduce((a,x)=>a+(x.k==="shot"?.7:(x.dur||.9)+.25),0)*1000+(lc.res==="goal"?1700:900);
+  const est=V.q.reduce((a,x)=>a+(x.k==="shot"?.7:(x.dur||.9)+.25),0)*1000+(lc.res==="goal"?1700:lc.res==="offside"?2600:900);
   M.busyUntil=now+est+(lc.res==="goal"?2400:0);V.wait=0;
   if(M.cine&&M.cine.type==="gol"){M.cine.t0=now+est+61300;M.cineUntil=now+est+1300+M.cine.dur}
 }
@@ -6341,9 +6364,14 @@ function runAction(a){
     if(tgt)V.q.unshift({k:"arrive",who:gk,max:3500,ms:400},{k:"pass",to:tgt,dur:1.4,arc:5,lab:`Saque largo de ${gk?gk.name:"el portero"}`,after:()=>{unstage()}})}
   else if(a.k==="fk"){const T2=teamOf(a.side);const tk=nearestTo(T2.filter(p=>p.role!=="POR"),b.x,b.y);b.move=null;b.z=0;V.holder=null;if(!tk)return;tk.ov={x:b.x-(a.side==="us"?1.2:-1.2),y:b.y};tk.stg=true;setLabel("Falta",1100);V.wait=performance.now()+1000;
     const mate=nearestTo(T2.filter(p=>p!==tk&&p.role!=="POR"),b.x+(a.side==="us"?8:-8),b.y);V.q.unshift({k:"arrive",who:tk,max:3500,ms:400},{k:"pass",to:mate||tk,dur:.7,arc:1,lab:`Saca la falta ${tk.name}`,after:()=>{tk.ov=null;tk.stg=false}})}
-  else if(a.k==="shot"){const sh=a.who,us=sh.side==="us",gx=us?PW:0,dir=us?1:-1;let x1,y1,z1;if(a.pow){V.beam={until:performance.now()+1300,col:us?(ourKit().c1||"#ffd23f"):"#7df9ff",side:sh.side};V.trail=[];setTimeout(()=>{try{setLabel("¡CAÑONAZO!",1400);SFX.kick(1);SFX.swell(.3,1)}catch(e){}},10)}M.st&&M.st.shots[sh.side]++;M.st&&M.st.sxy.push({side:sh.side,x:b.x,y:b.y,res:a.res==="goal"?"goal":a.res==="save"?"save":"wide"});V.zoomUntil=performance.now()+1600;SFX.kick(.55);SFX.swell(.06,1.2);V.excite=Math.max(V.excite||0,.4);
+  else if(a.k==="shot"){const sh=a.who,us=sh.side==="us",gx=us?PW:0,dir=us?1:-1;let x1,y1,z1;if(a.pow){V.beam={until:performance.now()+1300,col:us?(ourKit().c1||"#ffd23f"):"#7df9ff",side:sh.side};V.trail=[];setTimeout(()=>{try{setLabel("¡CAÑONAZO!",1400);SFX.kick(1);SFX.swell(.3,1)}catch(e){}},10)}M.st&&M.st.shots[sh.side]++;M.st&&M.st.sxy.push({side:sh.side,x:b.x,y:b.y,res:a.res==="goal"?"goal":a.res==="save"?"save":"wide"});if(a.res==="offside"&&M.st){M.st.offs=M.st.offs||{us:0,them:0};M.st.offs[sh.side]++}V.zoomUntil=performance.now()+1600;SFX.kick(.55);SFX.swell(.06,1.2);V.excite=Math.max(V.excite||0,.4);
     const done=()=>{unstage();if(a.logs){a.logs.forEach(l=>{const d=document.createElement("div");d.className="l "+(l[2]||"");d.innerHTML=`<b>${l[3]}'</b>${esc(l[1])}`;$("#mlog").prepend(d)})}M.pendLogs=null;M.dispUs=M.us;M.dispThem=M.them;updScore();sh.ov=null};
-    if(a.res==="goal"){x1=gx+dir*1.5;y1=rnd(31,37);z1=Math.random()*1.8+.2;
+    if(a.res==="offside"){x1=gx+dir*1.5;y1=rnd(31,37);z1=Math.random()*1.4+.2;
+      b.move={x0:b.x,y0:b.y,z0:.2,x1,y1,z1,t:0,dur:.55,arc:.6,end:()=>{V.net={side:us?1:0,until:performance.now()+1200};SFX.swell(.3,1.5);setLabel("¡GOOOOL!…",900);V.holder=null;
+        setTimeout(()=>{try{if(!M||!M.vis)return;V.offsideUntil=performance.now()+2200;SFX.whistle(2);setLabel("¡ANULADO! Fuera de juego",2000);done();
+          const other=teamOf(us?"them":"us");const gk=other.find(p=>p.role==="POR")||other[0];if(gk){b.x=gk.x;b.y=gk.y;b.z=0;V.holder=gk}V.wait=performance.now()+1600}catch(e){}},900);
+        V.wait=performance.now()+2600}}}
+    else if(a.res==="goal"){x1=gx+dir*1.5;y1=rnd(31,37);z1=Math.random()*1.8+.2;
       b.move={x0:b.x,y0:b.y,z0:.2,x1,y1,z1,t:0,dur:.55,arc:.6,end:()=>{V.net={side:us?1:0,until:performance.now()+1500};M.replayReq=!M.skipping;if(M.cine&&M.cine.type==="gol"){M.cine.t0=performance.now()+700;M.cineUntil=Math.max(M.cineUntil||0,M.cine.t0+M.cine.dur)}M.st&&M.st.on[sh.side]++;celebrate(sh.side,sh);SFX.swell(.4,3.5);SFX.whistle(1);coachSay(us?"goalUs":"goalThem");setLabel(a.own?`¡Gol en propia de ${a.own}!`:"¡GOOOOL!",1800);done();V.holder=null;
         V.wait=performance.now()+4200;V.q.unshift({k:"kick",side:us?"them":"us"})}}}
     else if(a.res==="save"){const gk=teamOf(us?"them":"us").find(p=>p.role==="POR")||teamOf(us?"them":"us")[0];x1=gx-dir*1.2;y1=gk?clamp(gk.y,30,38):34;z1=1;
