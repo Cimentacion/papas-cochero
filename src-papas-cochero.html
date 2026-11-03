@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2587,7 +2587,7 @@ function cupSection(){
   const cur=c.rounds[c.r]||[],prev=c.r>0?c.rounds[c.r-1]:null;
   const next=!c.done&&lg&&c.when[c.r]!=null?`Se juega antes de la jornada ${c.when[c.r]+1} de liga.`:"";
   return `<section class="win"><div class="bar">Copa del Rey <small>${c.done?"terminada":esc(c.stage[c.r])}</small></div><div class="body">
-   <p class="hint">${c.teams.length} equipos de todas las divisiones, sorteo puro y a partido único. Juega en casa el de categoría más baja. Si hay empate, penaltis. ${next}</p>
+   <p class="hint">${c.teams.length} equipos de todas las divisiones, sorteo puro y a partido único. Juega en casa el de categoría más baja. Si hay empate, prórroga (2 × 15 min) y, si siguen empatados, penaltis: cinco por equipo y luego muerte súbita. ${next}</p>
    <p><b>${c.done?(c.champ===0?"¡CAMPEONES!":`Campeón: ${esc(c.teams[c.champ].n)}`):c.out?"Estáis eliminados. La copa sigue sin vosotros.":"Seguís vivos."}</b></p>
    ${!c.done?`<div class="ko cupko"><div class="h">${esc(c.stage[c.r]).toUpperCase()}</div>${cur.map(tie).join("")}</div>`:""}
    ${prev?`<div class="ko cupko"><div class="h">${esc(c.stage[c.r-1]).toUpperCase()} · RESULTADOS</div>${prev.map(tie).join("")}</div>`:""}
