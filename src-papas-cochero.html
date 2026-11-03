@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -3078,7 +3078,8 @@ function cardShow(col,txt){if(M&&M.online&&txt!=="el entrenador")olEmit(col==="#
 function coachProtest(m){
   if(!M||M.coachOut||Math.random()>.45)return;coachSay("card");const ref=M.ref||{t:"normal"};
   if(Math.random()<({estricto:.4,comprado:.45,casero:M.m.a===0?.05:.3}[ref.t]||.2)){
-    if(M.coachYel){M.coachOut=true;M.shouts=0;const sb=$("#m-shout");if(sb){sb.textContent="Expulsado";sb.disabled=true}M.mod*=.97;addLog(m,`¡Expulsan al míster ${S.coach.name}! Se va a ver el partido desde la valla con un bocadillo de mortadela.`,"bad");cardShow("#e02020","el entrenador");}
+    if(M.coachYel){M.coachDoubleY=false;M.coachOut=true;M.shouts=0;const sb=$("#m-shout");if(sb){sb.textContent="Expulsado";sb.disabled=true}M.mod*=.97;addLog(m,`¡Expulsan al míster ${S.coach.name}! Se va a ver el partido desde la valla con un bocadillo de mortadela.`,"bad");cardShow("#e02020","el entrenador");
+      if(!M.online){const g=suspGames(!M.coachDoubleY);S.coachBan=g;M.coachBanNew=g;addLog(m,`El comité le cae encima: ${g} partido${g>1?"s":""} de sanción para el míster.`,"bad");addNews(`Sanción: ${S.coach.name} se pierde ${g} partido${g>1?"s":""} por la expulsión. Los verá desde la valla.`)}}
     else{M.coachYel=true;addLog(m,`Amarilla para el míster por protestar. «¡Que no he dicho nada!»`,"bad");cardShow("#ffd23f","el entrenador")}}
 }
 const PRAYERS=["Señor, que no nos metan otro.","Virgencita, que me quede como estoy.","Dios mío, si marcamos, dejo las latas.","San Pancracio, échanos una mano, que vamos fatal.","Que el árbitro vea la luz, amén."];
@@ -5684,7 +5685,8 @@ function startMatch(olo){
   document.querySelectorAll("[data-act=tac]").forEach(b=>b.classList.toggle("sel",b.dataset.v===M.tactic));
   $("#m-form").innerHTML=Object.keys(FORMS).map(f=>`<option value="${f}" ${f===M.form?"selected":""}>${f}</option>`).join("");
   voxInit();vo("intro",null,true);
-  $("#m-shout").textContent="Gritar (3)";$("#m-shout").disabled=false;$("#m-speed").textContent="Normal";{const mp=$("#m-pause");if(mp){mp.textContent="Pausa";mp.classList.remove("paused")}}
+  $("#m-shout").textContent="Gritar (3)";$("#m-shout").disabled=false;
+  if(!M.online&&(S.coachBan||0)>0){M.coachOut=true;M.coachBanned=true;M.shouts=0;M.mod*=.97;$("#m-shout").textContent="Expulsado";$("#m-shout").disabled=true;addLog(0,`El míster ${S.coach.name} está sancionado (${S.coachBan} partido${S.coachBan>1?"s":""}). Lo ve desde la valla con el bocadillo. No puede gritar.`,"bad")}$("#m-speed").textContent="Normal";{const mp=$("#m-pause");if(mp){mp.textContent="Pausa";mp.classList.remove("paused")}}
   $("#match").hidden=false;$("#match").scrollTop=0;
   if(!sq.length){addLog(0,"No ha llegado nadie. El árbitro os da el partido por perdido 0-3 por incomparecencia.","bad");M.them=3;M.early="Incomparecencia.";endMatch(false);return}
   if(M.oppStyle){const st=STY[M.oppStyle];addLog(0,M.studied?`El entrenador de ${T.n} os tiene estudiados: siempre jugáis igual. Hoy sale ${st.n} para pillaros.${st.good?` Lo que le hace daño: «${TACN[st.good]}».`:""}`:`${T.n} juega ${st.n}.${st.good&&(unl("report")||stf("segundo"))?` Tu segundo dice: «Con ${TACN[st.good]} les hacemos daño; con ${TACN[st.bad]} nos matan».`:""}`,M.studied?"bad":"ev")}
@@ -5737,6 +5739,7 @@ function endMatch(normal){
   if(r.pens){const our=m.a===0?r.pens[0]:r.pens[1],their=m.a===0?r.pens[1]:r.pens[0];addLog(M.min,`Penaltis: ${our}-${their}. ${r.win===0?"¡Pasáis!":"Fuera."}`,r.win===0?"goal":"bad")}
   if(c.type==="cup")cupRoundRest(c);else simRoundRest(c,true);
   const co=S.coach;const res=M.us>M.them?"W":M.us===M.them?"D":"L";try{deprTick(res)}catch(e){}
+  if(M.coachBanned&&S.coachBan>0){S.coachBan--;if(!S.coachBan)addNews(`${S.coach.name} cumple la sanción. Vuelve al banquillo con más ganas de protestar que nunca.`)}
   try{const tn=c.teams[M.opp].n;S.rivOut=S.rivOut||{};Object.keys(S.rivOut).forEach(k=>{S.rivOut[k]=S.rivOut[k].filter(x=>x.until>S.week);if(!S.rivOut[k].length)delete S.rivOut[k]});if(M.rOutL&&M.rOutL.length)S.rivOut[tn]=(S.rivOut[tn]||[]).concat(M.rOutL.map(x=>({n:x.n,why:x.why,until:S.week+x.g})))}catch(e){}
   co.gf+=M.us;co.ga+=M.them;
   if(res==="W"){co.w++;co.moral=clamp(co.moral+12,0,100)}else if(res==="D"){co.d++;co.moral=clamp(co.moral+2,0,100)}else{co.l++;co.moral=clamp(co.moral-10,0,100)}
