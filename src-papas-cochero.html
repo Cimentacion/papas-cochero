@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -9,11 +9,11 @@ window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Papas Cochero">
+<meta name="apple-mobile-web-app-title" content="Míster Manager">
 <meta name="theme-color" content="#5a3415">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Los Papas Cochero</title>
+<title>Míster Manager</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -788,7 +788,7 @@ function shapeOf(f){const r=FORMS[f];const a=r.reduce((s,x)=>s+WA[x],0),d=r.redu
 const WA={POR:0,DEF:.25,MED:.7,DEL:1},WD={POR:2.2,DEF:1,MED:.5,DEL:.12};
 const SA0=FORMS["4-4-2"].reduce((s,r)=>s+WA[r],0),SD0=FORMS["4-4-2"].reduce((s,r)=>s+WD[r],0);
 let HOME="Fuentes de Andalucía";const HOME0="Fuentes de Andalucía",KO=660;
-const GAME_T=window.PC_PLAY?"Míster de Pueblo":"Los Papas Cochero";
+const GAME_T="Míster Manager";
 const GEO_ES={
 "A Coruña":[["A Coruña",43.37,-8.40],["Santiago de Compostela",42.88,-8.54],["Ferrol",43.48,-8.24],["Narón",43.50,-8.19],["Oleiros",43.33,-8.31],["Carballo",43.21,-8.69],["Arteixo",43.30,-8.51],["Ribeira",42.55,-8.99],["Betanzos",43.28,-8.21],["Noia",42.79,-8.89],["Ordes",43.08,-8.41],["Cee",42.95,-9.19]],
 "Álava":[["Vitoria-Gasteiz",42.85,-2.67],["Llodio",43.14,-2.96],["Amurrio",43.05,-3.00],["Salvatierra",42.85,-2.39],["Agurain",42.85,-2.39],["Iruña de Oca",42.82,-2.80],["Oyón",42.51,-2.43],["Labastida",42.59,-2.80]],

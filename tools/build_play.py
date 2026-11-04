@@ -138,7 +138,7 @@ def subst(text):
     text = text.replace('la FIFA', 'la Federación').replace('la UEFA', 'la Confederación').replace('FIFA, dólares', 'Federación, dólares').replace('UEFA, euros', 'Confederación, euros')
     text = re.sub(r'\bUEFA\b', 'Confederación', text)
     text = re.sub(r'\bFIFA\b', 'Federación', text)
-    text = text.replace('de los Papas Cochero', 'de los nuestros').replace('los Papas Cochero', 'los nuestros').replace('Los Papas Cochero', 'Míster de Pueblo').replace('Papas Cochero', 'Míster de Pueblo').replace('los Papas', 'los nuestros')
+    text = text.replace('de los Papas Cochero', 'de los nuestros').replace('los Papas Cochero', 'los nuestros').replace('Los Papas Cochero', 'Míster Manager').replace('Papas Cochero', 'Míster Manager').replace('los Papas', 'los nuestros')
     return text
 
 s = subst(s)
@@ -168,7 +168,7 @@ if left:
 # ---------- 6) escribir ----------
 os.makedirs(os.path.join(OUT, 'i18n'), exist_ok=True)
 head = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read().split('<body>')[0] + '<body>'
-head = head.replace('Los Papas Cochero', 'Míster de Pueblo').replace('content="Papas Cochero"', 'content="Míster de Pueblo"').replace('icon-180.png', '../icon-180.png').replace('manifest.webmanifest', '../manifest.webmanifest')
+head = head.replace('Los Papas Cochero', 'Míster Manager').replace('content="Papas Cochero"', 'content="Míster Manager"').replace('icon-180.png', '../icon-180.png').replace('manifest.webmanifest', '../manifest.webmanifest')
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(head + s + '</body></html>')
 v = re.search(r'window\.PC_VERSION="([^"]+)"', s).group(1)
 notes = json.load(open(os.path.join(ROOT, 'version.json'), encoding='utf-8'))['notes']
