@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'play/index.html'
       - 'android-play/**'
       - '.github/workflows/play-aab.yml'
   workflow_dispatch:
