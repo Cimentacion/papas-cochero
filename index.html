@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Papas Cochero"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Los Papas Cochero</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -408,6 +408,12 @@ body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frla
 .doclist{max-width:640px;margin:0 auto;padding:4px 12px 12px;display:grid;gap:6px;width:100%;box-sizing:border-box}
 .docopt{display:flex;gap:8px;align-items:center;background:#141a2b;border:1px solid #2b3a63;border-radius:10px;padding:8px 10px;color:#fff;text-align:left;width:100%;font:inherit;cursor:pointer}
 .docopt:disabled{opacity:.45;cursor:default}.docopt i{font-style:normal;font-size:24px}.docopt div{flex:1}.docopt small{display:block;color:#9fb0d6;font-size:12px}.docopt em{font-style:normal;color:#ffd23f;font-weight:700;white-space:nowrap}
+.mmenu{min-height:calc(100vh - 40px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 16px;text-align:center}
+.mmenu h1{font:clamp(34px,10vw,58px)/1 Bungee,Impact,sans-serif;margin:0;color:#ffd23f;text-shadow:3px 3px 0 #5a3415,6px 6px 0 rgba(0,0,0,.35);letter-spacing:1px}
+.mmenu .tagl{font-size:15px;color:#fff;opacity:.9;margin:-4px 0 10px}.mmenu .hint{color:#fff;opacity:.6}.mmenu .btn:not(.mini){width:min(320px,100%);font-size:17px;padding:13px}.mmenu .chips{display:flex;flex-wrap:wrap;gap:6px}.mmenu .cont small{display:block;font-size:12px;opacity:.8;font-weight:400}
+.mmenu .ball{width:74px;height:74px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0 30%,#ddd 60%,#999);box-shadow:0 6px 0 rgba(0,0,0,.25);position:relative;animation:mmb 1.6s ease-in-out infinite}
+.mmenu .ball:after{content:"";position:absolute;inset:26px;background:#222;clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%)}
+@keyframes mmb{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 #sdfull{position:fixed;inset:0;z-index:60;background:linear-gradient(#2a0f2e,#120a24);display:flex;flex-direction:column;padding-top:max(8px,env(safe-area-inset-top,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}#sdfull[hidden]{display:none}
 .sdtop{display:flex;align-items:center;gap:10px;padding:4px 12px;color:#fff}.sdtop b{flex:1;font:16px Bungee,Impact,sans-serif;color:#ff6fa8}.sdtop span{font-weight:700}
 .sdstage{flex:1;overflow:hidden;position:relative;padding:6px 10px;display:flex;flex-direction:column}.sdstage .sdwrap{flex:1}.sdwrap{position:relative;height:100%;overflow-y:auto;overflow-x:hidden;border-radius:14px;touch-action:pan-y;-webkit-overflow-scrolling:touch;background:#fffaf0;box-shadow:0 10px 30px #000a}
@@ -780,7 +786,80 @@ const NORMAL_FORMS=["4-4-2","4-3-3","4-5-1","3-4-3","5-4-1","5-3-2","4-2-4"],CRA
 function shapeOf(f){const r=FORMS[f];const a=r.reduce((s,x)=>s+WA[x],0),d=r.reduce((s,x)=>s+WD[x],0);return{a:Math.sqrt(a/SA0),d:Math.sqrt(d/SD0)}}
 const WA={POR:0,DEF:.25,MED:.7,DEL:1},WD={POR:2.2,DEF:1,MED:.5,DEL:.12};
 const SA0=FORMS["4-4-2"].reduce((s,r)=>s+WA[r],0),SD0=FORMS["4-4-2"].reduce((s,r)=>s+WD[r],0);
-const HOME="Fuentes de Andalucía",KO=660;
+let HOME="Fuentes de Andalucía";const HOME0="Fuentes de Andalucía",KO=660;
+const GAME_T=window.PC_PLAY?"Míster de Pueblo":"Los Papas Cochero";
+const GEO_ES={
+"A Coruña":[["A Coruña",43.37,-8.40],["Santiago de Compostela",42.88,-8.54],["Ferrol",43.48,-8.24],["Narón",43.50,-8.19],["Oleiros",43.33,-8.31],["Carballo",43.21,-8.69],["Arteixo",43.30,-8.51],["Ribeira",42.55,-8.99],["Betanzos",43.28,-8.21],["Noia",42.79,-8.89],["Ordes",43.08,-8.41],["Cee",42.95,-9.19]],
+"Álava":[["Vitoria-Gasteiz",42.85,-2.67],["Llodio",43.14,-2.96],["Amurrio",43.05,-3.00],["Salvatierra",42.85,-2.39],["Agurain",42.85,-2.39],["Iruña de Oca",42.82,-2.80],["Oyón",42.51,-2.43],["Labastida",42.59,-2.80]],
+"Albacete":[["Albacete",38.99,-1.86],["Hellín",38.51,-1.70],["Villarrobledo",39.27,-2.60],["Almansa",38.87,-1.10],["La Roda",39.21,-2.16],["Caudete",38.70,-0.99],["Tobarra",38.59,-1.69],["Madrigueras",39.24,-1.80],["Casas-Ibáñez",39.28,-1.47]],
+"Alicante":[["Alicante",38.35,-0.48],["Elche",38.27,-0.70],["Torrevieja",37.98,-0.68],["Orihuela",38.08,-0.94],["Benidorm",38.54,-0.13],["Alcoy",38.70,-0.47],["Elda",38.48,-0.79],["San Vicente del Raspeig",38.40,-0.53],["Villena",38.63,-0.86],["Dénia",38.84,0.11],["Petrer",38.48,-0.77],["Crevillent",38.25,-0.81],["Novelda",38.38,-0.77],["Ibi",38.63,-0.57],["Altea",38.60,-0.05],["Jávea",38.79,0.17],["La Vila Joiosa",38.51,-0.23]],
+"Almería":[["Almería",36.84,-2.46],["Roquetas de Mar",36.76,-2.61],["El Ejido",36.78,-2.81],["Níjar",36.97,-2.21],["Vícar",36.83,-2.64],["Adra",36.75,-3.02],["Huércal-Overa",37.39,-1.94],["Vera",37.24,-1.86],["Berja",36.85,-2.95],["Albox",37.39,-2.15],["Garrucha",37.18,-1.82]],
+"Asturias":[["Oviedo",43.36,-5.85],["Gijón",43.54,-5.66],["Avilés",43.56,-5.92],["Siero",43.39,-5.66],["Langreo",43.30,-5.69],["Mieres",43.25,-5.78],["Castrillón",43.55,-5.98],["Llanes",43.42,-4.75],["Cangas de Onís",43.35,-5.13],["Navia",43.54,-6.72],["Luarca",43.54,-6.54],["Villaviciosa",43.48,-5.44],["Pola de Lena",43.16,-5.83]],
+"Ávila":[["Ávila",40.66,-4.70],["Arévalo",41.06,-4.72],["Arenas de San Pedro",40.21,-5.09],["Candeleda",40.15,-5.24],["Las Navas del Marqués",40.60,-4.33],["El Tiemblo",40.41,-4.50],["Piedrahíta",40.47,-5.33],["El Barco de Ávila",40.36,-5.52]],
+"Badajoz":[["Badajoz",38.88,-6.97],["Mérida",38.92,-6.34],["Don Benito",38.96,-5.86],["Almendralejo",38.68,-6.41],["Villanueva de la Serena",38.98,-5.80],["Zafra",38.42,-6.42],["Montijo",38.91,-6.62],["Villafranca de los Barros",38.56,-6.34],["Olivenza",38.68,-7.10],["Jerez de los Caballeros",38.32,-6.77],["Azuaga",38.26,-5.68],["Llerena",38.24,-6.02]],
+"Baleares":[["Palma",39.57,2.65],["Calvià",39.57,2.51],["Manacor",39.57,3.21],["Llucmajor",39.49,2.89],["Inca",39.72,2.91],["Ibiza",38.91,1.43],["Santa Eulària des Riu",38.98,1.53],["Maó",39.89,4.26],["Ciutadella",40.00,3.84],["Marratxí",39.62,2.72],["Sóller",39.77,2.71],["Alcúdia",39.85,3.12]],
+"Barcelona":[["Barcelona",41.39,2.17],["L'Hospitalet de Llobregat",41.36,2.10],["Badalona",41.45,2.25],["Terrassa",41.56,2.01],["Sabadell",41.55,2.11],["Mataró",41.54,2.44],["Santa Coloma de Gramenet",41.45,2.21],["Cornellà de Llobregat",41.36,2.07],["Sant Boi de Llobregat",41.34,2.04],["Granollers",41.61,2.29],["Manresa",41.73,1.83],["Vic",41.93,2.25],["Igualada",41.58,1.62],["Vilanova i la Geltrú",41.22,1.73],["Castelldefels",41.28,1.98],["Rubí",41.49,2.03],["Mollet del Vallès",41.54,2.21],["Berga",42.10,1.85]],
+"Bizkaia":[["Bilbao",43.26,-2.93],["Barakaldo",43.30,-2.99],["Getxo",43.36,-3.01],["Portugalete",43.32,-3.02],["Santurtzi",43.33,-3.03],["Basauri",43.24,-2.89],["Leioa",43.33,-2.99],["Durango",43.17,-2.63],["Galdakao",43.23,-2.84],["Sestao",43.31,-3.01],["Erandio",43.30,-2.97],["Bermeo",43.42,-2.72],["Gernika",43.32,-2.68],["Balmaseda",43.19,-3.19]],
+"Burgos":[["Burgos",42.34,-3.70],["Miranda de Ebro",42.69,-2.95],["Aranda de Duero",41.67,-3.69],["Briviesca",42.55,-3.32],["Medina de Pomar",42.93,-3.49],["Lerma",42.03,-3.76],["Villarcayo",42.94,-3.57],["Salas de los Infantes",42.02,-3.28]],
+"Cáceres":[["Cáceres",39.47,-6.37],["Plasencia",40.03,-6.09],["Navalmoral de la Mata",39.89,-5.54],["Trujillo",39.46,-5.88],["Coria",39.98,-6.54],["Miajadas",39.15,-5.91],["Moraleja",40.07,-6.66],["Jaraíz de la Vera",40.06,-5.76],["Valencia de Alcántara",39.41,-7.24]],
+"Cádiz":[["Cádiz",36.53,-6.29],["Jerez de la Frontera",36.69,-6.13],["Algeciras",36.13,-5.45],["San Fernando",36.46,-6.20],["El Puerto de Santa María",36.60,-6.23],["Chiclana de la Frontera",36.42,-6.15],["Sanlúcar de Barrameda",36.78,-6.35],["La Línea de la Concepción",36.17,-5.35],["Puerto Real",36.53,-6.19],["Arcos de la Frontera",36.75,-5.81],["Rota",36.62,-6.36],["Barbate",36.19,-5.92],["Conil de la Frontera",36.28,-6.09],["Ubrique",36.68,-5.45],["Villamartín",36.86,-5.64],["Tarifa",36.01,-5.60]],
+"Cantabria":[["Santander",43.46,-3.81],["Torrelavega",43.35,-4.05],["Castro Urdiales",43.38,-3.22],["Camargo",43.41,-3.86],["Piélagos",43.39,-3.95],["Laredo",43.41,-3.42],["Santoña",43.44,-3.46],["Reinosa",43.00,-4.14],["Los Corrales de Buelna",43.26,-4.06],["Cabezón de la Sal",43.31,-4.24],["Colindres",43.39,-3.45]],
+"Castellón":[["Castellón de la Plana",39.99,-0.05],["Vila-real",39.94,-0.10],["Burriana",39.89,-0.08],["Vinaròs",40.47,0.47],["Onda",39.96,-0.26],["Benicarló",40.42,0.43],["La Vall d'Uixó",39.82,-0.23],["Almassora",39.95,-0.06],["Benicàssim",40.06,0.07],["Segorbe",39.85,-0.49],["Nules",39.85,-0.16]],
+"Ciudad Real":[["Ciudad Real",38.99,-3.93],["Puertollano",38.69,-4.11],["Tomelloso",39.16,-3.02],["Valdepeñas",38.76,-3.38],["Alcázar de San Juan",39.39,-3.21],["Manzanares",39.00,-3.37],["Daimiel",39.07,-3.62],["La Solana",38.94,-3.24],["Miguelturra",38.96,-3.95],["Socuéllamos",39.29,-2.79],["Almagro",38.89,-3.71]],
+"Córdoba":[["Córdoba",37.88,-4.78],["Lucena",37.41,-4.49],["Puente Genil",37.39,-4.77],["Montilla",37.59,-4.64],["Priego de Córdoba",37.44,-4.20],["Cabra",37.47,-4.44],["Palma del Río",37.70,-5.28],["Baena",37.62,-4.32],["Pozoblanco",38.38,-4.85],["Aguilar de la Frontera",37.51,-4.66],["Peñarroya-Pueblonuevo",38.30,-5.27],["Montoro",38.02,-4.38],["Fuente Palmera",37.70,-5.10],["Rute",37.33,-4.37]],
+"Cuenca":[["Cuenca",40.07,-2.14],["Tarancón",40.01,-3.01],["San Clemente",39.40,-2.43],["Quintanar del Rey",39.34,-1.93],["Motilla del Palancar",39.56,-1.91],["Las Pedroñeras",39.45,-2.67],["Mota del Cuervo",39.50,-2.87],["Huete",40.14,-2.69]],
+"Gipuzkoa":[["Donostia-San Sebastián",43.32,-1.98],["Irun",43.34,-1.79],["Errenteria",43.31,-1.90],["Eibar",43.18,-2.47],["Zarautz",43.28,-2.17],["Arrasate",43.06,-2.49],["Hernani",43.27,-1.98],["Tolosa",43.13,-2.08],["Hondarribia",43.36,-1.79],["Beasain",43.05,-2.20],["Azpeitia",43.18,-2.27],["Lasarte-Oria",43.27,-2.02]],
+"Girona":[["Girona",41.98,2.82],["Figueres",42.27,2.96],["Blanes",41.67,2.79],["Lloret de Mar",41.70,2.85],["Olot",42.18,2.49],["Salt",41.97,2.79],["Palafrugell",41.92,3.16],["Sant Feliu de Guíxols",41.78,3.03],["Banyoles",42.12,2.77],["Ripoll",42.20,2.19],["Puigcerdà",42.43,1.93],["Roses",42.26,3.18]],
+"Granada":[["Granada",37.18,-3.60],["Motril",36.75,-3.52],["Almuñécar",36.73,-3.69],["Armilla",37.14,-3.62],["Baza",37.49,-2.77],["Loja",37.17,-4.15],["Guadix",37.30,-3.14],["Maracena",37.21,-3.63],["Las Gabias",37.13,-3.67],["Santa Fe",37.19,-3.72],["Atarfe",37.22,-3.69],["Huéscar",37.81,-2.54],["Salobreña",36.75,-3.59],["Íllora",37.29,-3.88],["Alhama de Granada",37.01,-3.99]],
+"Guadalajara":[["Guadalajara",40.63,-3.17],["Azuqueca de Henares",40.57,-3.27],["Alovera",40.59,-3.25],["El Casar",40.70,-3.43],["Cabanillas del Campo",40.64,-3.24],["Sigüenza",41.07,-2.64],["Molina de Aragón",40.84,-1.89],["Marchamalo",40.67,-3.20]],
+"Huelva":[["Huelva",37.26,-6.95],["Lepe",37.25,-7.20],["Almonte",37.26,-6.52],["Moguer",37.28,-6.84],["Isla Cristina",37.20,-7.32],["Ayamonte",37.21,-7.40],["Cartaya",37.28,-7.15],["Valverde del Camino",37.58,-6.75],["Bollullos Par del Condado",37.34,-6.54],["Aracena",37.89,-6.56],["La Palma del Condado",37.39,-6.55],["Punta Umbría",37.18,-6.97],["Gibraleón",37.38,-6.97],["Minas de Riotinto",37.69,-6.60]],
+"Huesca":[["Huesca",42.14,-0.41],["Monzón",41.91,0.19],["Barbastro",42.04,0.13],["Fraga",41.52,0.35],["Jaca",42.57,-0.55],["Sabiñánigo",42.52,-0.36],["Binéfar",41.85,0.29],["Graus",42.19,0.34],["Sariñena",41.79,-0.16]],
+"Jaén":[["Jaén",37.77,-3.79],["Linares",38.09,-3.64],["Andújar",38.04,-4.05],["Úbeda",38.01,-3.37],["Martos",37.72,-3.97],["Alcalá la Real",37.46,-3.92],["Bailén",38.09,-3.78],["Baeza",37.99,-3.47],["La Carolina",38.28,-3.62],["Torredonjimeno",37.77,-3.96],["Villacarrillo",38.12,-3.08],["Mancha Real",37.79,-3.61],["Alcaudete",37.59,-4.08],["Jódar",37.84,-3.35],["Cazorla",37.91,-3.00]],
+"La Rioja":[["Logroño",42.47,-2.45],["Calahorra",42.30,-1.97],["Arnedo",42.23,-2.10],["Haro",42.58,-2.85],["Alfaro",42.18,-1.75],["Lardero",42.43,-2.46],["Nájera",42.42,-2.73],["Santo Domingo de la Calzada",42.44,-2.95],["Villamediana de Iregua",42.43,-2.42]],
+"Las Palmas":[["Las Palmas de Gran Canaria",28.12,-15.43],["Telde",27.99,-15.42],["Santa Lucía de Tirajana",27.91,-15.54],["Arrecife",28.96,-13.55],["San Bartolomé de Tirajana",27.92,-15.57],["Arucas",28.12,-15.52],["Agüimes",27.90,-15.45],["Puerto del Rosario",28.50,-13.86],["Gáldar",28.15,-15.65],["Ingenio",27.92,-15.44],["Teguise",29.06,-13.56],["Mogán",27.88,-15.72]],
+"León":[["León",42.60,-5.57],["Ponferrada",42.55,-6.60],["San Andrés del Rabanedo",42.61,-5.61],["Villaquilambre",42.63,-5.55],["Astorga",42.46,-6.06],["La Bañeza",42.30,-5.90],["Bembibre",42.62,-6.42],["Villablino",42.94,-6.32],["Sahagún",42.37,-5.03],["Valencia de Don Juan",42.29,-5.52],["La Robla",42.80,-5.62]],
+"Lleida":[["Lleida",41.62,0.62],["Balaguer",41.79,0.81],["Tàrrega",41.65,1.14],["Mollerussa",41.63,0.89],["La Seu d'Urgell",42.36,1.46],["Cervera",41.67,1.27],["Solsona",41.99,1.52],["Tremp",42.17,0.89],["Vielha",42.70,0.80],["Alcarràs",41.56,0.52]],
+"Lugo":[["Lugo",43.01,-7.56],["Monforte de Lemos",42.52,-7.51],["Viveiro",43.66,-7.59],["Vilalba",43.30,-7.68],["Sarria",42.78,-7.41],["Ribadeo",43.54,-7.04],["Foz",43.57,-7.26],["Burela",43.66,-7.36],["Chantada",42.61,-7.77]],
+"Madrid":[["Madrid",40.42,-3.70],["Móstoles",40.32,-3.86],["Alcalá de Henares",40.48,-3.37],["Fuenlabrada",40.28,-3.79],["Leganés",40.33,-3.76],["Getafe",40.31,-3.73],["Alcorcón",40.35,-3.82],["Torrejón de Ardoz",40.46,-3.48],["Parla",40.24,-3.77],["Alcobendas",40.55,-3.64],["Las Rozas",40.49,-3.87],["San Sebastián de los Reyes",40.55,-3.63],["Pozuelo de Alarcón",40.43,-3.81],["Coslada",40.43,-3.56],["Rivas-Vaciamadrid",40.33,-3.52],["Valdemoro",40.19,-3.68],["Majadahonda",40.47,-3.87],["Collado Villalba",40.63,-4.01],["Aranjuez",40.03,-3.60],["Arganda del Rey",40.30,-3.44],["Boadilla del Monte",40.41,-3.88],["Pinto",40.24,-3.70],["Colmenar Viejo",40.66,-3.77],["Tres Cantos",40.60,-3.71],["San Lorenzo de El Escorial",40.59,-4.15],["Navalcarnero",40.29,-4.01]],
+"Málaga":[["Málaga",36.72,-4.42],["Marbella",36.51,-4.89],["Mijas",36.60,-4.64],["Vélez-Málaga",36.78,-4.10],["Fuengirola",36.54,-4.62],["Torremolinos",36.62,-4.50],["Benalmádena",36.60,-4.52],["Estepona",36.43,-5.15],["Rincón de la Victoria",36.72,-4.28],["Antequera",37.02,-4.56],["Alhaurín de la Torre",36.66,-4.56],["Ronda",36.74,-5.17],["Cártama",36.71,-4.63],["Coín",36.66,-4.76],["Nerja",36.75,-3.88],["Archidona",37.09,-4.39]],
+"Murcia":[["Murcia",37.98,-1.13],["Cartagena",37.60,-0.98],["Lorca",37.68,-1.70],["Molina de Segura",38.05,-1.21],["Alcantarilla",37.97,-1.21],["Mazarrón",37.60,-1.31],["Cieza",38.24,-1.42],["Águilas",37.41,-1.58],["Yecla",38.61,-1.12],["Torre-Pacheco",37.74,-0.95],["San Javier",37.81,-0.84],["Totana",37.77,-1.50],["Caravaca de la Cruz",38.11,-1.86],["Jumilla",38.48,-1.33],["Mula",38.04,-1.49],["Archena",38.12,-1.30]],
+"Navarra":[["Pamplona",42.81,-1.64],["Tudela",42.06,-1.60],["Barañáin",42.81,-1.68],["Burlada",42.83,-1.62],["Estella",42.67,-2.03],["Tafalla",42.53,-1.67],["Villava",42.83,-1.61],["Ansoáin",42.83,-1.64],["Corella",42.11,-1.79],["Alsasua",42.90,-2.17],["Sangüesa",42.58,-1.28],["Peralta",42.34,-1.80]],
+"Ourense":[["Ourense",42.34,-7.86],["Verín",41.94,-7.44],["O Barco de Valdeorras",42.42,-6.98],["O Carballiño",42.43,-8.08],["Xinzo de Limia",42.06,-7.72],["Ribadavia",42.29,-8.14],["Celanova",42.15,-7.96],["Allariz",42.19,-7.80]],
+"Palencia":[["Palencia",42.01,-4.53],["Aguilar de Campoo",42.79,-4.26],["Guardo",42.79,-4.84],["Venta de Baños",41.92,-4.49],["Villamuriel de Cerrato",41.95,-4.52],["Dueñas",41.88,-4.55],["Herrera de Pisuerga",42.60,-4.33],["Saldaña",42.52,-4.74]],
+"Pontevedra":[["Vigo",42.24,-8.72],["Pontevedra",42.43,-8.65],["Vilagarcía de Arousa",42.60,-8.77],["Redondela",42.28,-8.61],["Cangas",42.26,-8.78],["Marín",42.39,-8.70],["Ponteareas",42.18,-8.50],["Lalín",42.66,-8.11],["O Porriño",42.16,-8.62],["Sanxenxo",42.40,-8.81],["Tui",42.05,-8.64],["A Estrada",42.69,-8.49],["Baiona",42.12,-8.85],["Cambados",42.51,-8.81]],
+"Salamanca":[["Salamanca",40.97,-5.66],["Béjar",40.39,-5.76],["Ciudad Rodrigo",40.60,-6.53],["Santa Marta de Tormes",40.95,-5.62],["Villares de la Reina",41.00,-5.64],["Carbajosa de la Sagrada",40.93,-5.65],["Peñaranda de Bracamonte",40.90,-5.20],["Guijuelo",40.56,-5.67],["Alba de Tormes",40.83,-5.51],["Vitigudino",41.01,-6.44]],
+"Santa Cruz de Tenerife":[["Santa Cruz de Tenerife",28.47,-16.25],["San Cristóbal de La Laguna",28.49,-16.32],["Arona",28.10,-16.68],["Adeje",28.12,-16.73],["La Orotava",28.39,-16.52],["Granadilla de Abona",28.12,-16.58],["Los Realejos",28.38,-16.58],["Puerto de la Cruz",28.41,-16.55],["Santa Cruz de La Palma",28.68,-17.76],["Los Llanos de Aridane",28.66,-17.92],["Icod de los Vinos",28.37,-16.71],["Güímar",28.31,-16.41],["San Sebastián de La Gomera",28.09,-17.11],["Valverde",27.81,-17.92]],
+"Segovia":[["Segovia",40.95,-4.12],["Cuéllar",41.40,-4.31],["San Ildefonso",40.90,-4.00],["El Espinar",40.72,-4.25],["Cantalejo",41.26,-3.93],["Palazuelos de Eresma",40.93,-4.06],["Riaza",41.28,-3.48],["Sepúlveda",41.30,-3.75],["Nava de la Asunción",41.15,-4.49]],
+"Sevilla":[["Sevilla",37.39,-5.98],["Dos Hermanas",37.28,-5.92],["Alcalá de Guadaíra",37.34,-5.84],["Utrera",37.18,-5.78],["Mairena del Aljarafe",37.35,-6.06],["Écija",37.54,-5.08],["La Rinconada",37.49,-5.98],["Los Palacios y Villafranca",37.16,-5.92],["Carmona",37.47,-5.64],["Lebrija",36.92,-6.08],["Morón de la Frontera",37.12,-5.45],["Camas",37.40,-6.03],["Coria del Río",37.29,-6.05],["Tomares",37.37,-6.05],["San Juan de Aznalfarache",37.36,-6.03],["Bormujos",37.37,-6.07],["La Algaba",37.46,-6.01],["Lora del Río",37.66,-5.53],["Marchena",37.33,-5.42],["Osuna",37.24,-5.10],["Estepa",37.29,-4.88],["Fuentes de Andalucía",37.46,-5.35],["Arahal",37.26,-5.55],["Mairena del Alcor",37.37,-5.75],["El Viso del Alcor",37.39,-5.72],["Cantillana",37.61,-5.82],["Brenes",37.55,-5.87],["Pilas",37.30,-6.30],["Gerena",37.53,-6.16],["Las Cabezas de San Juan",36.98,-5.94],["Paradas",37.29,-5.50],["La Puebla de Cazalla",37.22,-5.31],["Cazalla de la Sierra",37.93,-5.76],["Constantina",37.87,-5.62],["La Campana",37.57,-5.43],["Cañada Rosal",37.60,-5.22],["La Luisiana",37.53,-5.22]],
+"Soria":[["Soria",41.76,-2.47],["Almazán",41.49,-2.53],["El Burgo de Osma",41.59,-3.07],["Ólvega",41.78,-1.98],["San Leonardo de Yagüe",41.83,-3.07],["Ágreda",41.85,-1.92],["Covaleda",41.93,-2.88],["San Esteban de Gormaz",41.58,-3.20]],
+"Tarragona":[["Tarragona",41.12,1.25],["Reus",41.15,1.11],["Tortosa",40.81,0.52],["El Vendrell",41.22,1.53],["Cambrils",41.07,1.06],["Salou",41.08,1.14],["Valls",41.29,1.25],["Amposta",40.71,0.58],["Calafell",41.20,1.57],["Vila-seca",41.11,1.15],["Deltebre",40.72,0.71],["Móra d'Ebre",41.09,0.64]],
+"Teruel":[["Teruel",40.34,-1.11],["Alcañiz",41.05,-0.13],["Andorra",40.98,-0.45],["Calamocha",40.92,-1.30],["Utrillas",40.81,-0.85],["Monreal del Campo",40.79,-1.35],["Calanda",40.94,-0.23],["Valderrobres",40.87,0.15]],
+"Toledo":[["Toledo",39.86,-4.03],["Talavera de la Reina",39.96,-4.83],["Illescas",40.12,-3.85],["Seseña",40.10,-3.70],["Torrijos",39.98,-4.28],["Quintanar de la Orden",39.59,-3.04],["Sonseca",39.68,-3.96],["Madridejos",39.47,-3.53],["Consuegra",39.46,-3.61],["Mora",39.68,-3.77],["Ocaña",39.96,-3.50],["Villacañas",39.63,-3.34],["Yepes",39.90,-3.62]],
+"Valencia":[["Valencia",39.47,-0.38],["Torrent",39.44,-0.47],["Gandia",38.97,-0.18],["Paterna",39.50,-0.44],["Sagunto",39.68,-0.27],["Alzira",39.15,-0.43],["Mislata",39.48,-0.42],["Burjassot",39.51,-0.41],["Ontinyent",38.82,-0.61],["Xàtiva",38.99,-0.52],["Sueca",39.20,-0.31],["Cullera",39.17,-0.25],["Requena",39.49,-1.10],["Manises",39.49,-0.46],["Llíria",39.62,-0.60],["Algemesí",39.19,-0.44],["Oliva",38.92,-0.12],["Utiel",39.57,-1.20]],
+"Valladolid":[["Valladolid",41.65,-4.72],["Medina del Campo",41.31,-4.91],["Laguna de Duero",41.58,-4.72],["Arroyo de la Encomienda",41.62,-4.79],["Tordesillas",41.50,-5.00],["Íscar",41.36,-4.53],["Tudela de Duero",41.58,-4.58],["Medina de Rioseco",41.88,-5.04],["Peñafiel",41.60,-4.12],["Cigales",41.76,-4.70]],
+"Zamora":[["Zamora",41.50,-5.75],["Benavente",42.00,-5.68],["Toro",41.52,-5.39],["Morales del Vino",41.45,-5.73],["Puebla de Sanabria",42.05,-6.63],["Fuentesaúco",41.23,-5.50],["Villalpando",41.87,-5.41],["Bermillo de Sayago",41.36,-6.11]],
+"Zaragoza":[["Zaragoza",41.65,-0.89],["Calatayud",41.35,-1.64],["Utebo",41.71,-0.99],["Ejea de los Caballeros",42.13,-1.14],["Tarazona",41.90,-1.72],["Caspe",41.24,-0.04],["La Almunia de Doña Godina",41.48,-1.38],["Zuera",41.87,-0.79],["Cuarte de Huerva",41.59,-0.93],["Alagón",41.77,-1.12],["Borja",41.83,-1.53],["Tauste",41.92,-1.25]],
+"Ceuta":[["Ceuta",35.89,-5.32]],
+"Melilla":[["Melilla",35.29,-2.94]]
+};
+const CCAA={"Almería":"and","Cádiz":"and","Córdoba":"and","Granada":"and","Huelva":"and","Jaén":"and","Málaga":"and","Sevilla":"and","Huesca":"ara","Teruel":"ara","Zaragoza":"ara","Asturias":"ast","Baleares":"bal","Las Palmas":"can","Santa Cruz de Tenerife":"can","Cantabria":"cnt","Ávila":"cyl","Burgos":"cyl","León":"cyl","Palencia":"cyl","Salamanca":"cyl","Segovia":"cyl","Soria":"cyl","Valladolid":"cyl","Zamora":"cyl","Albacete":"clm","Ciudad Real":"clm","Cuenca":"clm","Guadalajara":"clm","Toledo":"clm","Barcelona":"cat","Girona":"cat","Lleida":"cat","Tarragona":"cat","Alicante":"val","Castellón":"val","Valencia":"val","Badajoz":"ext","Cáceres":"ext","A Coruña":"gal","Lugo":"gal","Ourense":"gal","Pontevedra":"gal","Madrid":"mad","Murcia":"mur","Navarra":"nav","Álava":"pvs","Bizkaia":"pvs","Gipuzkoa":"pvs","La Rioja":"rio","Ceuta":"ceu","Melilla":"ceu"};
+const CCAA_ADJ={and:"Andaluza",ara:"Aragonesa",ast:"Asturiana",bal:"Balear",can:"Canaria",cnt:"Cántabra",cyl:"Castellanoleonesa",clm:"Castellanomanchega",cat:"Catalana",val:"Valenciana",ext:"Extremeña",gal:"Gallega",mad:"Madrileña",mur:"Murciana",nav:"Navarra",pvs:"Vasca",rio:"Riojana",ceu:"Norteafricana"};
+const geoAll=()=>{const o=[];Object.keys(GEO_ES).forEach(pr=>GEO_ES[pr].forEach(([n,la,lo])=>o.push({n,lat:la,lon:lo,pr})));return o};
+const townShort=n=>String(n).replace(/ de (la |los |las )?(Frontera|Andalucía|Aljarafe|Guadaíra|Henares|Duero|Ebro|Mar|Llobregat|Gramenet|Ardoz|Alarcón|los Reyes|la Reina|Tormes|Campoo|Lemos|Arousa|Barrameda|Compostela|Gran Canaria|Tenerife|Tirajana|Abona|Aridane|Aranjuez|Segura)$/,"").replace(/^(L'|El |La )(?=[A-ZÁÉÍÓÚ].{6,})/,"");
+function applyHome(){const h=S&&S.home;if(!h||!h.n||h.n===HOME0&&!h.lat)return;HOME=h.n;GEO[HOME]=[h.lat,h.lon];
+  const all=geoAll().filter(t=>t.n!==HOME).map(t=>Object.assign(t,{d:kmS({lat:h.lat,lon:h.lon},t)})).sort((a,b)=>a.d-b.d);
+  all.slice(0,140).forEach(t=>{if(!GEO[t.n])GEO[t.n]=[t.lat,t.lon]});
+  const sh=townShort(HOME),pr=h.prov||"Sevilla",cc=CCAA[pr]||"and",adj=CCAA_ADJ[cc]||"Regional";
+  TIERS[0].n=`Liga Local de ${sh}`;TIERS[1].n=`Tercera ${adj} (${pr})`;TIERS[2].n=`Segunda ${adj} (${pr})`;TIERS[3].n=`Primera ${adj} (${pr})`;TIERS[4].n=`División de Honor ${adj}`;
+  FIELDS.forEach(f=>{f.n=f.n.replace("de Fuentes","de "+sh)});
+  if(h.n===HOME0||kmS({lat:h.lat,lon:h.lon},{lat:GEO[HOME0][0],lon:GEO[HOME0][1]})<45)return;
+  {const sw={"Peña Bética El Tractor":"Peña El Tractor","Cerveza Cruzcampo":"Cerveza La Comarca","Peña Flamenca La Soleá":"Peña Cultural El Casino","Cooperativa Olivarera San José":"Cooperativa Agrícola San José","Autoescuela La Sevillana":"Autoescuela La Rápida","Hermandad del Rocío FC":"Cofradía del Santo FC"};
+   [LOCAL_TEAMS,COMARCA_TEAMS].forEach(A=>A.forEach((x,i)=>{if(sw[x])A[i]=sw[x]}))}
+  // ligas regionales con pueblos de alrededor
+  const far=all.filter(t=>!LOCAL_TEAMS.includes(t.n));const pre=[["Atlético","CD","Racing"],["UD","Club Deportivo","Sporting"],["CD","Atlético","Unión Deportiva"],["Real","CF","Deportivo"]];let off=22;
+  for(let t=3;t<=6;t++){const need=TIERS[t].teams+2;const L=[];for(let i=0;i<need;i++){const tw=far[(off+i)%far.length];if(!tw)break;L.push([`${pre[t-3][i%3]} ${townShort(tw.n)}`,tw.n])}TIER_REAL[t]=L;off+=need}
+  TOP_TEAMS.length=0}
+function homeSet(n,lat,lon,prov){S.home={n,lat,lon,prov};applyHome()}
 const VENUES=[{n:"Descampado de los Papas",d:.8,ours:1},{n:"Campo de la Feria",d:1.6},{n:"Pista del Polígono",d:2.6},{n:"Explanada de la Cooperativa",d:3.4}];
 const GEO={"Fuentes de Andalucía":[37.46,-5.35],"Marchena":[37.33,-5.42],"La Luisiana":[37.53,-5.22],"Cañada Rosal":[37.60,-5.22],"Écija":[37.54,-5.08],"La Campana":[37.57,-5.43],"Carmona":[37.47,-5.64],"Mairena del Alcor":[37.37,-5.75],"El Viso del Alcor":[37.39,-5.72],"Palma del Río":[37.70,-5.28],"Osuna":[37.24,-5.10],"Utrera":[37.18,-5.78],"Lebrija":[36.92,-6.08],"Morón":[37.12,-5.45],"Estepa":[37.29,-4.88],"Dos Hermanas":[37.28,-5.92],"Alcalá de Guadaíra":[37.34,-5.84],"Lora del Río":[37.66,-5.53],"Coria del Río":[37.29,-6.05],"Paradas":[37.29,-5.50],"El Arahal":[37.26,-5.55],"Lantejuela":[37.35,-5.22],"La Puebla de Cazalla":[37.22,-5.31],"Sevilla":[37.39,-5.98],"La Rinconada":[37.49,-5.98],"Los Palacios":[37.16,-5.92],"Tomares":[37.37,-6.05],"Córdoba":[37.88,-4.78],"Puente Genil":[37.39,-4.77],"Montilla":[37.59,-4.64],"Lucena":[37.41,-4.48],"Antequera":[37.02,-4.56],"Huelva":[37.26,-6.95],"Jerez de la Frontera":[36.69,-6.13],"San Fernando":[36.46,-6.20],"Cádiz":[36.53,-6.29]};
 const HAMLETS=["Venta El Cruce","Apeadero de Vado Hondo","Cortijo Los Jarales","Barriada San Isidro","El Rincón (pedanía)","Gasolinera La Parrilla","Poblado Los Motillos"];
@@ -866,7 +945,7 @@ function applySkin(){let k="pc";try{k=localStorage.getItem("papascochero_skin")|
 const KEY="papascochero_v5";
 let S=null,M=null,C=null,pendingFire=null,pendingReset=false,CINE=null;
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function load(){try{const t=localStorage.getItem(KEY);if(t){const s=JSON.parse(t);if(s&&s.v===5)S=s}}catch(e){S=null}}
+function load(){try{const t=localStorage.getItem(KEY);if(t){const s=JSON.parse(t);if(s&&s.v===5)S=s}}catch(e){S=null}try{applyHome()}catch(e){}}
 const FIELDS=[
  {n:"Descampado de los Papas",d:"Detrás del polígono. Coches quemados, un sofá y Paco.",base:0,inc:[],c:0,req:0},
  {n:"Campo de tierra municipal",d:"Alquilado al Ayuntamiento los domingos por la mañana. Líneas, porterías con red y nadie viviendo en el córner.",base:12,inc:["coches","basura","campamento","cal","porterias","balones"],c:1200,req:1},
@@ -1780,7 +1859,7 @@ function drawScene(cv,K,t){
 
 /* ================= creador ================= */
 function newCreator(){
-  C={name:pick(FIRSTC)+" "+pick(["Cortés","Ruiz","Palomo","Gavira","Rueda","Montero"]),nick:"Míster",age:47,photo:null,
+  C={name:pick(FIRSTC)+" "+pick(["Cortés","Ruiz","Palomo","Gavira","Rueda","Montero"]),nick:"Míster",age:47,photo:null,club:window.PC_PLAY?"":"Los Papas Cochero",prov:"Sevilla",town:HOME0,custom:"",
     look:{skin:SKINS[1],hair:1,hc:HCOL[1],shirt:SHIRTS[0],stache:true,glasses:false,belly:true,ojeras:true},
     story:{civil:"div2",per:true,madre:true,carnet:false,eso:true,alevin:false,bar:true}};
 }
@@ -1804,7 +1883,7 @@ function familyBox(){const D=famLine();
    </div><p class="hint">Un míster vive entre 70 y 115 años; la mayoría se muere entre los 80 y los 90. Cuando muere, su hijo hereda el equipo, el dinero y las deudas.</p></div></section>`}
 function bio(c){
   const s=c.story,p=[];
-  p.push(`${c.name}, ${c.age} años, de Fuentes de Andalucía de toda la vida.`);
+  p.push(`${c.name}, ${c.age} años, de ${c.town||HOME} de toda la vida.`);
   if(s.civil==="div")p.push("Divorciado. Ve a sus hijos fines de semana alternos, cuando ella se acuerda de avisar.");
   if(s.civil==="div2")p.push("Divorciado dos veces. La segunda se quedó con la casa, el perro y la Thermomix.");
   if(s.civil==="comp")p.push("Estado civil: es complicado. Ella dice que se acabó; él dice que se están dando un tiempo desde 2019.");
@@ -1817,7 +1896,7 @@ function bio(c){
   if(s.eso)p.push("Repitió cuarto de la ESO tres veces. Sigue pensando que el fuera de juego es opcional.");
   if(s.alevin)p.push("Entrenó al alevín del pueblo hasta lo de la barbacoa. De lo de la barbacoa no se habla.");
   if(s.bar)p.push("Debe dinero en el bar Los Cuatro Caminos.");
-  p.push("No tiene jugadores ni campo decente. Tiene un nombre: Los Papas Cochero.");
+  p.push(`No tiene jugadores ni campo decente. Tiene un nombre: ${c.club||"aún ninguno"}.`);
   return p.join(" ");
 }
 function viewCreator(){
@@ -1840,22 +1919,30 @@ function viewCreator(){
   <div class="opt"><span>Historial</span><div class="chips">${tg("c-story","per","Cobra el PER",s)}${tg("c-story","madre","Vive con su madre",s)}${tg("c-story","carnet","Sin carnet",s)}${tg("c-story","eso","Repitió 4º tres veces",s)}${tg("c-story","alevin","Lo de la barbacoa",s)}${tg("c-story","bar","Debe dinero en el bar",s)}</div></div>
   <div class="opt"><span>Tu historia</span><div class="bio" id="c-bio">${esc(bio(C))}</div></div>
   <div class="opt" data-notr><span>🌐</span><div class="chips">${Object.keys(window.PCLANGS||{es:1}).map(k=>`<button class="btn mini ${window.PCLANG===k?"sel":""}" data-act="setlang" data-v="${k}">${window.PCLANGS[k]}</button>`).join("")}</div></div>
-  <button class="btn play" data-act="c-sign">Fundar Los Papas Cochero</button>
+  <div class="sec"><h4>TU CLUB</h4>
+   <div class="fld"><label for="c-club">Nombre del club</label><input id="c-club" value="${esc(C.club||"")}" maxlength="28" placeholder="Ej.: CD ${esc(townShort(C.town))}"></div>
+   <div class="grid2"><div class="fld"><label for="c-prov">Provincia</label><select id="c-prov" class="inp">${Object.keys(GEO_ES).sort((a,b)=>a.localeCompare(b,"es")).map(p=>`<option ${p===C.prov?"selected":""}>${esc(p)}</option>`).join("")}</select></div>
+   <div class="fld"><label for="c-town">Pueblo o ciudad</label><select id="c-town" class="inp">${(GEO_ES[C.prov]||[]).map(([n])=>n).sort((a,b)=>a.localeCompare(b,"es")).map(n=>`<option ${n===C.town&&!C.custom?"selected":""}>${esc(n)}</option>`).join("")}</select></div></div>
+   <div class="fld"><label for="c-custom">¿Tu pueblo no sale? Escríbelo (se coloca en la provincia)</label><input id="c-custom" value="${esc(C.custom||"")}" maxlength="34" placeholder="Opcional"></div>
+   <p class="hint">Las ligas de abajo se hacen con pueblos y ciudades de alrededor.</p></div>
+  <button class="btn play" data-act="c-sign">Fundar ${esc(C.club||"el club")}</button>
   </div></section>`;
 }
 function startGame(){
   S={v:5,mafiaFix:1,field:0,season:1,yearBase:2026,tierTeams:{},tmarket:[],house:0,scouts:["primo"],reports:[],reach:0,coach:{...C,moral:55,w:0,d:0,l:0,gf:0,ga:0},money:300,week:1,phase:"pre",comp:null,players:[],lineup:Array(11).fill(null),formation:"4-4-2",
     sessions:[null,null,null],sessLog:[],upg:[],sponsors:[],sponsorPay:{},perks:{comida:0},freeWork:0,news:[],tab:"pueblo",nextId:1,trophies:[],prep:null,memorial:[],openPlace:"paro",tierNext:0,eds:0};
+  {const L=GEO_ES[C.prov]||[];let t=L.find(x=>x[0]===C.town)||L[0]||[HOME0,37.46,-5.35];let n=t[0],la=t[1],lo=t[2];if(C.custom){n=C.custom;const k=hashStr(n);la=t[1]+((k%100)/100-.5)*.3;lo=t[2]+(((k>>8)%100)/100-.5)*.3}
+   S.club={name:C.club};homeSet(n,la,lo,C.prov)}
   S.sites=genSites();
-  addNews("Fundas Los Papas Cochero en la barra del bar. Testigos: dos clientes y el camarero.");
+  addNews(`Fundas ${clubName()} en la barra del bar. Testigos: dos clientes y el camarero.`);
   addNews("Campo: un descampado detrás del polígono. Coches quemados, un sofá y Paco, que vive en el córner.");
   save();render();
-  modal("Los Papas Cochero, fundado",`<p>No tienes jugadores. Tienes un pueblo.</p>
+  modal(`${clubName()}, fundado`,`<p>No tienes jugadores. Tienes un pueblo: ${esc(HOME)}.</p>
    <div class="sec"><h4>PRETEMPORADA</h4><ul>
    <li><b>Pueblo:</b> recorre los sitios y recluta a quien haya. Necesitas 11 como mínimo.</li>
    <li><b>Club:</b> cada semana tienes tres entrenamientos. El campo, tal y como esté, decide cuánto mejoran.</li>
    <li><b>Once:</b> elige formación y coloca a cada uno. Algunos no saben ni de qué juegan.</li>
-   <li>Cuando tengas equipo, empieza la temporada en la Liga Local de Fuentes: 8 equipos, 14 jornadas, una por semana.</li></ul></div>
+   <li>Cuando tengas equipo, empieza la temporada en la ${esc(TIERS[0].n)}: 8 equipos, 14 jornadas, una por semana.</li></ul></div>
    <button class="btn play" data-act="close">Al pueblo</button>`);
 }
 
@@ -2596,7 +2683,7 @@ function cupSection(){
    ${c.done?`<div class="ko cupko"><div class="h">FINAL</div>${c.rounds[c.r].map(tie).join("")}</div>`:""}
   </div></section>`;
 }
-const clubName=()=>S&&S.club&&S.club.name||"Los Papas Cochero";
+const clubName=()=>S&&S.club&&S.club.name||(window.PC_PLAY?"CD "+townShort(HOME):"Los Papas Cochero");
 const clubShort=()=>{const n=clubName();return n==="Los Papas Cochero"?"los Papas":n};
 const KIT_DEF={c1:"#e7b923",c2:"#5a3415",pat:0,sh:"#5a3415"};
 const ourKit=()=>S&&S.club&&S.club.kit||KIT_DEF;
@@ -3606,7 +3693,7 @@ function bookMarkets(pu){const m=bookModel(pu),P=m.P,PH=m.PH;const mk=[];const a
   add("Al descanso","hW","Papas ganan al descanso",PH((i,j)=>i>j));add("Al descanso","hD","Empate al descanso",PH((i,j)=>i===j));add("Al descanso","hL","Rival gana al descanso",PH((i,j)=>i<j));
   add("Porterías a cero","csY",`${PP} no encaja${S.natSwap?"":"n"}`,P((i,j)=>j===0));add("Porterías a cero","csR","El rival no encaja",P((i,j)=>i===0));
   add("Locuras","red","Hay una roja",.22);add("Locuras","goleada","Alguien gana por 4+",P((i,j)=>Math.abs(i-j)>=4));add("Locuras","zero","0-0 a lo bestia",P((i,j)=>i===0&&j===0));
-  for(let i=0;i<=4;i++)for(let j=0;j<=4;j++)add(`Resultado exacto (${S.natSwap?"España":"Papas"}-rival)`,`x${i}_${j}`,`${i}-${j}`,P((a,b)=>a===i&&b===j));
+  for(let i=0;i<=4;i++)for(let j=0;j<=4;j++)add(`Resultado exacto (${S.natSwap?"España":clubShort()}-rival)`,`x${i}_${j}`,`${i}-${j}`,P((a,b)=>a===i&&b===j));
   return mk}
 function mkWon(id,R){const us=R.us,th=R.them,t=us+th;
   if(id==="W")return us>th;if(id==="D")return us===th;if(id==="L")return us<th;if(id==="1X")return us>=th;if(id==="X2")return us<=th;if(id==="12")return us!==th;
@@ -3626,7 +3713,7 @@ function bookieHTML(P,opp,pu,scorerOpts,scSel){const mk=bookMarkets(pu);P.mk=mk;
   const bsk=Math.max(1,nice(ek(null,.6)));const stake=[10,50,100,250,500,1000].map(x=>x*bsk);
   return `<section class="win bookie"><div class="bar">APUESTAS PACO 3000 <small>${esc(clubName())} vs ${esc(opp.n)}</small></div><div class="body">
    <div class="bkhead"><div><small>SALDO</small><b>${eur(S.money)}</b></div><div><small>APOSTADO HOY</small><b>${eur(P.bets.reduce((a,b)=>a+b.amt,0))}</b></div><div><small>BALANCE TOTAL</small><b class="${(S.betNet||0)>=0?"pos":"negv"}">${eur(S.betNet||0)}</b></div></div>
-   <p class="bkh">PROBABILIDADES</p>${bar("Papas",pW/tot,"g1")}${bar("Empate",pD/tot,"g2")}${bar("Rival",pL/tot,"g3")}
+   <p class="bkh">PROBABILIDADES</p>${bar(clubShort(),pW/tot,"g1")}${bar("Empate",pD/tot,"g2")}${bar("Rival",pL/tot,"g3")}
    <p class="bkh">ESTADÍSTICAS</p><div class="bkst"><div><small>Tus últimos 5</small>${last.map(x=>fchip(x.r)).join("")||"–"}</div><div><small>Cara a cara</small>${h2h.map(x=>`<span class="h2h ${x.r}">${x.us}-${x.them}</span>`).join("")||"Primera vez"}</div>
     <div><small>Tus goles por partido (favor / contra)</small><b>${gf} / ${ga}</b></div><div><small>${esc(opp.n)} por partido</small><b>${oT}</b></div><div><small>Goles esperados hoy</small><b>${BM.lu.toFixed(1)} - ${BM.lt.toFixed(1)}</b></div><div><small>Fuerza</small><b>${Math.round(pu*100)} % - ${100-Math.round(pu*100)} %</b></div></div>
    <p class="bkh">IMPORTE POR APUESTA</p><div class="amts bkamts">${stake.map(a=>`<button class="btn ${P.amt===a?"sel":""}" data-act="amt" data-v="${a}">${a} €</button>`).join("")}<button class="btn ${P.amt===Math.max(0,S.money)?"sel":""}" data-act="amt" data-v="${Math.max(0,S.money)}">TODO</button></div>
@@ -4813,9 +4900,19 @@ const MUS={ctx:null,on:false,t:0,step:0,timer:0,g:null,dly:null,
 document.addEventListener("click",()=>{try{MUS.sync()}catch(e){}},true);
 setInterval(()=>{try{MUS.sync()}catch(e){}},1500);
 function bgSync(){document.body.classList.toggle("bganim",!(S&&S.bganim===false))}
+/* ================= menú principal ================= */
+let MENU=true;
+function viewMenu(){const has=!!S;const tn=has&&S.comp?(S.comp.name||TIERS[S.comp.tier||0].n):has?TIERS[S.tierNext||0].n:"";
+  return `<div class="mmenu"><div class="ball"></div><h1>${esc(GAME_T)}</h1><p class="tagl">Fútbol cutre de pueblo</p>
+   ${has?`<button class="btn play cont" data-act="menu-cont">▶ Continuar partida<small>${esc(clubName())} · Temporada ${S.season} · ${esc(tn)}</small></button>`:""}
+   <button class="btn ${has?"":"play"}" data-act="menu-new">Nueva partida</button>
+   <button class="btn" data-act="menu-load">Cargar partida (código)</button>
+   <div class="chips" data-notr style="justify-content:center">${Object.keys(window.PCLANGS||{es:1}).map(k=>`<button class="btn mini ${window.PCLANG===k?"sel":""}" data-act="setlang" data-v="${k}">${window.PCLANGS[k]}</button>`).join("")}</div>
+   <p class="hint">v${esc(window.PC_VERSION||"")}</p></div>`}
 /* ================= render ================= */
 function render(){
   const v=$("#view");
+  if(MENU&&!M){$("#top").hidden=true;$("#tabs").hidden=true;v.innerHTML=viewMenu();return}
   if(!S){$("#top").hidden=true;$("#tabs").hidden=true;v.innerHTML=viewCreator();paintFaces(v);return}
   $("#top").hidden=false;$("#tabs").hidden=false;cupCheck();{const ct=$("#club-title");if(ct&&ct.textContent!==clubName())ct.textContent=clubName();const hc=$("#crest");if(hc&&!hc.dataset.v||hc&&hc.dataset.v!==JSON.stringify(S.club||0)){hc.dataset.v=JSON.stringify(S.club||0);hc.width=48;hc.height=48;hc.style.imageRendering=S.club&&S.club.crest?"auto":"pixelated";drawTeamCrest(hc,{us:1,n:clubName(),col:ourKit().c1})}}
   if(S.tab==="prep"&&!S.prep)S.tab="club";olResumeLobby();
@@ -6010,7 +6107,7 @@ const A={
   olon:()=>{const on=!olEnabled();olSetCfg({on});if(on){olAskPerm();olStart();toast("Modos online activados: tienes la pestaña «Online» abajo.")}else{olStart();toast("Modos online desactivados.")}render()},
   oldb:()=>{const v=($("#ol-db")&&$("#ol-db").value||"").trim();if(!/^https:\/\//.test(v)){toast("Pon la dirección completa, empezando por https://");return}olSetCfg({db:v});olStart();render()},
   oladdf:()=>{olAddFriend($("#ol-fc")&&$("#ol-fc").value)},
-  olsharecode:()=>{const t=`Añádeme en la liga online de Los Papas Cochero. Mi código: ${olMe()}`;try{if(navigator.share){navigator.share({text:t});return}}catch(e){}try{navigator.clipboard.writeText(t);toast("Copiado. Pégalo en WhatsApp.")}catch(e){toast(t)}},
+  olsharecode:()=>{const t=`Añádeme en la liga online de ${GAME_T}. Mi código: ${olMe()}`;try{if(navigator.share){navigator.share({text:t});return}}catch(e){}try{navigator.clipboard.writeText(t);toast("Copiado. Pégalo en WhatsApp.")}catch(e){toast(t)}},
   olcreate:()=>olCreate(),olfr:v=>olFriendly(v),olteam:v=>olViewTeam(v),olcard:v=>olCard(v),olback:()=>{if(OL.lastTeam)olShowTeam(OL.lastTeam)},
   olyes:v=>olAnswer(v,true),olno:v=>olAnswer(v,false),
   olsel:v=>{OL.sel=v;render()},
@@ -6027,7 +6124,7 @@ const A={
   vreload:()=>{try{window.speechSynthesis&&speechSynthesis.getVoices()}catch(e){}setTimeout(render,400)},
   savecopy:async()=>{const t=saveCode();try{await navigator.clipboard.writeText(t);toast("Código copiado. Pégalo en la otra versión.")}catch(e){const a=$("#save-out");a.focus();a.select();try{document.execCommand("copy");toast("Código copiado.")}catch(e2){toast("Mantén pulsado el texto y copia.")}}},
   savefile:()=>{const t=saveCode();const b=new Blob([t],{type:"text/plain"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`papas-cochero-T${S.season}.txt`;document.body.appendChild(a);a.click();a.remove();toast("Si no se descarga, usa «Copiar código».")},
-  saveshare:async()=>{const t=saveCode();try{if(navigator.share){await navigator.share({title:"Partida de Los Papas Cochero",text:t});return}}catch(e){}try{await navigator.clipboard.writeText(t);toast("No se puede compartir aquí: código copiado.")}catch(e){toast("Usa «Copiar código».")}},
+  saveshare:async()=>{const t=saveCode();try{if(navigator.share){await navigator.share({title:"Partida de "+GAME_T,text:t});return}}catch(e){}try{await navigator.clipboard.writeText(t);toast("No se puede compartir aquí: código copiado.")}catch(e){toast("Usa «Copiar código».")}},
   saveload:()=>loadCode($("#save-txt").value),
   savepick:()=>$("#save-in").click(),
   fbsend:()=>{const t=($("#fb-title").value||"").trim(),b=($("#fb-body").value||"").trim();if(!t&&!b){toast("Escribe algo.");return}if(t==="dinero"&&b==="dinero"){ledSync();S.money+=10000;led("Subvención misteriosa",10000);$("#fb-title").value="";$("#fb-body").value="";save();render();toast("Recibido.");return}const body=`${b}\n\n---\nVersión ${window.PC_VERSION} · temporada ${S.season} · ${S.comp?S.comp.name:"pretemporada"}`;openExternal(`https://github.com/Cimentacion/papas-cochero/issues/new?labels=peticion&title=${encodeURIComponent(t||b.slice(0,60))}&body=${encodeURIComponent(body)}`);toast("Se abre GitHub: dale a Submit.")},
@@ -6037,7 +6134,7 @@ const A={
   "c-look":v=>{C.look[v]=!C.look[v];render()},"c-hair":v=>{C.look.hair=+v;render()},
   "c-civil":v=>{C.story.civil=v;render()},"c-story":v=>{C.story[v]=!C.story[v];render()},
   "c-nophoto":()=>{C.photo=null;render()},
-  "c-sign":()=>{if(!C.name.trim()){toast("Pon un nombre. Aunque sea un mote.");return}startGame();try{scoutWeek();save();render()}catch(e){}},
+  "c-sign":()=>{if(!C.name.trim()){toast("Pon un nombre. Aunque sea un mote.");return}if(!(C.club||"").trim()){toast("Ponle nombre al club.");const i=$("#c-club");if(i)i.focus();return}startGame();try{scoutWeek();save();render()}catch(e){}},
   nophoto:()=>{S.coach.photo=null;save();render()},
   place:v=>{S.openPlace=S.openPlace===v?null:v;const y=window.scrollY;save();render();window.scrollTo(0,y);if(S.openPlace){const e=document.getElementById("pl-"+v);if(e){const r=e.getBoundingClientRect();if(r.top<130||r.top>window.innerHeight*.6)window.scrollTo(0,window.scrollY+r.top-130)}}},
   drill:v=>runDrill(v),
@@ -6154,6 +6251,10 @@ const A={
   buy:v=>{const u=UPG.find(x=>x.id===v);if(has(v))return;if(u.req&&!has(u.req))return;if(u.t&&u.t>(S.reach||0))return;
     if(S.freeWork&&u.c<=5000)S.freeWork--;else{if(S.money<u.c){toast(`Te faltan ${u.c-S.money} €.`);return}S.money-=u.c}
     S.upg.push(v);addNews(`Obras en el descampado: ${u.n.toLowerCase()}.`);save();render();toast("Hecho. "+u.d)},
+  "menu-cont":()=>{MENU=false;render();window.scrollTo(0,0)},
+  "menu-new":()=>{if(!S){MENU=false;newCreator();render();return}modal("Nueva partida",`<p>Se borra la partida de <b>${esc(clubName())}</b>. Si la quieres guardar, primero copia su código en Míster › Configuración.</p><div class="pc-act"><button class="btn primary" data-act="menu-new2">Empezar de cero</button><button class="btn" data-act="close">Cancelar</button></div>`)},
+  "menu-new2":()=>{try{localStorage.setItem(KEY+"_bak",JSON.stringify(S));localStorage.removeItem(KEY)}catch(e){}S=null;MENU=false;HOME=HOME0;closeModal();newCreator();render()},
+  "menu-load":()=>{modal("Cargar partida",`<textarea id="save-txt" class="inp" rows="4" style="width:100%;font-size:11px" placeholder="Pega aquí el código (empieza por PAPAS1:)"></textarea><div class="pc-act"><button class="btn primary" data-act="saveload">Cargar código pegado</button><button class="btn" data-act="savepick">Cargar desde archivo</button><button class="btn" data-act="close">Cancelar</button></div>`)},
   reset:()=>{if(!pendingReset){pendingReset=true;render();return}try{localStorage.removeItem(KEY)}catch(e){}S=null;pendingReset=false;newCreator();render()},
   close:()=>closeModal(),
   refbuy:v=>{const i=+v,L=REFS[i];if(!L||(S.ref||0)!==i||(S.reach||0)<L.t)return;if(S.money<L.c){toast("No te llega.");return}ledSync();S.money-=L.c;led(`Contacto: ${L.n}`,-L.c);S.ref=i+1;save();render();toast(`Nuevo contacto: ${L.n}.`)},
@@ -6215,6 +6316,8 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
   NAV=null;f(el.dataset.v,el)});
 document.addEventListener("change",e=>{
   const t=e.target;
+  if(!S&&C&&t.id==="c-prov"){C.prov=t.value;const L=(GEO_ES[C.prov]||[]);C.town=(L[0]||[HOME0])[0];render();return}
+  if(!S&&C&&t.id==="c-town"){C.town=t.value;C.custom="";const b=$("#c-bio");if(b)b.textContent=bio(C);const ci=$("#c-custom");if(ci)ci.value="";return}
   if(t.id==="sc-pick"){if(S.prep)S.prep.scPick=t.value;S.lastScPick=t.value;save();return}
   if(t.id==="m-form"){if(M&&!M.ended)setFormation(t.value,true);return}
   if(t.matches&&t.matches("select[data-slot]")&&S){const i=+t.dataset.slot;const id=t.value?+t.value:null;const j=id?S.lineup.indexOf(id):-1;if(j>=0&&j!==i)S.lineup[j]=S.lineup[i];S.lineup[i]=id;save();render();return}
@@ -6230,7 +6333,9 @@ document.addEventListener("change",e=>{
 });
 document.addEventListener("input",e=>{
   if(S||!C)return;const id=e.target.id;
-  if(id==="c-name")C.name=e.target.value;else if(id==="c-nick")C.nick=e.target.value||"Míster";else if(id==="c-age")C.age=clamp(+e.target.value||47,30,75);else return;
+  if(id==="c-name")C.name=e.target.value;else if(id==="c-nick")C.nick=e.target.value||"Míster";else if(id==="c-age")C.age=clamp(+e.target.value||47,30,75);
+  else if(id==="c-club"){C.club=e.target.value.trim().slice(0,28);const b=document.querySelector('[data-act="c-sign"]');if(b)b.textContent="Fundar "+(C.club||"el club")}
+  else if(id==="c-custom"){C.custom=e.target.value.trim().slice(0,34)}else return;
   const b=$("#c-bio");if(b)b.textContent=bio(C);
 });
 

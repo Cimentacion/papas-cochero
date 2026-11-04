@@ -10,7 +10,7 @@ const w=dom.window,d=w.document;
 const click=sel=>{const el=typeof sel==="string"?d.querySelector(sel):sel;if(!el)throw new Error("no "+sel);el.click()};
 const act=(a,v)=>{const el=d.querySelector(`[data-act="${a}"]${v!=null?`[data-v="${v}"]`:""}`);if(!el)throw new Error("no act "+a+" "+v);el.click()};
 try{
- act("c-sign");act("close");
+ act("menu-new");act("c-sign");act("close");
  const S=()=>JSON.parse(w.localStorage.getItem("papascochero_v5"));
  w.eval("void 0");
  // hire until 13
