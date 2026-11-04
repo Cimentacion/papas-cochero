@@ -1,0 +1,6 @@
+android-play/.gradle/
+android-play/build/
+android-play/app/build/
+android-play/app/src/main/assets/
+*.jks
+*.keystore

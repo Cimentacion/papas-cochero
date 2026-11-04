@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.application'
+}
+
+// versionCode = minutos desde 2026-01-01, así cada compilación sube sola
+def vcode = (int) ((System.currentTimeMillis() / 60000L) - 29454720L)
+def vname = (project.findProperty('pcVersion') ?: '1.0').toString()
+
+android {
+    namespace 'com.cimentacion.papascochero'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.cimentacion.papascochero'
+        minSdk 24
+        targetSdk 36
+        versionCode vcode
+        versionName vname
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="19.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="19.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -5533,7 +5533,7 @@ function tick(){
   M.tm=M.tm||{};M.tm[M.tactic]=(M.tm[M.tactic]||0)+1;
   if(!inAdd){coachAuto(m);prayTick(m);if(castStyle()==="paleto"&&Math.random()<.06)paletoSay(true);if(m>5&&Math.random()<(castStyle()==="paleto"?.03:.015))coachBanter()}
   if(m>2&&foulTick(m)){updScore();return}
-  if(m>3&&Math.random()<.04*(.4+.6*relNow())*(M.ours&&sst("seguridad")?.6:1)&&weird())return;
+  if(m>3&&Math.random()<.04*(.4+.6*relNow())*(M.ours&&sst("seguridad")?.6:1)&&weird()){clockEnd(m);return}
   if(M.online){if((M.online.role==="h"||M.online.solo)&&!M.pause)olHostChance()}
   else if(!M.pause&&Math.random()<.2+.25*(1-onList().length/11)+.1*(1-(M.oppN||11)/11))chance();
   updScore();
@@ -5554,15 +5554,15 @@ function shootout(){
   return{us,them}}
 function clockEnd(m){
   if(M.ended)return true;
-  if(m===45&&!M.ht&&M.addLeft===0){
+  if(m>=45&&!M.ht&&M.addLeft===0){
     if(!M.a1){M.a1=olA(1)||(rnd(1,3)+Math.min(3,Math.ceil(M.lost/2)));M.lost=0;M.addLeft=M.a1;addLog(45,`El árbitro levanta ${M.a1} dedo${M.a1>1?"s":""}: ${M.a1} minuto${M.a1>1?"s":""} de descuento.`,"ev");updScore();return false}
     M.ht=true;M.addN=0;if(has("nevera"))M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+4,0,100)});addLog(45,"Descanso. Bocadillos de mortadela del maletero."+(onList().some(x=>x.p.trait==="fumador")?" Alguien se enciende un Ducados.":""),"ev");M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+8,0,100)});updScore();M.htUs=M.us;M.htThem=M.them;SFX.whistle(2);vo("halftime",null,true);if(unl("tac")&&!M.skipping){M.paused=true;clearTimeout(M.timer);htTalk()}return false}
-  if(m===90&&M.addLeft===0&&!M.et){
+  if(m>=90&&M.addLeft===0&&!M.et){
     if(!M.a2){M.a2=olA(2)||(rnd(2,4)+Math.min(5,Math.ceil(M.lost/2)));M.addLeft=M.a2;addLog(90,`${M.a2} minutos de descuento. ${M.a2>5?"El árbitro ha apuntado lo del perro, lo del tabaco y todo.":"Nadie sabe de dónde los saca."}`,"ev");updScore();return false}
     if(isKO(S.comp)&&M.us===M.them&&!M.et&&!M.online){M.et=1;SFX.whistle(2);addLog(90,`¡Empate! Nos vamos a la PRÓRROGA: dos partes de 15 minutos. ${pick(["Los jugadores se tiran al suelo con calambres.","El del bar baja otra caja de cervezas.","Alguien pregunta si se puede ir ya a casa."])}`,"goal");vo("halftime",null,true);M.sq.forEach(p=>{if(!M.out.has(p.id))p.mE=clamp(p.mE+4,0,100)});updScore();return false}
     endMatch(true);return true}
-  if(M.et&&m===105&&M.addLeft===0&&M.et===1){M.et=2;addLog(105,"Cambio de campo en la prórroga. Agua y a seguir.","ev");return false}
-  if(M.et&&m===120&&M.addLeft===0){if(!M.a3){M.a3=rnd(1,2);M.addLeft=M.a3;addLog(120,`${M.a3} minuto${M.a3>1?"s":""} de descuento en la prórroga.`,"ev");updScore();return false}
+  if(M.et&&m>=105&&M.addLeft===0&&M.et===1){M.et=2;addLog(105,"Cambio de campo en la prórroga. Agua y a seguir.","ev");return false}
+  if(M.et&&m>=120&&M.addLeft===0){if(!M.a3){M.a3=rnd(1,2);M.addLeft=M.a3;addLog(120,`${M.a3} minuto${M.a3>1?"s":""} de descuento en la prórroga.`,"ev");updScore();return false}
     endMatch(true);return true}
   return false;
 }
