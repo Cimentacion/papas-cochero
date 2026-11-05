@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.3";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="20.4";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -418,7 +418,7 @@ body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frla
 .mm-logo canvas{display:block;width:100%;height:auto;aspect-ratio:1000/620;animation:mmfloat 5s ease-in-out .9s infinite}
 @keyframes mmdrop{0%{transform:translateY(-60px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 @keyframes mmfloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-.6deg)}}
-.mm-sp{flex:1}
+.mm-sp{flex:1}.mmenu.noanim .mm-logo,.mmenu.noanim .mm-btns{animation:none}
 .mm-btns{width:min(400px,100%);display:flex;flex-direction:column;gap:14px;animation:mmup .7s ease-out .35s both}
 @keyframes mmup{0%{transform:translateY(40px);opacity:0}100%{transform:none;opacity:1}}
 .mm-b{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;border:0;border-radius:20px;padding:14px 18px;cursor:pointer;text-align:left;font:22px/1.05 Bungee,Impact,sans-serif;letter-spacing:.5px;text-transform:uppercase;color:#2a1405;background:linear-gradient(180deg,#fff0a0 0%,#ffcf2e 45%,#ff9f0a 100%);box-shadow:0 7px 0 #a65a00,0 14px 26px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.7);transition:transform .08s,box-shadow .08s}
@@ -4923,6 +4923,7 @@ setInterval(()=>{try{MUS.sync()}catch(e){}},1500);
 function bgSync(){document.body.classList.toggle("bganim",!(S&&S.bganim===false))}
 /* ================= menú principal ================= */
 let MENU=true;
+const menuKey=()=>[!!S,S&&S.season,S&&clubName(),window.PCLANG].join("|");
 function viewMenu(){const has=!!S;const tn=has&&S.comp?(S.comp.name||TIERS[S.comp.tier||0].n):has?TIERS[S.tierNext||0].n:"";const FL={es:"🇪🇸",en:"🇬🇧",ro:"🇷🇴",ar:"🇸🇦"};
   return `<div class="mmenu"><canvas id="mmcv"></canvas><div class="mm-shade"></div><div class="mm-in">
    <div class="mm-logo"><canvas id="mmlogo" width="1000" height="620" aria-label="${esc(GAME_T)}"></canvas></div>
@@ -5071,7 +5072,7 @@ function drawMenuField(c,t,vx0,vx1){const W=640,H=380;vx0=vx0==null?0:Math.max(-
 /* ================= render ================= */
 function render(){
   const v=$("#view");
-  if(MENU&&!M){$("#top").hidden=true;$("#tabs").hidden=true;v.innerHTML=viewMenu();menuAnim();menuLogo();return}
+  if(MENU&&!M){$("#top").hidden=true;$("#tabs").hidden=true;const mm=v.querySelector(".mmenu");if(mm&&mm.dataset.k===menuKey())return;v.innerHTML=viewMenu();const m2=v.querySelector(".mmenu");if(m2){m2.dataset.k=menuKey();if(window.__mmShown)m2.classList.add("noanim");window.__mmShown=1}menuAnim();menuLogo();return}
   if(!S){$("#top").hidden=true;$("#tabs").hidden=true;v.innerHTML=viewCreator();paintFaces(v);return}
   $("#top").hidden=false;$("#tabs").hidden=false;cupCheck();{const ct=$("#club-title");if(ct&&ct.textContent!==clubName())ct.textContent=clubName();const hc=$("#crest");if(hc&&!hc.dataset.v||hc&&hc.dataset.v!==JSON.stringify(S.club||0)){hc.dataset.v=JSON.stringify(S.club||0);hc.width=48;hc.height=48;hc.style.imageRendering=S.club&&S.club.crest?"auto":"pixelated";drawTeamCrest(hc,{us:1,n:clubName(),col:ourKit().c1})}}
   if(S.tab==="prep"&&!S.prep)S.tab="club";olResumeLobby();
