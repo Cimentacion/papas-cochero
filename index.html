@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.5";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="20.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -416,7 +416,7 @@ body.fm .frc{background:#1b1f4b;border-color:#2c3170;color:#e9eaf7}body.fm .frla
 .mm-in{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;padding:max(3vh,env(safe-area-inset-top,0px)) 18px max(16px,env(safe-area-inset-bottom,0px));box-sizing:border-box;text-align:center}
 .mm-logo{width:min(94vw,560px);margin-top:2vh;animation:mmdrop .6s steps(6) both}
 .mm-logo canvas{display:block;width:100%;height:auto;aspect-ratio:220/130;image-rendering:pixelated;image-rendering:crisp-edges;animation:mmfloat 1.1s steps(2) .6s infinite}
-.mm-panel{width:min(400px,100%);animation:mmup .4s steps(4) .2s both}.mm-panel .body{display:grid;gap:10px}.mm-big{width:100%;font-size:20px;padding:14px}.mm-info{margin:-4px 0 2px;font-size:13px;text-align:center;opacity:.8}.mm-langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.mm-panel{width:min(400px,100%);display:grid;gap:12px;animation:mmup .4s steps(4) .2s both}.mm-panel .btn{box-shadow:0 6px 0 rgba(0,0,0,.45)}.mm-big{width:100%;font-size:20px;padding:14px}.mm-info{margin:-4px 0 2px;font-size:13px;text-align:center;opacity:.8}.mm-langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 @keyframes mmdrop{0%{transform:translateY(-60px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 @keyframes mmfloat{0%{transform:translateY(0)}100%{transform:translateY(-4px)}}
 .mm-sp{flex:1}.mmenu.noanim .mm-logo,.mmenu.noanim .mm-panel{animation:none}
@@ -4935,68 +4935,60 @@ function viewMenu(){const has=!!S;const tn=has&&S.comp?(S.comp.name||TIERS[S.com
   return `<div class="mmenu"><canvas id="mmcv"></canvas><div class="mm-shade"></div><div class="mm-in">
    <div class="mm-logo"><canvas id="mmlogo" width="220" height="130" aria-label="${esc(GAME_T)}"></canvas></div>
    <div class="mm-sp"></div>
-   <section class="win mm-panel"><div class="bar">${has?"Tu partida":"Bienvenido, míster"}</div><div class="body">
-    ${has?`<button class="btn play mm-big" data-act="menu-cont">▶ Continuar</button><p class="mm-info">${esc(clubName())} · Temporada ${S.season} · ${esc(tn)}</p>`:""}
+   <div class="mm-panel">
+    ${has?`<button class="btn play mm-big" data-act="menu-cont">▶ Continuar</button>`:""}
     <button class="btn ${has?"":"play"} mm-big" data-act="menu-new">⚽ Nueva partida</button>
-    <div class="chips mm-langs" data-notr>${Object.keys(window.PCLANGS||{es:1}).map(k=>`<button class="btn mini ${window.PCLANG===k?"sel":""}" data-act="setlang" data-v="${k}">${window.PCLANGS[k]}</button>`).join("")}</div>
-   </div></section><div class="mm-ver">v${esc(window.PC_VERSION||"")}</div></div></div>`}
+   </div><div class="mm-ver">v${esc(window.PC_VERSION||"")}</div></div></div>`}
 function menuAnim(){const cv=$("#mmcv");if(!cv)return;let g=null;try{g=cv.getContext("2d")}catch(e){}if(!g)return;const t0=performance.now();
   const loop=()=>{if(!document.body.contains(cv))return;const px=3,W=Math.max(120,Math.round(cv.clientWidth/px)),H=Math.max(200,Math.round(cv.clientHeight/px));if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
     try{drawMenuBG(g,W,H,(performance.now()-t0)/1000)}catch(e){return}requestAnimationFrame(loop)};requestAnimationFrame(loop)}
-/* fondo del menú: portería con su red al atardecer, en el estilo de píxeles del juego */
-function drawMenuBG(c,W,H,t){c.imageSmoothingEnabled=false;const hz=H*.5;// horizonte
-  // cielo de atardecer
-  const sk=c.createLinearGradient(0,0,0,hz);sk.addColorStop(0,"#2c4a7c");sk.addColorStop(.45,"#7f86b0");sk.addColorStop(.8,"#e9a87c");sk.addColorStop(1,"#f7c27a");c.fillStyle=sk;c.fillRect(0,0,W,hz+2);
-  // sol y nubes
-  const sx=W*.78,sy=hz*.86;const sg=c.createRadialGradient(sx,sy,2,sx,sy,W*.5);sg.addColorStop(0,"rgba(255,228,160,.85)");sg.addColorStop(1,"rgba(255,228,160,0)");c.fillStyle=sg;c.fillRect(0,0,W,hz);
-  c.fillStyle="#ffe9b0";c.beginPath();c.arc(sx,sy,W*.06,0,7);c.fill();
-  for(let i=0;i<5;i++){const cx=((i*W*.31+t*3*(1+i*.3))%(W*1.4))-W*.2,cy=hz*(.12+i*.13);c.fillStyle=`rgba(255,${200+i*8},${180+i*10},.55)`;for(let k=0;k<4;k++){c.fillRect(Math.round(cx+k*6),Math.round(cy-(k%2)*2),Math.round(18-k*2),3)}}
-  // árboles y grada del fondo
-  c.fillStyle="#2c3a2a";for(let x=0;x<W;x+=4){const h=6+Math.round(4*Math.abs(Math.sin(x*.37))+3*Math.abs(Math.sin(x*.11)));c.fillRect(x,hz-h-10,4,h+10)}
-  const gT=hz-18,gB=hz+4;c.fillStyle="#58606e";c.fillRect(0,gT-6,W*.62,4);c.fillStyle="#3a404c";c.fillRect(0,gT-2,W*.62,gB-gT+2);
-  const cols=["#2f6fd1","#3fa34d","#e7b923","#c8233a","#2f6fd1","#3fa34d"];for(let y=gT;y<gB;y+=3)for(let x=0;x<W*.6;x+=3){c.fillStyle=cols[((x/3|0)+(y/3|0)*2)%cols.length];c.fillRect(x,y,2,2)}
-  c.fillStyle="#b9bec8";c.fillRect(0,gT-8,W*.64,2);for(let x=4;x<W*.62;x+=W*.12)c.fillRect(x,gT-8,1,gB-gT+8);
-  c.fillStyle="#7d8290";c.fillRect(W*.7,gT+2,W*.3,gB-gT-2);c.fillStyle="#9aa0ad";for(let x=W*.72;x<W;x+=6)c.fillRect(x,gT+4,3,3);
-  // foco
-  c.fillStyle="#3a404c";c.fillRect(W*.93,hz-44,2,40);c.fillStyle="#e8e6d8";c.fillRect(W*.9,hz-48,8,4);
-  // césped con franjas en perspectiva
-  for(let i=0;i<14;i++){const y0=hz+Math.pow(i/14,1.7)*(H-hz),y1=hz+Math.pow((i+1)/14,1.7)*(H-hz);c.fillStyle=i%2?"#3f8f3a":"#4a9e42";c.fillRect(0,Math.floor(y0),W,Math.ceil(y1-y0)+1)}
-  const sh=c.createLinearGradient(0,hz,0,H);sh.addColorStop(0,"rgba(255,190,110,.25)");sh.addColorStop(.4,"rgba(0,0,0,0)");sh.addColorStop(1,"rgba(0,0,0,.25)");c.fillStyle=sh;c.fillRect(0,hz,W,H-hz);
-  // líneas de cal: línea de gol, área y córner
-  const line=(x0,y0,x1,y1,w)=>{c.strokeStyle="rgba(245,245,235,.95)";c.lineWidth=w||2;c.beginPath();c.moveTo(Math.round(x0),Math.round(y0));c.lineTo(Math.round(x1),Math.round(y1));c.stroke()};
-  const gl=y=>y;const gy0=H*.8,gy1=H*.66;// línea de gol: de abajo izq a derecha
-  line(-W*.1,H*.86,W*1.1,H*.62,2);line(W*.82,H*.645,W*1.1,H*.7,2);
-  c.strokeStyle="rgba(245,245,235,.95)";c.lineWidth=2;c.beginPath();c.ellipse(W*.02,H*.9,W*.16,H*.035,-.25,-.4,1.2);c.stroke();
-  // portería en perspectiva (frente: poste izq cerca, poste dcho lejos)
-  const sway=Math.sin(t*1.3)*1.2;
-  const FL={x:W*.1,yT:H*.5,yB:H*.79},FR={x:W*.6,yT:H*.49,yB:H*.69},dx=W*.2,dy=-H*.025;
-  const BL={x:FL.x+dx*1.25,yT:FL.yT+dy+H*.06,yB:FL.yB+dy-H*.02},BR={x:FR.x+dx*.7,yT:FR.yT+dy+H*.05,yB:FR.yB+dy};
-  const L2=(a,b,k)=>a+(b-a)*k;
-  // red: fondo, techo y lateral
-  c.strokeStyle="rgba(255,255,255,.55)";c.lineWidth=1;
-  for(let i=0;i<=16;i++){const k=i/16;const x0=L2(BL.x,BR.x,k),yt=L2(BL.yT,BR.yT,k),yb=L2(BL.yB,BR.yB,k);c.beginPath();c.moveTo(Math.round(x0),Math.round(yt));c.quadraticCurveTo(x0+sway,(yt+yb)/2,Math.round(x0),Math.round(yb));c.stroke()}
-  for(let j=0;j<=10;j++){const k=j/10;c.beginPath();c.moveTo(Math.round(BL.x),Math.round(L2(BL.yT,BL.yB,k)));c.lineTo(Math.round(BR.x),Math.round(L2(BR.yT,BR.yB,k)));c.stroke()}
-  for(let i=0;i<=16;i++){const k=i/16;c.beginPath();c.moveTo(Math.round(L2(FL.x,FR.x,k)),Math.round(L2(FL.yT,FR.yT,k)));c.lineTo(Math.round(L2(BL.x,BR.x,k)),Math.round(L2(BL.yT,BR.yT,k)));c.stroke()}
-  for(let j=0;j<=4;j++){const k=j/4;c.beginPath();c.moveTo(Math.round(L2(FL.x,BL.x,k)),Math.round(L2(FL.yT,BL.yT,k)));c.lineTo(Math.round(L2(FR.x,BR.x,k)),Math.round(L2(FR.yT,BR.yT,k)));c.stroke()}
-  for(let j=0;j<=8;j++){const k=j/8;c.beginPath();c.moveTo(Math.round(FR.x),Math.round(L2(FR.yT,FR.yB,k)));c.lineTo(Math.round(BR.x),Math.round(L2(BR.yT,BR.yB,k)));c.stroke()}
-  for(let i=0;i<=4;i++){const k=i/4;c.beginPath();c.moveTo(Math.round(L2(FR.x,BR.x,k)),Math.round(L2(FR.yT,BR.yT,k)));c.lineTo(Math.round(L2(FR.x,BR.x,k)),Math.round(L2(FR.yB,BR.yB,k)));c.stroke()}
-  // red del lateral izquierdo (cerca)
-  for(let j=0;j<=10;j++){const k=j/10;c.beginPath();c.moveTo(Math.round(FL.x),Math.round(L2(FL.yT,FL.yB,k)));c.lineTo(Math.round(BL.x),Math.round(L2(BL.yT,BL.yB,k)));c.stroke()}
-  // estructura de atrás
-  c.strokeStyle="#d8dde4";c.lineWidth=2;c.beginPath();c.moveTo(BL.x,BL.yT);c.lineTo(BR.x,BR.yT);c.moveTo(BL.x,BL.yB);c.lineTo(BR.x,BR.yB);c.moveTo(FR.x,FR.yB);c.lineTo(BR.x,BR.yB);c.moveTo(FL.x,FL.yB);c.lineTo(BL.x,BL.yB);c.stroke();
-  // marco blanco gordo con sombra
-  const post=(x0,y0,x1,y1,w)=>{c.strokeStyle="rgba(0,0,0,.25)";c.lineWidth=w+2;c.beginPath();c.moveTo(x0+2,y0+1);c.lineTo(x1+2,y1+1);c.stroke();c.strokeStyle="#ffffff";c.lineWidth=w;c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke();c.strokeStyle="#c9d0da";c.lineWidth=Math.max(1,w/3);c.beginPath();c.moveTo(x0+w/3,y0);c.lineTo(x1+w/3,y1);c.stroke()};
-  post(FR.x,FR.yT,FR.x,FR.yB,4);post(FL.x,FL.yT,FR.x,FR.yT,5);post(FL.x,FL.yT,FL.x,FL.yB,6);
-  // sombra de la portería en el césped
-  c.fillStyle="rgba(0,0,0,.18)";c.beginPath();c.moveTo(FL.x,FL.yB);c.lineTo(FR.x,FR.yB);c.lineTo(BR.x+6,BR.yB+2);c.lineTo(BL.x+6,BL.yB+2);c.fill();
-  // el balón, con un pequeño bote
-  const bx=W*.7,by=H*.735,br=Math.max(4,W*.03),bh=Math.abs(Math.sin(t*2))*2;c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(bx+1,by+br*.9,br*1.1,br*.35,0,0,7);c.fill();
-  c.fillStyle="#f3f1ea";c.beginPath();c.arc(bx,by-bh,br,0,7);c.fill();c.fillStyle="#1b1b1b";c.beginPath();c.arc(bx-br*.15,by-bh-br*.1,br*.35,0,7);c.fill();c.fillRect(Math.round(bx+br*.35),Math.round(by-bh-br*.5),2,2);c.fillRect(Math.round(bx-br*.7),Math.round(by-bh+br*.3),2,2);c.fillRect(Math.round(bx+br*.2),Math.round(by-bh+br*.55),2,2);
-  c.fillStyle="rgba(255,220,160,.6)";c.fillRect(Math.round(bx+br*.3),Math.round(by-bh-br*.75),2,2);
-  // pájaros
-  for(let i=0;i<3;i++){const x=((t*8+i*40)%(W+40))-20,y=hz*(.25+i*.07)+Math.sin(t*3+i)*2,f=Math.sin(t*10+i)>0;c.fillStyle="#2a2f3a";c.fillRect(Math.round(x),Math.round(y),1,1);c.fillRect(Math.round(x-2),Math.round(y-(f?1:0)),2,1);c.fillRect(Math.round(x+1),Math.round(y-(f?1:0)),2,1)}
-  // viñeta
-  const vg=c.createRadialGradient(W/2,H*.45,W*.3,W/2,H*.5,H*.75);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.45)");c.fillStyle=vg;c.fillRect(0,0,W,H)}
+/* fondo del menú: estadio de noche en píxeles nítidos (todo con rectángulos, sin suavizado) */
+function drawMenuBG(c,W,H,t){c.imageSmoothingEnabled=false;const R=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),Math.max(1,Math.round(w)),Math.max(1,Math.round(h)))};const rnd=k=>{const x=Math.sin(k*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+  const hz=Math.round(H*.56);// donde empieza el césped
+  // cielo en franjas con tramado
+  const sky=["#070b1c","#0a1028","#0e1634","#141c42","#1b2350","#23295c"];const sh=Math.round(H*.36);
+  for(let y=0;y<sh;y++){const k=y/sh*(sky.length-1);let i=Math.floor(k);if(k-i>.5&&(y&1))i++;R(0,y,W,1,sky[Math.min(sky.length-1,i)])}
+  for(let i=0;i<60;i++){const x=Math.floor(rnd(i)*W),y=Math.floor(rnd(i+99)*sh*.8);const on=((t*2+i)%7)>1;if(on)R(x,y,1,1,i%5?"#8890c0":"#ffffff")}
+  // grada: tres pisos con público
+  const tiers=[[sh,Math.round(H*.12)],[sh+Math.round(H*.12),Math.round(H*.05)]];
+  R(0,sh-4,W,4,"#2a2f40");R(0,sh-5,W,1,"#596080");// techo
+  for(let x=0;x<W;x+=12)R(x,sh-4,1,4,"#151924");
+  const crowd=["#c8233a","#ffd23f","#ffffff","#2f6fd1","#e7b923","#3fa34d","#ff8fb1","#f0f0f0"];
+  const g0=sh,g1=hz-10;R(0,g0,W,g1-g0,"#20263a");
+  for(let y=g0+1;y<g1-1;y+=2){for(let x=(y>>1)&1;x<W;x+=2){const k=Math.floor(x/2)+y*131;const jump=Math.sin(t*6+x*.3+y*.2)>.85?1:0;R(x,y-jump,1,1,crowd[Math.floor(rnd(k)*crowd.length)]);R(x,y+1-jump,1,1,"#3a3020")}}
+  // bandas de color de la grada (bufandas)
+  for(let x=0;x<W;x+=4)R(x,g0+Math.round((g1-g0)*.55),2,1,(x/4)%2?"#ffd23f":"#5a3415");
+  // flashes de cámaras
+  for(let i=0;i<5;i++){const ph=(t*1.7+i*.37)%1;if(ph<.08){const x=Math.floor(rnd(i+Math.floor(t*1.7))*W),y=g0+Math.floor(rnd(i*7+Math.floor(t*1.7))*(g1-g0));R(x-1,y,3,1,"#ffffff");R(x,y-1,1,3,"#ffffff")}}
+  // vallas publicitarias LED que se desplazan
+  const ly=g1,lh=Math.max(5,Math.round(H*.022));R(0,ly,W,lh,"#0a0a0a");const ads=["#e33","#fd3","#39f","#3c3","#f8f","#fff"];const off=Math.floor(t*12);
+  for(let x=0;x<W;x++){const seg=Math.floor((x+off)/18);const inb=((x+off)%18)<14;if(inb){const col=ads[seg%ads.length];if(((x+off)%18)>1&&((x+off)%18)<13)R(x,ly+1,1,lh-2,(x+off+seg)%3?col:"#111")}}
+  R(0,ly+lh,W,hz-ly-lh,"#1d4a22");
+  // torres de focos
+  [[Math.round(W*.08),Math.round(H*.12)],[Math.round(W*.92),Math.round(H*.12)]].forEach(([x,y],k)=>{R(x-1,y,2,sh-y,"#3a4058");for(let yy=y+4;yy<sh;yy+=4)R(x-2,yy,4,1,"#2a3044");
+    R(x-6,y-6,12,7,"#cfd4e6");for(let i=0;i<4;i++)for(let j=0;j<2;j++)R(x-5+i*3,y-5+j*3,2,2,((t*3|0)+i+j)%5?"#ffffff":"#fff3c0");
+    for(let r=1;r<6;r++){c.fillStyle=`rgba(255,250,220,${.05})`;c.beginPath();c.moveTo(x,y);c.lineTo(k?x-W*.9:x+W*.9,hz+r*H*.06);c.lineTo(k?x-W*.4:x+W*.4,H);c.closePath();c.fill()}});
+  // césped: franjas en perspectiva con tramado
+  const gr=["#2e7a2e","#358a34"];let y=hz,i=0;while(y<H){const h=Math.max(2,Math.round(2+((y-hz)/(H-hz))*18));R(0,y,W,h,gr[i%2]);y+=h;i++}
+  for(let yy=hz;yy<H;yy+=2)for(let x=(yy>>1)&1;x<W;x+=4)if(rnd(x*3+yy)>.7)R(x,yy,1,1,"#2a6d2a");
+  // líneas: medio campo y círculo central (elipse a píxeles)
+  const cy=Math.round(hz+(H-hz)*.42),cx=Math.round(W/2),rx=Math.round(W*.34),ry=Math.round((H-hz)*.16);
+  R(0,cy,W,1,"#eef2e8");
+  for(let a=0;a<360;a+=1){const x=Math.round(cx+Math.cos(a*Math.PI/180)*rx),yy=Math.round(cy+Math.sin(a*Math.PI/180)*ry);R(x,yy,1,1,"#eef2e8")}
+  R(cx-1,cy-1,3,2,"#eef2e8");
+  // banda lateral cerca
+  R(0,hz+2,W,1,"#dfe6d8");
+  // jugadores pequeñitos calentando
+  const pl=[[.2,.1,"#ffd23f","#5a3415"],[.32,.22,"#ffd23f","#5a3415"],[.7,.15,"#2f6fd1","#ffffff"],[.83,.27,"#2f6fd1","#ffffff"]];
+  pl.forEach(([fx,fy,a,b],k)=>{const x=Math.round(W*fx+Math.sin(t*.6+k)*3),yy=Math.round(hz+(H-hz)*fy);const st=Math.floor(t*4+k)%2;R(x,yy,3,3,a);R(x+1,yy-2,1,2,"#e0ac7e");R(x,yy+3,3,1,b);R(x+(st?0:2),yy+4,1,2,"#111");R(x+(st?2:0),yy+4,1,1,"#111")});
+  // balón grande delante, botando a saltitos
+  const B=["....XXXX....","..XXWWWWXX..",".XWWWWWWWWX.",".XWWWXXWWWX.","XXWWXXXXWWXX","XXXWXXXXWXXX","XWWWWXXWWWWX","XWWWWWWWWWWX",".XWXWWWWXWX.",".XXXXWWXXXX.","..XXWWWWXX..","....XXXX...."];
+  const bs=Math.max(1,Math.round(W/60)),bw=12*bs,bx=Math.round(W/2-bw/2),bounce=[0,2,5,7,8,7,5,2][Math.floor(t*8)%8]*bs,by0=Math.round(H*.8)-bw;
+  R(bx+bs,by0+bw+bs,bw-2*bs,bs*2,"rgba(0,0,0,.35)");
+  B.forEach((row,yy)=>[...row].forEach((ch,xx)=>{if(ch!==".")R(bx+xx*bs,by0-bounce+yy*bs,bs,bs,ch==="X"?"#161616":"#f4f4f0")}));
+  R(bx+3*bs,by0-bounce+2*bs,bs,bs,"#ffffff");
+  // viñeta en píxeles (oscurece bordes por bandas)
+  for(let k=0;k<6;k++){c.fillStyle=`rgba(0,0,0,${.07})`;R(0,0,k*2+1,H,"rgba(0,0,0,.07)");R(W-k*2-1,0,k*2+1,H,"rgba(0,0,0,.07)")}}
 /* logo en píxeles, como los de los juegos de fútbol de 16 bits */
 function pxMask(txt,size,W,H,y){const o=document.createElement("canvas");o.width=W;o.height=H;const g=o.getContext("2d");g.font=`${size}px "LogoPC", Bungee, Impact, sans-serif`;g.textAlign="center";g.textBaseline="alphabetic";let sz=size;while(g.measureText(txt).width>W-14&&sz>8){sz--;g.font=`${sz}px "LogoPC", Bungee, Impact, sans-serif`}g.fillStyle="#fff";g.fillText(txt,W/2,y);
   const d=g.getImageData(0,0,W,H).data;const m=new Uint8Array(W*H);for(let i=0;i<W*H;i++)m[i]=d[i*4+3]>120?1:0;return m}
