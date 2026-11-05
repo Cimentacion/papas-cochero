@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="20.2";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -6426,7 +6426,7 @@ const A={
   buy:v=>{const u=UPG.find(x=>x.id===v);if(has(v))return;if(u.req&&!has(u.req))return;if(u.t&&u.t>(S.reach||0))return;
     if(S.freeWork&&u.c<=5000)S.freeWork--;else{if(S.money<u.c){toast(`Te faltan ${u.c-S.money} €.`);return}S.money-=u.c}
     S.upg.push(v);addNews(`Obras en el descampado: ${u.n.toLowerCase()}.`);save();render();toast("Hecho. "+u.d)},
-  "menu-cont":()=>{MENU=false;render();window.scrollTo(0,0)},
+  "menu-cont":()=>{MENU=false;window.scrollTo(0,0);if(S&&!M&&S.comp&&S.comp.done){try{compEnd();return}catch(e){}}render()},
   "menu-new":()=>{if(!S){MENU=false;newCreator();render();return}modal("Nueva partida",`<p>Se borra la partida de <b>${esc(clubName())}</b>. Si la quieres guardar, primero copia su código en Míster › Configuración.</p><div class="pc-act"><button class="btn primary" data-act="menu-new2">Empezar de cero</button><button class="btn" data-act="close">Cancelar</button></div>`)},
   "menu-new2":()=>{try{localStorage.setItem(KEY+"_bak",JSON.stringify(S));localStorage.removeItem(KEY)}catch(e){}S=null;MENU=false;HOME=HOME0;closeModal();newCreator();render()},
   "menu-load":()=>{modal("Cargar partida",`<textarea id="save-txt" class="inp" rows="4" style="width:100%;font-size:11px" placeholder="Pega aquí el código (empieza por PAPAS1:)"></textarea><div class="pc-act"><button class="btn primary" data-act="saveload">Cargar código pegado</button><button class="btn" data-act="savepick">Cargar desde archivo</button><button class="btn" data-act="close">Cancelar</button></div>`)},
