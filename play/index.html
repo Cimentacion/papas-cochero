@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="../icon-180.png"><link rel="manifest" href="../manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/play/";window.PC_PLAY=1;
+window.PC_VERSION="20.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/play/";window.PC_PLAY=1;
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pcp_code"),v=localStorage.getItem("pcp_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -5962,6 +5962,8 @@ function startMatch(olo){
   const P=S.prep;const m=ourFixture();const opp=m.a===0?m.b:m.a;const v=P.venue;
   const sq=goers().filter(p=>P.arrive[p.id]&&P.arrive[p.id].min<90).map(p=>({...p,mE:clamp(p.energy+P.arrive[p.id].en-(p.hang>0?15:0),10,100),drunk:!has("hotel")&&!p.real&&Math.random()<(p.dep||0)/180}));if(has("hotel"))sq.forEach(x=>x.mE=clamp(x.mE+6,10,100));
   const arr={};sq.forEach(p=>arr[p.id]=P.arrive[p.id].min);
+  // si no hay ni 7 a su hora, el árbitro retrasa el inicio hasta que haya 7
+  let kWait=0;{const mins=sq.map(p=>arr[p.id]).filter(m=>m<90).sort((a,b)=>a-b);if(sq.filter(p=>arr[p.id]<=0).length<7&&mins.length){const w=mins[Math.min(7,mins.length)-1];if(w>0){kWait=w;sq.forEach(p=>{if(arr[p.id]<90)arr[p.id]=Math.max(0,arr[p.id]-w)})}}}
   const T=S.comp.teams[opp];const rAbs=((S.rivOut||{})[T.n]||[]).filter(x=>x.until>S.week);if(rAbs.length&&T.roster){const an=new Set(rAbs.map(x=>x.n));T.roster=T.roster.filter(x=>!an.has(x.n)).concat(T.roster.filter(x=>an.has(x.n)))}
   const of=S.comp.type==="online"||S.comp.type==="nat"||(S.comp.type==="euro"&&!T.tag&&T.coachN)?(T.form||"4-4-2"):oppForm(T);const F2=slotXY(of);const sh=shapeOf(of);
   M={m,opp,outHoles:0,addLeft:0,addN:0,a1:0,a2:0,lost:0,ht:false,home:v.home,ours:v.ours,venue:v,oppStr:T.str*(.9+Math.random()*.2)*(v.home||S.comp.type==="cup"?1:1.06),us:0,them:0,min:0,sq,arr,form:S.formation,slots:Array(11).fill(null),out:new Map(),
@@ -6001,6 +6003,7 @@ function startMatch(olo){
   sq.filter(p=>p.drunk).forEach(p=>addLog(0,pick([`${short(p)} llega con una lata en la mano. Va contento.`,`${short(p)} huele a La Campiña desde el córner.`,`${short(p)} saluda al árbitro con un abrazo muy largo.`,`${short(p)} se ha calentado con tres latas en el aparcamiento.`]),"bad"));
   sq.filter(p=>!p.drunk&&p.hang>0).forEach(p=>addLog(0,`${short(p)} tiene una resaca que no ve la pelota.`,"bad"));
   sq.filter(p=>arr[p.id]>0).forEach(p=>addLog(0,`${short(p)} todavía no ha llegado. Se le espera hacia el minuto ${arr[p.id]}.`,"bad"));
+  if(kWait){const fine=nice(30*EK[curTier()]);ledSync();S.money-=fine;led("Multa por retrasar el inicio del partido",-fine);addLog(0,`El árbitro retrasa el inicio ${kWait} minutos esperando a que llegue tu equipo. Multa de ${fine} € y pitos de toda la grada.`,"bad")}
   const n=onIds().length;if(n<11)addLog(0,`Empezáis con ${n}. Habéis preguntado en el bar y nadie quería.`,"bad");
   visInit();
   {const md=$("#m-done");if(!olo&&S.comp.type!=="online"){md.dataset.act="post1";md.textContent="Rueda de prensa"}}
