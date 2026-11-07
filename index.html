@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="21.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -5992,6 +5992,8 @@ function startMatch(olo){
   S.lineup.forEach((id,i)=>{if(id&&ready.some(p=>p.id===id))M.slots[i]=id});
   const filled=[];M.slots.forEach((id,i)=>{if(id)return;const b=bestFor(roleOf(i),ready.filter(p=>!M.slots.includes(p.id)));if(b){M.slots[i]=b.id;filled.push(b)}});
   setDots();
+  // Copa: un equipo de varias categorías más arriba se nota mucho más (menos milagros)
+  if(S.comp.type==="cup"&&T.tierOf!=null&&T.tierOf>S.comp.tier&&onList().length){const pw=myPower(),us=(pw.a+pw.d)/2;if(us>0&&M.oppStr>us){const g=Math.min(1.1,.45*(T.tierOf-S.comp.tier));M.oppStr*=Math.pow(M.oppStr/us,g);M.classGap=T.tierOf-S.comp.tier}}
   {const hm=m.a===0;$("#m-home").textContent=hm?clubName():T.n;$("#m-away").textContent=hm?T.n:clubName()}
   $("#mlog").innerHTML="";$("#m-done").hidden=true;$("#mctl").hidden=false;
   if(P.tacStart&&TACN[P.tacStart])M.tactic=P.tacStart;if(P.informe)M.mod*=1.03;natScoreFlags();
