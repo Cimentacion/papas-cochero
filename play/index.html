@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="../icon-180.png"><link rel="manifest" href="../manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="21.0";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/play/";window.PC_PLAY=1;
+window.PC_VERSION="21.1";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/play/";window.PC_PLAY=1;
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pcp_code"),v=localStorage.getItem("pcp_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -5842,9 +5842,9 @@ function shootout(){
   const ours=onList().map(x=>x.p).filter(p=>p).sort((a,b)=>b.atk-a.atk);{const pt=setPieceTaker("pen");if(pt){const i=ours.indexOf(pt);if(i>0){ours.splice(i,1);ours.unshift(pt)}}}const theirs=(M.vis?M.vis.them.map(x=>x.full):[]).filter(Boolean);
   const gkU=(onList().find(x=>x.role==="POR")||{}).p;let us=0,them=0,k=0;const lines=[];
   addLog(M.min,"¡PENALTIS! Todo se decide desde los once metros.","goal");vo("penUs",null,true);
-  const kick=(side,i)=>{if(side==="us"){const p=ours[i%Math.max(1,ours.length)];if(!p)return false;const pr=clamp(.72+(p.atk-TIER_Q[curTier()])/150+(specs(p).includes("Lanzador de faltas")?.08:0)+(specs(p).includes("Mente fría")?.1:0)-(p.mE<30?.08:0),.45,.92);const ok=Math.random()<pr;
+  const kick=(side,i)=>{if(side==="us"){const p=ours[i%Math.max(1,ours.length)];if(!p)return false;const pr=clamp(.72-.02*(M.classGap||0)+(p.atk-TIER_Q[curTier()])/150+(specs(p).includes("Lanzador de faltas")?.08:0)+(specs(p).includes("Mente fría")?.1:0)-(p.mE<30?.08:0),.45,.92);const ok=Math.random()<pr;
       addLog(M.min,ok?`✔ ${short(p)} marca. ${pick(["Al palo largo.","Por el centro, con dos narices.","A lo Panenka. Casi se le para el corazón al míster."])}`:`✘ ${short(p)} falla. ${pick(["Al tejado de la nave.","Se lo para el portero.","Resbala y la manda a Écija."])}`,ok?"goal":"bad");return ok}
-    const n=theirs.length?theirs[i%theirs.length]:"un rival";const pr=clamp(.74-(gkU?(gkU.def-TIER_Q[curTier()])/160:0),.45,.9);const ok=Math.random()<pr;addLog(M.min,ok?`${n} marca para ellos.`:`¡${gkU?short(gkU):"Tu portero"} PARA el penalti de ${n}!`,ok?"bad":"goal");return ok};
+    const n=theirs.length?theirs[i%theirs.length]:"un rival";const pr=clamp(.74+.04*(M.classGap||0)-(gkU?(gkU.def-TIER_Q[curTier()])/160:0),.45,.94);const ok=Math.random()<pr;addLog(M.min,ok?`${n} marca para ellos.`:`¡${gkU?short(gkU):"Tu portero"} PARA el penalti de ${n}!`,ok?"bad":"goal");return ok};
   for(;k<5;k++){if(kick("us",k))us++;if(us>them+(5-k-1)+1||them>us+(5-k))break;if(kick("them",k))them++;if(us>them+(5-k-1)||them>us+(5-k-1))break}
   let g=0;while(us===them&&g++<20){const a=kick("us",5+g),b=kick("them",5+g);if(a)us++;if(b)them++}
   addLog(M.min,`Penaltis: ${us}-${them}. ${us>them?"¡PASÁIS! El pueblo entero invade el campo.":"Fuera de la copa. Nadie dice nada en el coche de vuelta."}`,us>them?"goal":"bad");SFX.whistle(3,true);
@@ -5979,7 +5979,7 @@ function startMatch(olo){
   const filled=[];M.slots.forEach((id,i)=>{if(id)return;const b=bestFor(roleOf(i),ready.filter(p=>!M.slots.includes(p.id)));if(b){M.slots[i]=b.id;filled.push(b)}});
   setDots();
   // Copa: un equipo de varias categorías más arriba se nota mucho más (menos milagros)
-  if(S.comp.type==="cup"&&T.tierOf!=null&&T.tierOf>S.comp.tier&&onList().length){const pw=myPower(),us=(pw.a+pw.d)/2;if(us>0&&M.oppStr>us){const g=Math.min(1.1,.45*(T.tierOf-S.comp.tier));M.oppStr*=Math.pow(M.oppStr/us,g);M.classGap=T.tierOf-S.comp.tier}}
+  if(S.comp.type==="cup"&&T.tierOf!=null&&T.tierOf>S.comp.tier&&onList().length){const pw=myPower(),us=(pw.a+pw.d)/2;if(us>0&&M.oppStr>us){const g=Math.min(1.6,.55*(T.tierOf-S.comp.tier));M.oppStr*=Math.pow(M.oppStr/us,g);M.classGap=T.tierOf-S.comp.tier}}
   {const hm=m.a===0;$("#m-home").textContent=hm?clubName():T.n;$("#m-away").textContent=hm?T.n:clubName()}
   $("#mlog").innerHTML="";$("#m-done").hidden=true;$("#mctl").hidden=false;
   if(P.tacStart&&TACN[P.tacStart])M.tactic=P.tacStart;if(P.informe)M.mod*=1.03;natScoreFlags();
