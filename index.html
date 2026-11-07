@@ -1,7 +1,8 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Míster Manager</title></head><body><meta charset="utf-8">
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Míster Manager"><meta name="theme-color" content="#5a3415"><link rel="apple-touch-icon" href="icon-180.png"><link rel="manifest" href="manifest.webmanifest"><title>Míster Manager</title></head><body>
+<meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.8";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="20.9";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -1454,7 +1455,7 @@ function travelCost(){
   return c;
 }
 function resolveTravel(){
-  const P=S.prep,log=[],arrive={},d=P.venue.d;
+  const P=S.prep,log=[],arrive={},d=P.venue.d;P.lateWhy=null;
   const cost=travelCost();ledSync();S.money-=cost;led("Viaje al partido (gasolina y billetes)",-cost);
   const walkLate=Math.max(0,Math.round(d*14)-40),walkEn=-Math.round(d*3);
   const carMin=Math.round(d*1.1+5);
@@ -1470,7 +1471,7 @@ function resolveTravel(){
     let delay=0,en=v.type==="vespa"||v.type==="moto"?-10:v.type==="tractor"?-12:-4;
     if(v.slow){delay=Math.max(0,Math.round(carMin*1.2-20));log.push(`El ${v.n} va a 30 por la cuneta. ${delay?`Llegan con ${delay} minutos de retraso.`:"Llegan justos."}`)}
     if(v.mom){en+=5;log.push("Tu madre conduce a 60 y os reparte un tupper de filetes empanados.")}
-    if(Math.random()<v.brk){if(Math.random()<.5){delay+=rnd(15,35);log.push(`Pinchazo en el ${v.n}. Cambian la rueda en la cuneta. Retraso de ${delay} minutos.`)}
+    if(Math.random()<v.brk){if(Math.random()<.5){delay+=rnd(15,35);P.lateWhy=`pinchazo en el ${v.n}`;log.push(`Pinchazo en el ${v.n}. Cambian la rueda en la cuneta. Retraso de ${delay} minutos.`)}
       else if(canWalk()){delay+=walkLate+15;log.push(`El ${v.n} se muere a mitad de camino. ${names} siguen andando.`)}
       else{delay=999;log.push(`El ${v.n} se queda tirado en la carretera. ${names} vuelven a Fuentes en la grúa.`)}}
     if((v.type==="vespa"||v.type==="moto")&&Math.random()<.12){delay+=20;S.money-=100;log.push(`Control de la Guardia Civil a la ${v.n}. No tiene seguro. Multa de 100 € y 20 minutos de charla.`)}
@@ -6016,7 +6017,7 @@ function startMatch(olo){
   sq.filter(p=>p.drunk).forEach(p=>addLog(0,pick([`${short(p)} llega con una lata en la mano. Va contento.`,`${short(p)} huele a Cruzcampo desde el córner.`,`${short(p)} saluda al árbitro con un abrazo muy largo.`,`${short(p)} se ha calentado con tres latas en el aparcamiento.`]),"bad"));
   sq.filter(p=>!p.drunk&&p.hang>0).forEach(p=>addLog(0,`${short(p)} tiene una resaca que no ve la pelota.`,"bad"));
   sq.filter(p=>arr[p.id]>0).forEach(p=>addLog(0,`${short(p)} todavía no ha llegado. Se le espera hacia el minuto ${arr[p.id]}.`,"bad"));
-  if(kWait){const fine=nice(30*EK[curTier()]);ledSync();S.money-=fine;led("Multa por retrasar el inicio del partido",-fine);addLog(0,`El árbitro retrasa el inicio ${kWait} minutos esperando a que llegue tu equipo. Multa de ${fine} € y pitos de toda la grada.`,"bad")}
+  if(kWait)addLog(0,`Tu equipo llega ${kWait} minutos tarde${P.lateWhy?` (${P.lateWhy})`:""}. El árbitro espera para empezar. Pitos de toda la grada.`,"bad");
   const n=onIds().length;if(n<11)addLog(0,`Empezáis con ${n}. Habéis preguntado en el bar y nadie quería.`,"bad");
   visInit();
   {const md=$("#m-done");if(!olo&&S.comp.type!=="online"){md.dataset.act="post1";md.textContent="Rueda de prensa"}}
@@ -7014,4 +7015,5 @@ document.addEventListener("visibilitychange",()=>{try{if(document.hidden&&S&&olO
 window.PCDBG=()=>({drawRadar,drawFace,cardHTML,drawScene,cineSquad,lookOf,bodyOf,faceCanvas,natMaybeStart,weeklyLines,wageFor,fieldCap,EK,FIELDS,STANDS,TICKET,FANS_CAP,TVW,mktVal,nice,ovr,TIER_Q,wInit,wToPlayer,wRealNames,wSeason,wRealize,wInit,S,M,OL,olPending,olTable,arr,fb,render,A,olNow,olCine,stagePiece,teamOf,compEnd,finishCompAuto,genTOffer,showTOffer,removeAt,holeStop,power,formStruct,FORMS,bearEvent});
 })();
 </script>
+
 </body></html>
