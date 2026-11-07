@@ -1,1 +1,1 @@
-{"v": "20.6", "notes": ["Menú principal: fondo nuevo (estadio de noche en píxeles, con público, focos y vallas LED) y solo los botones de Continuar y Nueva partida."]}
+{"v": "20.7", "notes": ["Arreglado: si todo el equipo llegaba tarde al partido, «Once automático» y «Colocar según el informe» dejaban el once vacío. Ahora meten a los que llegan tarde (salen al campo cuando llegan)."]}

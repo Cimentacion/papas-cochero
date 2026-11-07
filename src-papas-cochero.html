@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="20.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="20.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -2210,8 +2210,10 @@ function viewPueblo(){
    <p class="hint">Gente que recorre los pueblos buscando jugadores por cuatro bocadillos. Cada semana, cada uno te avisa de alguien bueno que ha venido al pueblo, con la posición ya comprobada (lo verás con la lupa 🔎). Los mejores traen gente de sitios que aún no has descubierto.</p>${scoutRows}</div></section>`;
 }
 function prepAvail(p){const P=S.prep;if(!P)return !p.injured;if(P.arrive)return !!(P.arrive[p.id]&&P.arrive[p.id].min<90);if(P.step!=="conv")return !!P.conv[p.id]&&!P.absent[p.id]&&!p.injured;return !p.injured}
+/* los que llegan tarde solo entran en el once si no hay 11 que hayan llegado a su hora (entran al campo cuando llegan) */
+function lateOk(p){const P=S.prep;if(!P||!P.arrive)return true;const a=P.arrive[p.id];if(!a)return false;if(a.min<=0)return true;const onTime=S.players.filter(q=>P.arrive[q.id]&&P.arrive[q.id].min<=0&&prepAvail(q)).length;return onTime<11&&a.min<90}
 function autoLineup(){
-  const roles=FORMS[S.formation];const P=S.prep;const av=S.players.filter(p=>prepAvail(p)&&!(P&&P.arrive&&P.arrive[p.id].min>0));const used=new Set();
+  const roles=FORMS[S.formation];const P=S.prep;const av=S.players.filter(p=>prepAvail(p)&&lateOk(p)).sort((a,b)=>((P&&P.arrive&&P.arrive[a.id]?P.arrive[a.id].min:0)>0)-((P&&P.arrive&&P.arrive[b.id]?P.arrive[b.id].min:0)>0));const used=new Set();
   const order=roles.map((r,i)=>i).sort((a,b)=>(roles[a]==="POR"?-1:0)-(roles[b]==="POR"?-1:0));
   S.lineup=Array(11).fill(null);const sc=(p,r)=>ovrAs(p,r)*knownFit(p,r);
   const ord2=order.slice().sort((a,b)=>["POR","DEL","DEF","MED"].indexOf(roles[a])-["POR","DEL","DEF","MED"].indexOf(roles[b]));
@@ -4252,7 +4254,7 @@ function reportBox(){if(!S.prep||!S.prep.arrive)return "";const T=reportOpp();if
   if(!sc)return `<p class="hint">Con un ojeador bueno (el retirado del Écija o el representante) aquí tendrías su informe del rival y un botón para colocar el once según él.</p>`;
   const rd=reportData(T);return `<div class="screp"><b>🔎 Informe de ${esc(sc.n)}</b><ul>${rd.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>${S.prep.informe?`<small>✔ Once colocado según el informe. Saldréis con «${TACN[S.prep.tacStart]}».</small>`:""}</div>`}
 function applyReport(){const T=reportOpp();if(!T||!scoutPremium())return;const rd=reportData(T);S.formation=rd.sug;const roles=FORMS[rd.sug],subs=slotSubs(rd.sug);const P=S.prep;
-  const av=S.players.filter(p=>prepAvail(p)&&!(P&&P.arrive&&P.arrive[p.id]&&P.arrive[p.id].min>0));av.forEach(xattr);const used=new Set();
+  const av=S.players.filter(p=>prepAvail(p)&&lateOk(p));av.forEach(xattr);const used=new Set();
   const ex=(p,i)=>{const pr=rd.prefs[subs[i]]||rd.prefs[roles[i]];return pr==="spd"?1+((p.spd||50)-50)/180:pr==="alt"?1+((p.alt||178)-178)/120+((p.cab||50)-50)/400:1};
   const sc=(p,i)=>ovrAs(p,roles[i])*knownFit(p,roles[i])*attrK(p,roles[i],subs[i])*ex(p,i);
   const order=roles.map((r,i)=>i).sort((a,b)=>(roles[a]==="POR"?-2:0)-(roles[b]==="POR"?-2:0)||((rd.prefs[subs[b]]||rd.prefs[roles[b]])?1:0)-((rd.prefs[subs[a]]||rd.prefs[roles[a]])?1:0));
@@ -6433,7 +6435,7 @@ const A={
   gas:v=>{const P=S.prep;P.gas[v]=!P.gas[v];save();render()},
   autoassign:()=>{autoAssign();save();render();toast("Repartidos. Que nadie se maree.")},
   trip:()=>{const P=S.prep;if(!goers().some(p=>P.assign[p.id]&&P.assign[p.id]!=="casa")){toast("No sale nadie. Así no hay partido.");return}
-    const{log,arrive,cost}=resolveTravel();P.arrive=arrive;P.cost=cost;P.step="apuestas";{const keep=S.lineup.map(id=>id&&arrive[id]&&arrive[id].min===0?id:null);const roles=FORMS[S.formation];const pool=S.players.filter(p=>arrive[p.id]&&arrive[p.id].min===0&&!keep.includes(p.id)).map(p=>({...p,mE:p.energy}));keep.forEach((id,i)=>{if(id)return;const b=bestFor(roles[i],pool.filter(x=>!keep.includes(x.id)));if(b)keep[i]=b.id});S.lineup=keep}save();render();window.scrollTo(0,0);
+    const{log,arrive,cost}=resolveTravel();P.arrive=arrive;P.cost=cost;P.step="apuestas";{const keep=S.lineup.map(id=>id&&arrive[id]&&arrive[id].min===0?id:null);const roles=FORMS[S.formation];const pool=S.players.filter(p=>arrive[p.id]&&arrive[p.id].min===0&&!keep.includes(p.id)).map(p=>({...p,mE:p.energy}));keep.forEach((id,i)=>{if(id)return;const b=bestFor(roles[i],pool.filter(x=>!keep.includes(x.id)));if(b)keep[i]=b.id});S.lineup=keep;if(S.lineup.filter(Boolean).length<11){const k0=S.lineup.slice();autoLineup();if(S.lineup.filter(Boolean).length<k0.filter(Boolean).length)S.lineup=k0}}save();render();window.scrollTo(0,0);
     modal("El trayecto",`<div class="sec"><h4>CRÓNICA DEL CAMINO</h4><ul>${log.map(l=>`<li>${esc(l)}</li>`).join("")||"<li>Sin novedad.</li>"}</ul></div><p class="hint">Gasolina y billetes: ${cost} €.</p><button class="btn play" data-act="close">Llegamos</button>`)},
   amt:v=>{S.prep.amt=Math.max(0,+v);save();render()},
   bet:v=>{const P=S.prep;if(v==="L"&&fewArrived()){toast("Con menos de 11 no te dejan apostar contra tu equipo. Sería demasiado fácil.");return}if(S.money<P.amt){toast("No te llega para apostar.");return}const lbl={W:"que ganan los Papas",D:"empate",L:"que gana el rival"}[v];
@@ -6446,7 +6448,7 @@ const A={
     b.odds=betEff(b.odds,P.amt,b.side==="r");ledSync();S.money-=P.amt;b.amt=P.amt;P.bets.push(b);led(`Apuesta: ${b.label}`,-P.amt);save();render();toast(`✔ Apostados ${P.amt} € a ${b.label} a cuota ${b.odds}. Si aciertas cobras ${Math.round(P.amt*b.odds)} €.`)},
   kick:()=>startMatch(),
   form:v=>setFormation(v,false),
-  auto:()=>{const P=S.prep;if(P&&P.xi0){const ok=id=>{const p=pById(id);return p&&prepAvail(p)&&!(P.arrive&&P.arrive[id]&&P.arrive[id].min>0)};const keep=P.xi0.map(id=>id&&ok(id)?id:null);const roles=FORMS[S.formation];
+  auto:()=>{const P=S.prep;if(P&&P.xi0){const ok=id=>{const p=pById(id);return p&&prepAvail(p)&&lateOk(p)};const keep=P.xi0.map(id=>id&&ok(id)?id:null);const roles=FORMS[S.formation];
       const pool=S.players.filter(p=>ok(p.id)&&!keep.includes(p.id)).map(p=>({...p,mE:p.energy}));let filled=0;keep.forEach((id,i)=>{if(id)return;const b=bestFor(roles[i],pool.filter(x=>!keep.includes(x.id)));if(b){keep[i]=b.id;filled++}});S.lineup=keep;save();render();toast(filled?`Tu once de siempre. Faltan ${filled}: entran suplentes.`:"Tu once de siempre.");return}
     autoLineup();save();render();toast("Once hecho a ojo de buen cubero.")},
   fire:(v,el)=>{const id=+el.dataset.id;
