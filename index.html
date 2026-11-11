@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 <script>
 /* arranque: si hay una versión más nueva descargada, se carga esa (mismo origen, misma partida guardada) */
-window.PC_VERSION="21.6";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
+window.PC_VERSION="21.7";window.PC_REMOTE="https://cimentacion.github.io/papas-cochero/";
 window.pcCmpV=function(a,b){a=String(a).split(".").map(Number);b=String(b).split(".").map(Number);for(var i=0;i<Math.max(a.length,b.length);i++){var x=a[i]||0,y=b[i]||0;if(x!==y)return x>y?1:-1}return 0};
 (function(){try{if(window.__pcBoot||location.href.indexOf(window.PC_REMOTE)===0)return;var c=localStorage.getItem("pc_code"),v=localStorage.getItem("pc_codev");if(c&&v&&window.pcCmpV(v,window.PC_VERSION)>0){window.__pcBoot=1;document.write(c+'<plaintext style="display:none">')}}catch(e){}})();
 </script>
@@ -639,6 +639,7 @@ const km=d=>d<10?d.toFixed(1).replace(".",","):String(Math.round(d));
 const MALE=["Manolo","Paco","Juanma","Rafa","Curro","Antonio","Pepe","José Luis","Youssef","Karim","Rachid","Abdel","Mamadou","Ionuț","Vasile","Kike","Toni","Joaquín","Fali","Moisés","Samuel","Iván","Isra","Hamza","Bilal","Dani","Chema","Andrei","Omar","Cristian","Agustín","Ramón","Javi","Álvaro","Rubén","Sergio","Jesús","Alejandro","Adrián","Manué","Paquito","Josele","Nico","Brayan","Wei","Ousmane","Mihai","Kevin","Jonathan","Yeray"];
 const FEM=["Loli","Mari Carmen","Reme","Rocío","Fátima","Encarni","Nadia","Puri","Yessica","Vanesa","Alina","Desiré"];
 const SUR=["Heredia","Montoya","Jiménez","Rodríguez","Benítez","El Idrissi","Bennani","Haddad","Diallo","Popescu","Moreno","Ruiz","Carmona","Amaya","Fernández","Ortega","Lozano","Saavedra","Ziani","Toumi","Ionescu","Vargas","Navarro","Sánchez","Gavira","Palomo","Pérez","Gómez","Romero","Domínguez","Cabello","Reyes","Barrera","Torres","Camacho","Vega","Delgado","Rivas"];
+const PK_F=["Muhammad", "Ali", "Imran", "Usman", "Bilal", "Hassan", "Faisal", "Asif", "Kamran", "Zubair", "Tariq", "Nadeem", "Shahid", "Waqar", "Adnan", "Rizwan", "Junaid", "Saqib", "Arshad", "Zeeshan"],PK_S=["Khan", "Ahmed", "Hussain", "Malik", "Iqbal", "Butt", "Chaudhry", "Qureshi", "Raza", "Shah", "Akhtar", "Mirza", "Siddiqui", "Javed", "Rehman", "Aslam"],PK_M=["Durum", "Salsa Blanca", "El del Döner", "Falafel", "Picante", "Mixto", "Pan de Pita", "El Cuchillo Largo"];
 const MEGA_MOTE=["El Manteca", "Burger", "Calorías al Cuadrado", "El Gravedad", "Bloque de Cemento", "Michelín", "El Eclipse", "Barril", "Torrezno", "Doble Menú", "El Frigorífico", "Pandero", "La Hormigonera", "Zampabollos", "El Planeta", "Morcilla", "Panceta", "El Bufé Libre", "Cuatro Quesos", "El Tsunami", "Sobrasada", "Mesa Camilla", "El Satélite", "Tonelada", "Mantecado", "El Colchón", "Medio Cerdo", "Agujero Negro", "El Armario Empotrado", "Kilo y Medio de Más", "La Tragaperras", "Bocata de Lomo"];
 const MOTE=["El Chispa","Cuarto Kilo","Garrafa","El Cuco","Tractor","Mollete","El Fino","Bombona","El Largo","Chanclas","Er Niño","Tortilla","El Mudo","Butano","Calcetín","Pistacho","El Abuelo","Jamelgo","Turbo","Sifón","Torrija","Melón","La Jefa","Peineta"];
 const TRAITS=[
@@ -667,6 +668,7 @@ const tr=id=>TRAITS.find(t=>t.id===id)||TRAITS[TRAITS.length-1];
 const PLACES=[
  {id:"paro",t:0,n:"Oficina del paro",d:"Cola desde las ocho. Hay de todo.",or:["Parado de larga duración","Opositor eterno a Correos","Repartidor sin moto"],q:0,unk:.15,age:[20,55]},
  {id:"bar",t:0,n:"Bar Los Cuatro Caminos",d:"Los de la barra llevan aquí desde 2004.",or:["Cliente fijo de la barra","Ex-jugador regional"],q:.5,unk:.1,age:[28,60],tr:["tercera","fumador","pelea"]},
+ {id:"kebab",t:0,n:"Kebab Gran Reserva",d:"Abierto hasta las cuatro de la mañana. Los de detrás del mostrador son pakistaníes y trabajan como mulas; los de delante, clientes fijos de más de 140 kilos.",or:["Kebabero","Cliente fijo de madrugada"],q:.2,unk:.3,age:[20,50],kebab:1},
  {id:"hogar",t:0,n:"Hogar del Jubilado",d:"Entre partida de dominó y partida de dominó.",or:["Jubilado aburrido"],q:-.6,unk:.25,age:[63,74],tr:["tercera","reza"]},
  {id:"bolos",t:0,n:"Peña de bolos El Boliche",d:"Tienen puntería. Con el pie, ya veremos.",or:["Jugador de bolos"],q:0,unk:.65,age:[25,65],tr:["punteria"]},
  {id:"coope",t:0,n:"Cooperativa aceitunera",d:"Temporeros con brazos como jamones.",or:["Temporero de la aceituna"],q:.3,unk:.15,age:[19,50],tr:["aceituna","hacienda"]},
@@ -1025,10 +1027,10 @@ function genPlayer(place,boost,lvl){
   const base=lvl!=null?TIER_Q[clamp(Math.floor(lvl),0,9)]+(lvl-Math.floor(lvl))*(TIER_Q[clamp(Math.floor(lvl)+1,0,9)]-TIER_Q[clamp(Math.floor(lvl),0,9)]):TIER_Q[Math.min(tier,Math.max(1,pl.t||0))];
   const q=base+fieldBonus()*.12+pl.q*3+(boost||0)+rnd(-2,2);
   const cap=Math.max(TIER_CAP[tier],Math.round(q+8));
-  const ori=pick(pl.or);
-  const female=/Abuela|Trabajadora/.test(ori)||(!/Portero|Barítono|Sacristán|Padre/.test(ori)&&Math.random()<.08);
+  let ori=pick(pl.or);const kebabFat=pl.kebab?Math.random()<.5:false;if(pl.kebab)ori=kebabFat?pl.or[1]:pl.or[0];
+  const female=pl.kebab?false:/Abuela|Trabajadora/.test(ori)||(!/Portero|Barítono|Sacristán|Padre/.test(ori)&&Math.random()<.08);
   const pos=pick(["POR","DEF","DEF","DEF","MED","MED","MED","DEL","DEL"]);
-  const p={id:S.nextId++,first:female?pick(FEM):pick(MALE),mote:Math.random()<.5?pick(MOTE):"",sur:pick(SUR),female,age:rnd(pl.age[0],pl.age[1]),pos,known:Math.random()>pl.unk*REL[S.comp?S.comp.tier:(S.tierNext||0)],origen:ori,place:pl.id,seed:rnd(1,2e9),energy:100,injured:0,goals:0,games:0,veh:null};if(!female)p.sur=coherentName(p.first,p.sur,Math.random);
+  const p={id:S.nextId++,first:female?pick(FEM):pick(MALE),mote:Math.random()<.5?pick(MOTE):"",sur:pick(SUR),female,age:rnd(pl.age[0],pl.age[1]),pos,known:Math.random()>pl.unk*REL[S.comp?S.comp.tier:(S.tierNext||0)],origen:ori,place:pl.id,seed:rnd(1,2e9),energy:100,injured:0,goals:0,games:0,veh:null};if(!female)p.sur=coherentName(p.first,p.sur,Math.random);if(pl.kebab&&!kebabFat){p.first=pick(PK_F);p.sur=pick(PK_S);p.reg="paki";p.mote=Math.random()<.35?pick(PK_M):""}
   const b=()=>Math.round(q+rnd(-5,5));
   p.atk=b();p.def=b();p.fis=b();p.cab=b();
   if(pos==="POR"){p.def+=6;p.atk-=8}else if(pos==="DEF"){p.def+=4;p.atk-=4}else if(pos==="DEL"){p.atk+=4;p.def-=4}
@@ -1042,7 +1044,7 @@ function genPlayer(place,boost,lvl){
   p.cost=lvl==null?Math.max(0,Math.round((ovr(p)-base)*2+rnd(-6,8))):Math.max(0,nice((Math.max(0,ovr(p)-TIER_Q[tier]+8)*(3+tier*2)*diffK(1.25,.8)+rnd(-6,8))*ek(tier,.7)));
   p.pot=potFor(p,tier);xattr(p);
   if(Math.random()<.01){p.wheel=1;p.spd=Math.max(1,Math.round(p.spd*.55))}
-  else if(!female&&Math.random()<.035){p.mega=1;p.kg=rnd(140,230);p.mote=pick(MEGA_MOTE);p.build="gordo";p.spd=Math.max(1,Math.round(p.spd*.5));p.def=clamp(p.def+10,1,cap);p.cab=clamp(p.cab+6,1,cap);p.atk=clamp(p.atk-6,1,cap)}
+  else if(!female&&Math.random()<(pl.kebab?(kebabFat?1:0):pl.id==="bar"?.25:.012)){p.mega=1;p.kg=rnd(140,230);p.mote=pick(MEGA_MOTE);p.build="gordo";p.spd=Math.max(1,Math.round(p.spd*.5));p.def=clamp(p.def+10,1,cap);p.cab=clamp(p.cab+6,1,cap);p.atk=clamp(p.atk-6,1,cap)}
   return p;
 }
 const diffK=(hard,easy)=>[easy,1,hard][S&&S.diff!=null?S.diff:1];
@@ -2210,7 +2212,7 @@ function transferBox(){
 }
 function viewPueblo(){
   const open=S.openPlace;const opened=PLACES.filter(placeOpen);const locked=PLACES.filter(pl=>!placeOpen(pl));
-  const rows=opened.map(pl=>{const cs=S.sites[pl.id]||[];const n=cs.length,isO=open===pl.id;return `<div class="place ${isO?"open":""}" id="pl-${pl.id}"><div><b>${esc(pl.n)}</b><p>${esc(pl.d)}</p></div><button class="btn mini ${isO?"primary":""}" data-act="place" data-v="${pl.id}">${isO?"Cerrar ▲":n?`Ver (${n}) ▼`:"Nadie"}</button></div>${isO?`<div class="placelist"><p class="hint">${n} disponible${n===1?"":"s"} · plantilla ${S.players.length}/22</p><div class="list">${n?cs.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div>`:""}`}).join("");
+  const rows=opened.map(pl=>{const cs=S.sites[pl.id]||(pl.kebab&&S.sites?(S.sites[pl.id]=Array.from({length:rnd(2,3)},()=>genPlayer(pl.id))):[]);const n=cs.length,isO=open===pl.id;return `<div class="place ${isO?"open":""}" id="pl-${pl.id}"><div><b>${esc(pl.n)}</b><p>${esc(pl.d)}</p></div><button class="btn mini ${isO?"primary":""}" data-act="place" data-v="${pl.id}">${isO?"Cerrar ▲":n?`Ver (${n}) ▼`:"Nadie"}</button></div>${isO?`<div class="placelist"><p class="hint">${n} disponible${n===1?"":"s"} · plantilla ${S.players.length}/22</p><div class="list">${n?cs.map(p=>prow(p,"market")).join(""):`<p class="hint">Hoy no hay nadie. Vuelve la semana que viene.</p>`}</div></div>`:""}`}).join("");
   const cap=HOUSES[S.house||0].scouts;const mine=(S.scouts||[]);
   const scoutRows=SCOUTS.map(sc=>{const hired=mine.includes(sc.id);const lock=(sc.t||0)>(S.reach||0);
     return `<div class="place"><div><b>${esc(sc.n)}</b><p>${esc(sc.d)} Cobra ${sc.w} €/semana${sc.c?` y ${sc.c} € por firmar`:""}.</p></div>${hired?`${(()=>{const t=(S.trips||[]).find(x=>x.sid===sc.id);return t?`<small>De viaje en ${esc(TRIPS.find(x=>x.id===t.dest).n)}, vuelve en ${Math.max(1,t.back-S.week)} sem.</small>`:sc.ojo>=1?`<button class="btn mini primary" data-act="tripui" data-v="${sc.id}">Mandar de viaje</button>`:""})()}<button class="btn mini" data-act="unscout" data-v="${sc.id}">Despedir</button>`:lock?`<span class="hint">Sube de categoría</span>`:`<button class="btn mini primary" data-act="scout" data-v="${sc.id}" ${mine.length>=cap?"disabled":""}>Contratar</button>`}</div>`}).join("");
@@ -4214,6 +4216,7 @@ function natPreview(c,oppIdx){const opp=c.teams[oppIdx];const code=opp.flag;cons
    <div class="pc-act"><button class="btn mini" data-act="natsq" data-v="${code}">Ver su plantilla</button><button class="btn mini" data-act="natcancel">Dejarlo para luego</button></div></div></section>`}
 function natScoreFlags(){if(!M||!S.comp||S.comp.type!=="nat")return;const T=S.comp.teams[M.opp];const h=$("#m-home"),a=$("#m-away");h.innerHTML=`${flagSVG(ME,26)} España`;a.innerHTML=`${esc(T.n)} ${flagSVG(T.flag,26)}`}
 
+NREG.paki=Object.assign({},NREG.pers,{sk:[0,0,1,4,4,1,0],bd:.8,n:"Del Kebab Gran Reserva"});
 /* rasgos de cara por región: paleta de piel propia, peinados, ojos, nariz, labios y mofletes */
 const REGF={
  asia:{skp:["#f0d0a6","#e8c293","#ddb381","#cfa16e"],hair:[[8,5],[4,3],[4,2],[7,1],[13,2],[16,1]],eye:"a",nose:{s:.8},bd:.15},
